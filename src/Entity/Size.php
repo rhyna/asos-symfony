@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -33,15 +35,26 @@ class Size
      */
     private ?int $sortOrder = null;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Category", mappedBy="sizes")
+     */
+    private Collection $categories;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Product", mappedBy="sizes")
+     */
+    private Collection $products;
+
     public function __construct(string $title)
     {
         $this->title = $title;
 
         $lowerCaseTitle = mb_strtolower($title);
-
         $normalizedTitle = str_replace(' ', '', $lowerCaseTitle);
-
         $this->normalizedTitle = (string)$normalizedTitle;
+
+        $this->categories = new ArrayCollection();
+        $this->products = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -78,5 +91,35 @@ class Size
     {
         $this->sortOrder = $sortOrder;
     }
+
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): void
+    {
+        if ($this->categories->contains($category)) {
+            return;
+        }
+
+        $this->categories->add($category);
+    }
+
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function setProducts(Product $product): void
+    {
+        if ($this->products->contains($product)) {
+            return;
+        }
+
+        $this->products->add($product);
+    }
+
+
 
 }

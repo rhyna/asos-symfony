@@ -55,6 +55,16 @@ class Category
      */
     private bool $rootWomenCategory;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="categories")
+     */
+    private Collection $sizes;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="category")
+     */
+    private Collection $products;
+
     public function __construct(string $title, ?int $parent, bool $rootMenCategory, bool $rootWomenCategory)
     {
         $this->title = $title;
@@ -63,6 +73,9 @@ class Category
         $this->rootWomenCategory = $rootWomenCategory;
 
         $this->children = new ArrayCollection();
+        $this->sizes = new ArrayCollection();
+        $this->products = new ArrayCollection();
+
     }
 
     public function getId(): ?int
@@ -143,4 +156,34 @@ class Category
     {
         $this->rootWomenCategory = $rootWomenCategory;
     }
+
+    public function getSizes(): Collection
+    {
+        return $this->sizes;
+    }
+
+    public function addSize(Size $size): void
+    {
+        if ($this->sizes->contains($size)) {
+            return;
+        }
+
+        $this->sizes->add($size);
+    }
+
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+
+    public function addProduct(Product $product): void
+    {
+        if ($this->products->contains($product)) {
+            return;
+        }
+
+        $this->products->add($product);
+    }
+
 }
