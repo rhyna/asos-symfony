@@ -9,15 +9,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
-class SizeController extends AbstractController
+/**
+ * @Route(path="/admin/banner", name="admin.banner.")
+ */
+class BannerController extends AbstractController
 {
     /**
      * @Route(path="/", methods={"GET"}, name="list")
      */
     public function list(Request $request): Response
     {
-        return new Response('size list');
+        return new Response('banner list');
     }
 
     /**

@@ -9,15 +9,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
-class SizeController extends AbstractController
+/**
+ * @Route(path="/admin/category", name="admin.category.")
+ */
+class CategoryController extends AbstractController
 {
     /**
      * @Route(path="/", methods={"GET"}, name="list")
      */
     public function list(Request $request): Response
     {
-        return new Response('size list');
+        return new Response('category list');
     }
 
     /**
@@ -67,4 +69,5 @@ class SizeController extends AbstractController
     {
 
     }
+
 }
