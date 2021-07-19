@@ -8,6 +8,7 @@ use App\Entity\Banner;
 use App\Entity\BannerPlace;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -53,6 +54,13 @@ class BannerController extends AbstractController
      */
     public function addAction(Request $request): Response
     {
+        /** @var UploadedFile $image */
+        $image = $request->files->get('image');
+        $image->move('./upload/banner', uniqid() . '.' . $image->getClientOriginalExtension());
+
+        echo '<pre>';
+        var_dump($request->files->get('image'));
+        exit;
     }
 
     /**
