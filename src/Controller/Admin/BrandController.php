@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Entity\Brand;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,9 +19,17 @@ class BrandController extends AbstractController
     /**
      * @Route(path="/", methods={"GET"}, name="list")
      */
-    public function list(Request $request): Response
+    public function list(Request $request, EntityManagerInterface $em): Response
     {
-        return new Response('brand list');
+        $repository = $em->getRepository(Brand::class);
+
+        $brands = $repository->findBy(array(), array('title' => 'ASC'));
+
+        return $this->render('admin/brand/list.html.twig',
+            [
+                'brands' => $brands,
+                'title' => 'Brand List',
+            ]);
     }
 
     /**

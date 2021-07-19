@@ -24,7 +24,7 @@ class BannerController extends AbstractController
     {
         $repository = $em->getRepository(Banner::class);
 
-        $banners = $repository->findAll();
+        $banners = $repository->getAllBannersSortedByPlaceAlias();
 
         return $this->render('admin/banner/list.html.twig',
             [
@@ -53,7 +53,6 @@ class BannerController extends AbstractController
      */
     public function addAction(Request $request): Response
     {
-
     }
 
     /**

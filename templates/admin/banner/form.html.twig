@@ -51,9 +51,12 @@
             <input class="form-control" type="text" name="button-label" id="button-label"
                    value="{{ banner.buttonLabel | default('') }}">
         </div>
-        <button type="submit" class="entity-form-submit" onclick="event.preventDefault();
-                updateBanner({{ banner.id | default(null) }})">
+        <button type="submit" class="entity-form-submit">
             Submit
         </button>
+{#        <button type="submit" class="entity-form-submit" onclick="event.preventDefault();#}
+{#                updateBanner({{ banner.id | default(null) }})">#}
+{#            Submit#}
+{#        </button>#}
     </form>
 {% endblock %}
