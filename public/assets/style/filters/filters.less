@@ -1,0 +1,222 @@
+.catalog-filters {
+  form {
+    display: flex;
+    align-items: center;
+  }
+
+  label {
+    font-weight: 700;
+    margin-left: 12px;
+    text-transform: capitalize;
+  }
+
+  .form-group {
+    width: 220px;
+    margin-right: 30px;
+    margin-bottom: 15px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &-submit {
+    width: 100px;
+    border: 2px solid #2d2d2d;
+    height: 100%;
+    padding: 5px;
+    margin-left: 30px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+
+  .btn.dropdown-toggle.bs-placeholder.btn-light {
+    color: #2d2d2d;
+    background-color: transparent;
+    border-color: #ddd;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .btn-light:not(:disabled):not(.disabled):active:focus {
+    box-shadow: none;
+  }
+
+  .btn-light:focus {
+    box-shadow: none;
+  }
+
+  .btn-light {
+    color: #2d2d2d;
+    background-color: transparent;
+    border-color: #ddd;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+
+    &.actions-btn {
+      border: 1px solid #adb5bd;
+
+      &:first-child {
+        margin-right: 15px;
+      }
+    }
+  }
+
+  .bootstrap-select .dropdown-toggle:focus {
+    outline: none !important;
+  }
+
+  .dropdown-menu.show {
+    -webkit-box-shadow: 0 5px 13px -2px rgb(0 0 0 / 80%);
+    box-shadow: 0 5px 13px -2px rgba(0, 0, 0, .8);
+    background-color: #eee;
+    border: none;
+    border-radius: 0;
+    color: #2d2d2d;
+    padding-bottom: 0;
+    margin-top: 0;
+  }
+
+  .bootstrap-select .dropdown-menu.inner {
+    float: left;
+    padding: 0 10px 10px 10px;
+  }
+
+  .bootstrap-select .dropdown-menu li a.opt {
+    padding-left: 15px;
+  }
+
+  .dropdown-menu.inner.show {
+    box-shadow: none;
+  }
+
+  .dropdown-menu.inner.show li {
+    background-color: #fff;
+    border-radius: 0;
+    font-size: 14px;
+    color: #2d2d2d;
+    padding-bottom: 0;
+    margin-bottom: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 45px;
+    width: 100%;
+    max-width: 300px;
+    cursor: pointer;
+
+    &.no-results {
+      padding: 15px;
+      margin: 0;
+      border-radius: 0;
+      line-height: normal
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &.disabled {
+      background-color: #ddd;
+
+      a {
+        text-align: center;
+      }
+
+      span.text {
+        margin-right: 0;
+      }
+    }
+
+    &.dropdown-header {
+      background-color: transparent;
+      cursor: default;
+      height: auto;
+      padding: 0;
+      color: #6c757dc2;
+      font-style: italic;
+      font-size: 13px;
+
+      &:not(&:first-child) {
+        margin-top: 15px;
+      }
+    }
+
+    &.dropdown-divider {
+      display: none;
+    }
+  }
+
+  .form-control {
+    border-radius: 0;
+    border: 1px solid #ddd;
+  }
+
+  .form-control:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .bs-searchbox {
+    margin-bottom: 10px;
+  }
+
+  .dropdown-item {
+    background-color: transparent;
+    color: #2d2d2d;
+    line-height: normal;
+    outline: 0;
+    padding: 15px;
+
+    span.text {
+      max-width: 250px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+
+  .bootstrap-select.show-tick .dropdown-menu .selected span.check-mark {
+    top: 15px;
+    right: 15px;
+    color: #3333339e;
+  }
+
+  .btn-light:not(:disabled):not(.disabled).active, .btn-light:not(:disabled):not(.disabled):active, .show > .btn-light.dropdown-toggle {
+    color: #2d2d2d;
+    background-color: transparent;
+    border-color: #ddd;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+
+    &.actions-btn {
+      border: 1px solid #adb5bd;
+    }
+  }
+
+  .bootstrap-select .dropdown-toggle .filter-option-inner-inner {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.bs-searchbox + .bs-actionsbox {
+  padding-bottom: 15px;
+}

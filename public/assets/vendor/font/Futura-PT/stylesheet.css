@@ -1,0 +1,71 @@
+@font-face {
+    font-family: futura-pt;
+    src: url('FTN45__W.eot');
+    src: url('FTN45__W.eot#iefix') format("embedded-opentype"), url('FTN45__W.woff2') format("woff2"), url('FTN45__W.woff') format("woff"), url('FTN45__W.ttf') format("truetype"), url('FTN45__W.svg#FuturaPTWeb-Book') format("svg");
+    font-weight: 400;
+    font-style: normal
+}
+
+@font-face {
+    font-family: futura-pt;
+    src: url('FTN75__W.eot');
+    src: url('FTN75__W.eot#iefix') format("embedded-opentype"), url('FTN75__W.woff2') format("woff2"), url('FTN75__W.woff') format("woff"), url('FTN75__W.ttf') format("truetype"), url('FTN75__W.svg#FuturaPTWeb-Heavy') format("svg");
+    font-weight: 700;
+    font-style: normal
+}
+
+@font-face {
+    font-family: futura-pt;
+    src: url('FTN46__W.eot');
+    src: url('FTN46__W.eot#iefix') format("embedded-opentype"), url('FTN46__W.woff2') format("woff2"), url('FTN46__W.woff') format("woff"), url('FTN46__W.ttf') format("truetype"), url('FTN46__W.svg#FuturaPTWeb-BookObl') format("svg");
+    font-weight: 400;
+    font-style: italic
+}
+
+@font-face {
+    font-family: futura-pt;
+    src: url('FTN96__W.eot');
+    src: url('FTN96__W.eot#iefix') format("embedded-opentype"), url('FTN96__W.woff2') format("woff2"), url('FTN96__W.woff') format("woff"), url('FTN96__W.ttf') format("truetype"), url('FTN96__W.svg#FuturaPTWeb-ExtraBoldObl') format("svg");
+    font-weight: 900;
+    font-style: italic
+}
+
+@font-face {
+    font-family: FuturaStd;
+    src: url('FTN45__W.eot');
+    src: url('FTN45__W.eot#iefix') format("embedded-opentype"), url('FTN45__W.woff2') format("woff2"), url('FTN45__W.woff') format("woff"), url('FTN45__W.ttf') format("truetype"), url('FTN45__W.svg#FuturaPTWeb-Book') format("svg");
+    font-weight: 400;
+    font-style: normal
+}
+
+@font-face {
+    font-family: FuturaStd;
+    src: url('FTN75__W.eot');
+    src: url('FTN75__W.eot#iefix') format("embedded-opentype"), url('FTN75__W.woff2') format("woff2"), url('FTN75__W.woff') format("woff"), url('FTN75__W.ttf') format("truetype"), url('FTN75__W.svg#FuturaPTWeb-Heavy') format("svg");
+    font-weight: 700;
+    font-style: normal
+}
+
+@font-face {
+    font-family: FuturaStd;
+    src: url('FTN46__W.eot');
+    src: url('FTN46__W.eot#iefix') format("embedded-opentype"), url('FTN46__W.woff2') format("woff2"), url('FTN46__W.woff') format("woff"), url('FTN46__W.ttf') format("truetype"), url('FTN46__W.svg#FuturaPTWeb-BookObl') format("svg");
+    font-weight: 400;
+    font-style: italic
+}
+
+@font-face {
+    font-family: FuturaStd;
+    src: url('FTN96__W.eot');
+    src: url('FTN96__W.eot#iefix') format("embedded-opentype"), url('FTN96__W.woff2') format("woff2"), url('FTN96__W.woff') format("woff"), url('FTN96__W.ttf') format("truetype"), url('FTN96__W.svg#FuturaPTWeb-ExtraBoldObl') format("svg");
+    font-weight: 900;
+    font-style: italic
+}
+
+@font-face {
+    font-family: FuturaStdBookOblique;
+    src: url('FTN46__W.eot');
+    src: url('FTN46__W.eot#iefix') format("embedded-opentype"), url('FTN46__W.woff2') format("woff2"), url('FTN46__W.woff') format("woff"), url('FTN46__W.ttf') format("truetype"), url('FTN46__W.svg#FuturaPTWeb-BookObl') format("svg");
+    font-weight: 400;
+    font-style: italic
+}

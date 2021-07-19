@@ -1,0 +1,70 @@
+.product-gallery {
+  display: flex;
+}
+.product-gallery .previews {
+  margin-right: 15px;
+}
+.product-gallery .previews span {
+  display: block;
+  margin-bottom: 10px;
+}
+.product-gallery .previews span:last-child {
+  margin-bottom: 0;
+}
+.product-gallery .previews span:hover {
+  cursor: pointer;
+}
+.product-gallery .previews img {
+  width: 70px;
+}
+.product-gallery .full {
+  width: 500px;
+}
+.product-gallery .full img {
+  width: 100%;
+}
+.product-gallery .full img:hover {
+  cursor: pointer;
+}
+@media (max-width: 550px) {
+  .product-gallery {
+    width: 400px;
+    flex-direction: column-reverse;
+  }
+  .product-gallery .full {
+    width: 400px;
+  }
+  .product-gallery .previews {
+    margin-right: 0;
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+  }
+  .product-gallery .previews span {
+    margin-right: 5px;
+    margin-bottom: 0;
+  }
+  .product-gallery .previews span:last-child {
+    margin-right: 0;
+  }
+}
+@media (max-width: 450px) {
+  .product-gallery {
+    width: 300px;
+  }
+  .product-gallery .full {
+    width: 300px;
+  }
+}
+.no-image {
+  width: 500px;
+  height: 640px;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #ccc;
+  letter-spacing: 0.5px;
+}
+/*# sourceMappingURL=stylesheet.admin-css.map */
