@@ -8,7 +8,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete the {{ entityType }}?
+                Are you sure you want to delete the {{ entityType }}
+                ("<span class="delete-entity-modal-entity-marker"></span>")?
                 {{ entityType is same as 'size' ? '<br>The size will be deleted only from the current category' : '' }}
             </div>
             <form action="{{ path('admin.' ~ entityType ~ '.delete.action') }}" method="post"

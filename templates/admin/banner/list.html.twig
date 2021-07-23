@@ -42,7 +42,7 @@
                                     </a>
                                     <button type="button" data-toggle="modal"
                                             data-target="#deleteEntity"
-                                            onclick="passEntityId({{ banner.id }})">
+                                            onclick="passEntityInfo('{{ [banner.id, banner.bannerPlace.alias | default('Banner not posted yet')] | json_encode | e('js') }}')">
                                         <i class="far fa-trash-alt"></i>
                                     </button>
                                 </div>

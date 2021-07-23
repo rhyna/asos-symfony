@@ -42,10 +42,21 @@ function deleteEntityImage(buttonElement) {
         })
 }
 
-function passEntityId(entityId) {
-    let modalHiddenInput = $('#deleteEntity').find('.delete-entity-modal-entity-id');
+function passEntityInfo(data) {
 
-    modalHiddenInput.val(entityId);
+    let array = JSON.parse(data);
+
+    let entityId = array[0];
+
+    let entityMarker = array[1];
+
+    let modalHiddenIdInput = $('#deleteEntity').find('.delete-entity-modal-entity-id');
+
+    let modalMarkerInput = $('#deleteEntity').find('.delete-entity-modal-entity-marker');
+
+    modalHiddenIdInput.val(entityId);
+
+    modalMarkerInput.html(entityMarker);
 }
 
 function deleteEntity(form, entityType) {
@@ -325,7 +336,7 @@ function createSizeItem(size) {
     let deleteButton = $(`<button type="button"
         data-toggle="modal"
         data-target="#deleteEntity"
-        onclick="passEntityId(${size['id']})">`);
+        onclick="passEntityInfo(JSON.stringify([${size['id']}, '']))">`);
 
     deleteButton.appendTo(iconsInner);
 

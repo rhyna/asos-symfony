@@ -42,12 +42,13 @@ class BannerController extends AbstractController
     public function addForm(Request $request, EntityManagerInterface $em): Response
     {
         $repository = $em->getRepository(BannerPlace::class);
+
         $bannerPlaces = $repository->findAll();
 
         return $this->render('admin/banner/form.html.twig',
             [
                 'bannerPlaces' => $bannerPlaces,
-                'title' => 'Add Banner Form',
+                'title' => 'Add Banner',
             ]);
     }
 
@@ -58,26 +59,36 @@ class BannerController extends AbstractController
     {
         /** @var UploadedFile $image */
         $image = $request->files->get('image');
+
         $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
-        $imageDirectory = './upload/banner/test/';
+
+        $imageDirectory = './upload/banner/';
+
         $imageDestination = $imageDirectory . $imageUniqueName;
 
         $bannerPlaceId = (int)$request->get('banner-place') ?: null;
+
         $link = (string)$request->get('link');
+
         $title = (string)$request->get('title') ?: null;
+
         $description = (string)$request->get('description') ?: null;
+
         $buttonLabel = (string)$request->get('button-label') ?: null;
 
         $banner = new Banner($imageDestination, $link);
 
         $banner->setTitle($title);
+
         $banner->setDescription($description);
+
         $banner->setButtonLabel($buttonLabel);
 
         $bannerPlace = null;
 
         if ($bannerPlaceId) {
             $repository = $em->getRepository(BannerPlace::class);
+
             $bannerPlace = $repository->find($bannerPlaceId);
         }
 
@@ -97,18 +108,21 @@ class BannerController extends AbstractController
      */
     public function editForm(Request $request, EntityManagerInterface $em): Response
     {
-        $id = $request->get('id');
+        $id = (int)$request->get('id');
+
         $repository = $em->getRepository(Banner::class);
+
         $banner = $repository->find($id);
 
         $repository = $em->getRepository(BannerPlace::class);
+
         $bannerPlaces = $repository->findAll();
 
         return $this->render('admin/banner/form.html.twig',
             [
                 'banner' => $banner,
                 'bannerPlaces' => $bannerPlaces,
-                'title' => 'Edit Banner Form',
+                'title' => 'Edit Banner',
             ]);
     }
 
@@ -123,24 +137,35 @@ class BannerController extends AbstractController
         $imageDestination = null;
 
         if ($image) {
+
             $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
-            $imageDirectory = './upload/banner/test/';
+
+            $imageDirectory = './upload/banner/';
+
             $imageDestination = $imageDirectory . $imageUniqueName;
         }
 
         $bannerPlaceId = (int)$request->get('banner-place') ?: null;
+
         $link = (string)$request->get('link');
+
         $title = (string)$request->get('title') ?: null;
+
         $description = (string)$request->get('description') ?: null;
+
         $buttonLabel = (string)$request->get('button-label') ?: null;
 
         $bannerId = (int)$request->get('id');
 
         $banner = $em->getRepository(Banner::class)->find($bannerId);
 
+
         $banner->setLink($link);
+
         $banner->setTitle($title);
+
         $banner->setDescription($description);
+
         $banner->setButtonLabel($buttonLabel);
 
         $previousImage = $banner->getImage();
@@ -152,7 +177,9 @@ class BannerController extends AbstractController
         $bannerPlace = null;
 
         if ($bannerPlaceId) {
+
             $repository = $em->getRepository(BannerPlace::class);
+
             $bannerPlace = $repository->find($bannerPlaceId);
         }
 
@@ -167,14 +194,6 @@ class BannerController extends AbstractController
         $fileSystem->remove($previousImage);
 
         return $this->redirectToRoute('admin.banner.list');
-    }
-
-    /**
-     * @Route(path="/delete", methods={"GET"}, name="delete.form")
-     */
-    public function deleteForm(Request $request): Response
-    {
-
     }
 
     /**
@@ -199,21 +218,13 @@ class BannerController extends AbstractController
 
             $bannerImage = $banner->getImage();
 
-            $bannerPlace = $banner->getBannerPlace();
-
-            if ($bannerPlace) {
-                $bannerPlaceAlias = $banner->getBannerPlace()->getAlias();
-            } else {
-                $bannerPlaceAlias = 'Not posted yet';
-            }
-
             $em->remove($banner);
 
             $em->flush();
 
             $fileSystem->remove($bannerImage);
 
-            return new Response('Successfully deleted the banner with id ' . $id . ', banner place - "' . $bannerPlaceAlias . '"', 200);
+            return new Response('Successfully deleted the banner', 200);
 
         } catch (\BadRequestException $e) {
             return new Response($e->getMessage(), 400);
