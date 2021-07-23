@@ -55,7 +55,7 @@ function deleteEntity(form, entityType) {
 
     let onDeletionModal = $('#onDeletionResponse');
 
-    let identifier = $('.entity-list-item').find("a[href*='id=" + id + "']");
+    let identifier = $('.entity-list-item[data-id="' + id + '"]')
 
     let categoryId = null;
 

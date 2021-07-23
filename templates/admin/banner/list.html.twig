@@ -1,7 +1,5 @@
 {% extends '/admin/base.html.twig' %}
 
-{#{% block title %}ASOS Admin | {{ title }}{% endblock %}#}
-
 {% block body %}
     <a href="{{ path('admin.banner.add.form') }}" class="add-entity">Add banner</a>
     <h1 class="entity-list-title">Banners</h1>
@@ -18,17 +16,17 @@
         <div class="entity-list-content">
             {% for banner in banners %}
                 <div class="entity-list-item__wrapper">
-                    <div class="entity-list-item">
+                    <div class="entity-list-item" data-id="{{ banner.id }}">
                         <div class="row entity-list-item__row">
                             <div class="col-3">
                                 <div class="entity-list-item-image"
-                                     style="background-image: url('{{ banner.image }}')">
+                                     style="background-image: url('{{ banner.image | trim('.') }}')">
                                     <a href="{{ path('admin.banner.edit.form', {'id' : banner.id}) }}"></a>
                                 </div>
                             </div>
                             <div class="col">
                                 <a href="{{ path('admin.banner.edit.form', {'id' : banner.id}) }}">
-                                    {{ (banner.bannerPlace.alias ?: 'NO PLACE (Banner not posted yet)') }}
+                                    {{ banner.bannerPlace.alias | default('NO PLACE (Banner not posted yet)') }}
                                 </a>
                             </div>
                             <div class="col">
@@ -55,4 +53,9 @@
             {% endfor %}
         </div>
     </div>
+
+    {% include('/admin/delete-entity-confirmation.html.twig') %}
+
+    {% include('/admin/on-entity-deletion-modal.html.twig') %}
+
 {% endblock %}

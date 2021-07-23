@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @Route(path="/admin/banner", name="admin.banner.")
@@ -31,6 +32,7 @@ class BannerController extends AbstractController
             [
                 'banners' => $banners,
                 'title' => 'Banner List',
+                'entityType' => 'banner'
             ]);
     }
 
@@ -52,15 +54,42 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/add", methods={"POST"}, name="add.action")
      */
-    public function addAction(Request $request): Response
+    public function addAction(Request $request, EntityManagerInterface $em): Response
     {
         /** @var UploadedFile $image */
         $image = $request->files->get('image');
-        $image->move('./upload/banner', uniqid() . '.' . $image->getClientOriginalExtension());
+        $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
+        $imageDirectory = './upload/banner/test/';
+        $imageDestination = $imageDirectory . $imageUniqueName;
 
-        echo '<pre>';
-        var_dump($request->files->get('image'));
-        exit;
+        $bannerPlaceId = (int)$request->get('banner-place') ?: null;
+        $link = (string)$request->get('link');
+        $title = (string)$request->get('title') ?: null;
+        $description = (string)$request->get('description') ?: null;
+        $buttonLabel = (string)$request->get('button-label') ?: null;
+
+        $banner = new Banner($imageDestination, $link);
+
+        $banner->setTitle($title);
+        $banner->setDescription($description);
+        $banner->setButtonLabel($buttonLabel);
+
+        $bannerPlace = null;
+
+        if ($bannerPlaceId) {
+            $repository = $em->getRepository(BannerPlace::class);
+            $bannerPlace = $repository->find($bannerPlaceId);
+        }
+
+        $banner->setBannerPlace($bannerPlace);
+
+        $em->persist($banner);
+
+        $em->flush();
+
+        $image->move($imageDirectory, $imageUniqueName);
+
+        return $this->redirectToRoute('admin.banner.list');
     }
 
     /**
@@ -84,11 +113,60 @@ class BannerController extends AbstractController
     }
 
     /**
-     * @Route(path="/edit", methods={"POST"}, name="edit.action")
+     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
      */
-    public function editAction(Request $request): Response
+    public function editAction(Request $request, EntityManagerInterface $em, Filesystem $fileSystem): Response
     {
+        /** @var UploadedFile $image */
+        $image = $request->files->get('image');
 
+        $imageDestination = null;
+
+        if ($image) {
+            $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
+            $imageDirectory = './upload/banner/test/';
+            $imageDestination = $imageDirectory . $imageUniqueName;
+        }
+
+        $bannerPlaceId = (int)$request->get('banner-place') ?: null;
+        $link = (string)$request->get('link');
+        $title = (string)$request->get('title') ?: null;
+        $description = (string)$request->get('description') ?: null;
+        $buttonLabel = (string)$request->get('button-label') ?: null;
+
+        $bannerId = (int)$request->get('id');
+
+        $banner = $em->getRepository(Banner::class)->find($bannerId);
+
+        $banner->setLink($link);
+        $banner->setTitle($title);
+        $banner->setDescription($description);
+        $banner->setButtonLabel($buttonLabel);
+
+        $previousImage = $banner->getImage();
+
+        if ($imageDestination) {
+            $banner->setImage($imageDestination);
+        }
+
+        $bannerPlace = null;
+
+        if ($bannerPlaceId) {
+            $repository = $em->getRepository(BannerPlace::class);
+            $bannerPlace = $repository->find($bannerPlaceId);
+        }
+
+        $banner->setBannerPlace($bannerPlace);
+
+        $em->flush();
+
+        if ($image) {
+            $image->move($imageDirectory, $imageUniqueName);
+        }
+
+        $fileSystem->remove($previousImage);
+
+        return $this->redirectToRoute('admin.banner.list');
     }
 
     /**
@@ -102,8 +180,49 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")
      */
-    public function deleteAction(Request $request): Response
+    public function deleteAction(Request $request, EntityManagerInterface $em, Filesystem $fileSystem): Response
     {
+        $id = $request->get('id');
 
+        try {
+            if (!$id) {
+                throw new \BadRequestException('The id is not provided');
+            }
+
+            $id = (int)$id;
+
+            $banner = $em->getRepository(Banner::class)->find($id);
+
+            if (!$banner) {
+                throw new \NotFoundException('Such a banner does not exist');
+            }
+
+            $bannerImage = $banner->getImage();
+
+            $bannerPlace = $banner->getBannerPlace();
+
+            if ($bannerPlace) {
+                $bannerPlaceAlias = $banner->getBannerPlace()->getAlias();
+            } else {
+                $bannerPlaceAlias = 'Not posted yet';
+            }
+
+            $em->remove($banner);
+
+            $em->flush();
+
+            $fileSystem->remove($bannerImage);
+
+            return new Response('Successfully deleted the banner with id ' . $id . ', banner place - "' . $bannerPlaceAlias . '"', 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 }
