@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Entity\Category;
+use App\Repository\CategoryRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,12 +17,29 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CategoryController extends AbstractController
 {
+
     /**
      * @Route(path="/", methods={"GET"}, name="list")
      */
-    public function list(Request $request): Response
+    public function list(Request $request, EntityManagerInterface $em): Response
     {
-        return new Response('category list');
+        $repository = $em->getRepository(Category::class);
+
+        $categoryLevels = $repository->getRootCategories();
+
+        $categoryLevels = $repository->getFirstLevelCategories($categoryLevels);
+
+        $categoryLevels = $repository->getSecondLevelCategories($categoryLevels);
+
+        $repository = $em->getRepository(Category::class);
+
+        $categories = $repository->getCategoriesList();
+
+        return $this->render('admin/category/list.html.twig', [
+            'categories' => $categories,
+            'title' => 'Category List',
+            'entityType' => 'category',
+        ]);
     }
 
     /**

@@ -43,7 +43,6 @@ function deleteEntityImage(buttonElement) {
 }
 
 function passEntityInfo(data) {
-
     let array = JSON.parse(data);
 
     let entityId = array[0];

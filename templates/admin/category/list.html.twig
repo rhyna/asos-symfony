@@ -1,0 +1,63 @@
+{% extends '/admin/base.html.twig' %}
+
+{% block body %}
+{#    {{ dump(categories) }}#}
+    <a href="{{ path('admin.category.add.form') }}" class="add-entity">Add category</a>
+    <h1 class="entity-list-title">Categories</h1>
+    <div class="catalog-filters">
+        <form>
+            {# <?php #}
+            {# foreach ($categoriesByGender as $gender => $category) { #}
+            {# renderSelectPicker($category, 'ids', $gender . ' categories', ''); #}
+            {# } #}
+
+            {# ?> #}
+            <button type="submit" class="catalog-filters-submit">Filter</button>
+        </form>
+    </div>
+    <div class="entity-list entity-list--category">
+        <div class="entity-list-header">
+            <div class="row">
+                <div class="col">Title</div>
+                <div class="col">Parent Category</div>
+                <div class="col-1"></div>
+            </div>
+        </div>
+        <div class="entity-list-content">
+            {% for category in categories %}
+                <div class="entity-list-item__wrapper">
+                    <div class="entity-list-item">
+                        <div class="row entity-list-item__row">
+                            <div class="col">
+                                <a href="{{ path('admin.category.edit.form', {
+                                    id: category.id
+                                }) }}">
+                                    {{ category.title }}
+                                </a>
+                            </div>
+                            <div class="col">{{ category.parent.parent.title | default ('') }} {{ category.parent.title | default ('') }}</div>
+                            <div class="col-1 entity-list-item-icons">
+                                <div class="entity-list-item-icons__inner">
+                                    <a href="{{ path('admin.category.edit.form', {
+                                        id: category.id
+                                    }) }}">
+                                        <i class="far fa-edit"></i>
+                                    </a>
+                                    <button type="button" data-toggle="modal"
+                                            data-target="#deleteEntity"
+                                            onclick="passEntityInfo('{{ [category.id, category.title ~ ', parent category - ' ~ category.parent.parent.title | default('') ~ ' ' ~ category.parent.title | default('') ] | json_encode | e('js') }}')">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include('/admin/delete-entity-confirmation.html.twig') %}
+
+    {% include('/admin/on-entity-deletion-modal.html.twig') %}
+{% endblock %}
