@@ -40,6 +40,7 @@ class CategoryRepository extends ServiceEntityRepository
             $categoryLevel['childCategory1'] = $qb->getQuery()->getResult();
         }
 
+
         return $categoryLevels;
     }
 

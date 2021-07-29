@@ -1,17 +1,18 @@
 {% extends '/admin/base.html.twig' %}
 
 {% block body %}
-{#    {{ dump(categories) }}#}
     <a href="{{ path('admin.category.add.form') }}" class="add-entity">Add category</a>
     <h1 class="entity-list-title">Categories</h1>
     <div class="catalog-filters">
         <form>
-            {# <?php #}
-            {# foreach ($categoriesByGender as $gender => $category) { #}
-            {# renderSelectPicker($category, 'ids', $gender . ' categories', ''); #}
-            {# } #}
-
-            {# ?> #}
+            {% for gender, category  in categoriesByGender %}
+                {{ include('chuncks/selectpicker.html.twig', {
+                    options: category,
+                    type: 'ids',
+                    label: (gender ~ ' categories'),
+                    settings: '',
+                }) }}
+            {% endfor %}
             <button type="submit" class="catalog-filters-submit">Filter</button>
         </form>
     </div>

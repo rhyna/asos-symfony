@@ -1,0 +1,27 @@
+<div class="form-group">
+    <label for="{{ type }}">{{ label }}</label>
+    <select class="selectpicker"
+            multiple
+            data-live-search="true"
+            data-actions-box="true"
+            name="{{ type }}[]"
+            id="{{ type }}">
+        {% if settings['optGroups'] is defined %}
+            {% set optGroups = buildOptGroups(settings) %}
+            {% for key, optGroup in optGroups %}
+                <optgroup label="{{ key }}">
+                    {{ include ('chuncks/selectpicker-option.html.twig', {
+                        optionArray: optGroup,
+                        type: type
+                    }) }}
+                </optgroup>
+            {% endfor %}
+        {% else %}
+            {{ include ('chuncks/selectpicker-option.html.twig',
+                {
+                    optionArray: options,
+                    type: type
+                }) }}
+        {% endif %}
+    </select>
+</div>
