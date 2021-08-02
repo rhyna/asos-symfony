@@ -38,8 +38,6 @@ class CategoryController extends AbstractController
 
         $repository = $em->getRepository(Category::class);
 
-        $categories = $repository->getCategoriesList();
-
         $categoriesByGender = [];
 
         foreach ($categoryLevels as $gender) {
@@ -53,6 +51,38 @@ class CategoryController extends AbstractController
                 $categoriesByGender[$gender['title']][] = $data;
             }
         }
+
+        $params = [];
+
+        $whereClauses = [];
+
+        $ids = $request->get('ids');
+
+        if ($ids) {
+            $params['ids'] = $ids;
+
+            $whereClauses[] = 'FIND_IN_SET(c.parent_id, :ids)';
+        }
+
+        $where = 'and ' . implode(' and ', $whereClauses);
+
+        if (!$whereClauses) {
+            $where = '';
+        }
+
+        $totalCategoriesInList = $repository->countCategoriesInList($where, $params);
+
+        $categoryListIds = $repository->getCategoryListIds($params, $where);
+
+        $categories = $repository->getCategoryList($categoryListIds);
+
+        $page = $request->get('page');
+
+        if (!$page || (string)(int)$page !== $page) {
+            $page = 1;
+        }
+
+        $page = (int)$page;
 
         return $this->render('admin/category/list.html.twig', [
             'categories' => $categories,

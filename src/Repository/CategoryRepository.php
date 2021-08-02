@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Statement;
 use Doctrine\Persistence\ManagerRegistry;
 
 class CategoryRepository extends ServiceEntityRepository
@@ -26,7 +27,7 @@ class CategoryRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getFirstLevelCategories($categoryLevels)
+    public function getFirstLevelCategories(array $categoryLevels): array
     {
         foreach ($categoryLevels as &$categoryLevel) {
             $qb = $this->createQueryBuilder('c');
@@ -44,9 +45,10 @@ class CategoryRepository extends ServiceEntityRepository
         return $categoryLevels;
     }
 
-    public function getSecondLevelCategories($categoryLevels): array
+    public function getSecondLevelCategories(array $categoryLevels): array
     {
         foreach ($categoryLevels as &$categoryLevel) {
+
             foreach ($categoryLevel['childCategory1'] as &$childCategory) {
                 $qb = $this->createQueryBuilder('c');
 
@@ -63,54 +65,88 @@ class CategoryRepository extends ServiceEntityRepository
         return $categoryLevels;
     }
 
-    public function getCategoriesList(): array
+    public function getCategoryList(array $ids): array
     {
-//        $sql = "select distinct c.id,
-//                    c.title,
-//                    c.parent_id as parentId,
-//                    pc.title as parentTitle,
-//                    pc1.title as rootCategory
-//                    from category c
-//                    left join category pc
-//                    on pc.id = c.parent_id
-//                    left join category pc1
-//                    on pc1.id = pc.parent_id
-//                    where c.root_men_category = 0
-//                    and c.root_women_category = 0
-//                    %s
-//                    order by c.parent_id asc,
-//                    c.id asc
-//                    limit :limit
-//                    offset :offset";
-//
-//        $qb = $this->createQueryBuilder('c');
-//
-//        $qb->select('c.id',
-//            'c.title',
-//            'cp.id as parentId',
-//            'cp.title as parentTitle',
-//            'cp1.title as rootCategoryTitle');
-//
-//        $qb->leftJoin('c.parent', 'cp', 'with', 'c.id = cp.id');
-//
-//        $qb->leftJoin('cp.parent', 'cp1', 'with', 'cp.id = cp1.id');
-//
-//        $qb->where('c.rootWomenCategory = 0 and c.rootMenCategory = 0');
-//
-//        $qb->addOrderBy('cp.id', 'ASC');
-//
-//        $qb->addOrderBy('c.id', 'ASC');
-
         $qb = $this->createQueryBuilder('c');
 
         $qb->leftJoin('c.parent', 'cp');
 
         $qb->where('c.rootWomenCategory = 0 and c.rootMenCategory = 0');
 
+        if ($ids) {
+            $idString = implode(',', $ids);
+
+            $qb->andWhere("c.id IN ($idString)");
+        }
+
         $qb->addOrderBy('cp.id', 'ASC');
 
         $qb->addOrderBy('c.id', 'ASC');
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function getCategoryListIds(array $params, string $where): array
+    {
+//        try {
+        $sql = <<<SQL
+                    select distinct c.id, 
+                    c.title, 
+                    c.parent_id as parentId, 
+                    pc.title as parentTitle,
+                    pc1.title as rootCategory 
+                    from category c 
+                    left join category pc 
+                    on pc.id = c.parent_id 
+                    left join category pc1 
+                    on pc1.id = pc.parent_id
+                    where c.root_men_category = 0 
+                    and c.root_women_category = 0 
+                    %s
+                    order by c.parent_id asc, 
+                    c.id asc
+            SQL;
+
+        $stmt = $this->prepareFilterStatement($sql, $where, $params);
+
+        $result = $stmt->executeQuery();
+
+        return array_column($result->fetchAllAssociative(), 'id');
+
+//        } catch (\Throwable $e) {
+//
+//        }
+    }
+
+    public function countCategoriesInList(string $where, array $params)
+    {
+        $sql = <<<SQL
+                select count(distinct c.id)
+                from category c
+                where c.root_men_category = 0 
+                and c.root_women_category = 0 
+                %s
+        SQL;
+
+        $stmt = $this->prepareFilterStatement($sql, $where, $params);
+
+        $result = $stmt->executeQuery();
+
+        return $result->fetchOne();
+    }
+
+    public function prepareFilterStatement(string $sql, string $where, array $params): Statement
+    {
+        $newSQL = sprintf($sql, $where);
+
+        $stmt = $this->_em->getConnection()->prepare($newSQL);
+
+        foreach ($params as $key => $value) {
+            if ($key === 'ids') {
+                $stmt->bindValue('ids', implode(',', $value));
+            }
+        }
+
+        return $stmt;
     }
 }
