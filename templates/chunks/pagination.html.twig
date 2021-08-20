@@ -1,0 +1,42 @@
+<nav class="pagination-container">
+    <ul class="pagination">
+        <li class="page-item pagination-item">
+            {% if pagination.previous %}
+                <a class="page-link pagination-link" aria-label="Previous"
+                   href="{{ pagination.baseUrl }}{{ pagination.token }}page={{ pagination.previous }}">
+                    Previous
+                </a>
+            {% else %}
+                <a class="nav-link disabled" aria-label="Previous" href="#" tabindex="-1"
+                   aria-disabled="true">Previous</a>
+            {% endif %}
+        </li>
+        {% for i in 1..pagination.totalPages %}
+{#            in order not to show the '0' page if there're no items in the list to render #}
+            {% if i %}
+                <li class="page-item pagination-item">
+                    <a class="page-link pagination-link{{ (page == i) ? ' active' : '' }}"
+                       href="{{ pagination.baseUrl }}{{ pagination.token }}page={{ i }}">
+                        {{ i }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        <li class="page-item pagination-item">
+            {% if pagination.next %}
+                <a class="page-link pagination-link" aria-label="Next"
+                   href="{{ pagination.baseUrl }}{{ pagination.token }}page={{ pagination.next }}">
+                    Next
+                </a>
+            {% else %}
+                <a class="nav-link disabled"
+                   aria-label="Next"
+                   href="#"
+                   tabindex="-1"
+                   aria-disabled="true">
+                    Next
+                </a>
+            {% endif %}
+        </li>
+    </ul>
+</nav>

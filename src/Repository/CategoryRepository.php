@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Statement;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 class CategoryRepository extends ServiceEntityRepository
@@ -65,88 +66,82 @@ class CategoryRepository extends ServiceEntityRepository
         return $categoryLevels;
     }
 
-    public function getCategoryList(array $ids): array
+    private function getCategoryListQueryBuilder(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('c');
 
-        $qb->leftJoin('c.parent', 'cp');
+        $qb->select("distinct c.id");
 
-        $qb->where('c.rootWomenCategory = 0 and c.rootMenCategory = 0');
+        $qb->leftJoin("c.parent", 'cp');
 
-        if ($ids) {
-            $idString = implode(',', $ids);
+        $qb->where("c.rootMenCategory = 0 and c.rootWomenCategory = 0");
 
-            $qb->andWhere("c.id IN ($idString)");
+        return $qb;
+    }
+
+    public function getCategoryList(array $whereClauses, int $limit, int $offset): array
+    {
+        $qb = $this->getCategoryListQueryBuilder();
+
+        $qb->addSelect("c.title, cp.id as parentId, cp.title as parentTitle, cp1.title as rootCategory");
+
+        $qb->leftJoin('cp.parent', 'cp1');
+
+        foreach ($whereClauses as $clause) {
+            $qb->andWhere($clause);
         }
 
         $qb->addOrderBy('cp.id', 'ASC');
 
         $qb->addOrderBy('c.id', 'ASC');
 
+        $qb->setMaxResults($limit);
+
+        $qb->setFirstResult($offset);
+
         return $qb->getQuery()->getResult();
     }
 
-    public function getCategoryListIds(array $params, string $where): array
+    public function countCategoriesInList(array $whereClauses): int
     {
-//        try {
-        $sql = <<<SQL
-                    select distinct c.id, 
-                    c.title, 
-                    c.parent_id as parentId, 
-                    pc.title as parentTitle,
-                    pc1.title as rootCategory 
-                    from category c 
-                    left join category pc 
-                    on pc.id = c.parent_id 
-                    left join category pc1 
-                    on pc1.id = pc.parent_id
-                    where c.root_men_category = 0 
-                    and c.root_women_category = 0 
-                    %s
-                    order by c.parent_id asc, 
-                    c.id asc
-            SQL;
+        $qb = $this->getCategoryListQueryBuilder();
 
-        $stmt = $this->prepareFilterStatement($sql, $where, $params);
-
-        $result = $stmt->executeQuery();
-
-        return array_column($result->fetchAllAssociative(), 'id');
-
-//        } catch (\Throwable $e) {
-//
-//        }
-    }
-
-    public function countCategoriesInList(string $where, array $params)
-    {
-        $sql = <<<SQL
-                select count(distinct c.id)
-                from category c
-                where c.root_men_category = 0 
-                and c.root_women_category = 0 
-                %s
-        SQL;
-
-        $stmt = $this->prepareFilterStatement($sql, $where, $params);
-
-        $result = $stmt->executeQuery();
-
-        return $result->fetchOne();
-    }
-
-    public function prepareFilterStatement(string $sql, string $where, array $params): Statement
-    {
-        $newSQL = sprintf($sql, $where);
-
-        $stmt = $this->_em->getConnection()->prepare($newSQL);
-
-        foreach ($params as $key => $value) {
-            if ($key === 'ids') {
-                $stmt->bindValue('ids', implode(',', $value));
-            }
+        foreach ($whereClauses as $clause) {
+            $qb->andWhere($clause);
         }
 
-        return $stmt;
+        return count($qb->getQuery()->getResult());
     }
+
+//    public function countCategoriesInList(string $where, array $params)
+//    {
+//        $sql = <<<SQL
+//                select count(distinct c.id)
+//                from category c
+//                where c.root_men_category = 0
+//                and c.root_women_category = 0
+//                %s
+//        SQL;
+//
+//        $stmt = $this->prepareFilterStatement($sql, $where, $params);
+//
+//        $result = $stmt->executeQuery();
+//
+//        return $result->fetchOne();
+//    }
+//
+//    private function prepareFilterStatement(string $sql, string $where, array $params): Statement
+//    {
+//        $newSQL = sprintf($sql, $where);
+//
+//        $stmt = $this->_em->getConnection()->prepare($newSQL);
+//
+//        foreach ($params as $key => $value) {
+//            if ($key === 'ids') {
+//                $stmt->bindValue('ids', implode(',', $value));
+//            }
+//        }
+//
+//        return $stmt;
+//    }
 }

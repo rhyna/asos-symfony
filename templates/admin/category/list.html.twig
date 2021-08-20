@@ -6,7 +6,7 @@
     <div class="catalog-filters">
         <form>
             {% for gender, category  in categoriesByGender %}
-                {{ include('chuncks/selectpicker.html.twig', {
+                {{ include('chunks/selectpicker.html.twig', {
                     options: category,
                     type: 'ids',
                     label: (gender ~ ' categories'),
@@ -36,7 +36,7 @@
                                     {{ category.title }}
                                 </a>
                             </div>
-                            <div class="col">{{ category.parent.parent.title | default ('') }} {{ category.parent.title | default ('') }}</div>
+                            <div class="col">{{ category.rootCategory | default ('') }} {{ category.parentTitle | default ('') }}</div>
                             <div class="col-1 entity-list-item-icons">
                                 <div class="entity-list-item-icons__inner">
                                     <a href="{{ path('admin.category.edit.form', {
@@ -46,7 +46,7 @@
                                     </a>
                                     <button type="button" data-toggle="modal"
                                             data-target="#deleteEntity"
-                                            onclick="passEntityInfo('{{ [category.id, category.title ~ ', parent category - ' ~ category.parent.parent.title | default('') ~ ' ' ~ category.parent.title | default('') ] | json_encode | e('js') }}')">
+                                            onclick="passEntityInfo('{{ [category.id, category.title ~ ', parent category - ' ~ category.rootCategory | default('') ~ ' ' ~ category.parentTitle | default('') ] | json_encode | e('js') }}')">
                                         <i class="far fa-trash-alt"></i>
                                     </button>
                                 </div>
@@ -57,6 +57,7 @@
             {% endfor %}
         </div>
     </div>
+    {{ include("/chunks/pagination.html.twig") }}
 
     {% include('/admin/delete-entity-confirmation.html.twig') %}
 

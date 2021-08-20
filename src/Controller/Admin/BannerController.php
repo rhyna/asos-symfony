@@ -19,12 +19,21 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class BannerController extends AbstractController
 {
+    private EntityManagerInterface $em;
+    private Filesystem $fileSystem;
+
+    public function __construct(EntityManagerInterface $em, Filesystem $fileSystem)
+    {
+        $this->em = $em;
+        $this->fileSystem = $fileSystem;
+    }
+
     /**
      * @Route(path="/", methods={"GET"}, name="list")
      */
-    public function list(Request $request, EntityManagerInterface $em): Response
+    public function list(Request $request): Response
     {
-        $repository = $em->getRepository(Banner::class);
+        $repository = $this->em->getRepository(Banner::class);
 
         $banners = $repository->getAllBannersSortedByPlaceAlias();
 
@@ -39,9 +48,9 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/add", methods={"GET"}, name="add.form")
      */
-    public function addForm(Request $request, EntityManagerInterface $em): Response
+    public function addForm(Request $request): Response
     {
-        $repository = $em->getRepository(BannerPlace::class);
+        $repository = $this->em->getRepository(BannerPlace::class);
 
         $bannerPlaces = $repository->findAll();
 
@@ -55,7 +64,7 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/add", methods={"POST"}, name="add.action")
      */
-    public function addAction(Request $request, EntityManagerInterface $em): Response
+    public function addAction(Request $request): Response
     {
         /** @var UploadedFile $image */
         $image = $request->files->get('image');
@@ -87,16 +96,16 @@ class BannerController extends AbstractController
         $bannerPlace = null;
 
         if ($bannerPlaceId) {
-            $repository = $em->getRepository(BannerPlace::class);
+            $repository = $this->em->getRepository(BannerPlace::class);
 
             $bannerPlace = $repository->find($bannerPlaceId);
         }
 
         $banner->setBannerPlace($bannerPlace);
 
-        $em->persist($banner);
+        $this->em->persist($banner);
 
-        $em->flush();
+        $this->em->flush();
 
         $image->move($imageDirectory, $imageUniqueName);
 
@@ -106,15 +115,15 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
      */
-    public function editForm(Request $request, EntityManagerInterface $em): Response
+    public function editForm(Request $request): Response
     {
         $id = (int)$request->get('id');
 
-        $repository = $em->getRepository(Banner::class);
+        $repository = $this->em->getRepository(Banner::class);
 
         $banner = $repository->find($id);
 
-        $repository = $em->getRepository(BannerPlace::class);
+        $repository = $this->em->getRepository(BannerPlace::class);
 
         $bannerPlaces = $repository->findAll();
 
@@ -129,7 +138,7 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
      */
-    public function editAction(Request $request, EntityManagerInterface $em, Filesystem $fileSystem): Response
+    public function editAction(Request $request): Response
     {
         /** @var UploadedFile $image */
         $image = $request->files->get('image');
@@ -157,7 +166,7 @@ class BannerController extends AbstractController
 
         $bannerId = (int)$request->get('id');
 
-        $banner = $em->getRepository(Banner::class)->find($bannerId);
+        $banner = $this->em->getRepository(Banner::class)->find($bannerId);
 
 
         $banner->setLink($link);
@@ -178,20 +187,20 @@ class BannerController extends AbstractController
 
         if ($bannerPlaceId) {
 
-            $repository = $em->getRepository(BannerPlace::class);
+            $repository = $this->em->getRepository(BannerPlace::class);
 
             $bannerPlace = $repository->find($bannerPlaceId);
         }
 
         $banner->setBannerPlace($bannerPlace);
 
-        $em->flush();
+        $this->em->flush();
 
         if ($image) {
             $image->move($imageDirectory, $imageUniqueName);
         }
 
-        $fileSystem->remove($previousImage);
+        $this->fileSystem->remove($previousImage);
 
         return $this->redirectToRoute('admin.banner.list');
     }
@@ -199,7 +208,7 @@ class BannerController extends AbstractController
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")
      */
-    public function deleteAction(Request $request, EntityManagerInterface $em, Filesystem $fileSystem): Response
+    public function deleteAction(Request $request): Response
     {
         $id = $request->get('id');
 
@@ -210,7 +219,7 @@ class BannerController extends AbstractController
 
             $id = (int)$id;
 
-            $banner = $em->getRepository(Banner::class)->find($id);
+            $banner = $this->em->getRepository(Banner::class)->find($id);
 
             if (!$banner) {
                 throw new \NotFoundException('Such a banner does not exist');
@@ -218,11 +227,11 @@ class BannerController extends AbstractController
 
             $bannerImage = $banner->getImage();
 
-            $em->remove($banner);
+            $this->em->remove($banner);
 
-            $em->flush();
+            $this->em->flush();
 
-            $fileSystem->remove($bannerImage);
+            $this->fileSystem->remove($bannerImage);
 
             return new Response('Successfully deleted the banner', 200);
 

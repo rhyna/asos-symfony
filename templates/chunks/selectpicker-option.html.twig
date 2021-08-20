@@ -1,0 +1,14 @@
+{% for item in optionArray %}
+    <option value='{{ item.id }}'
+            {% set selectedValues = app.request.query.get(type) %}
+            {% if selectedValues is defined %}
+                {% for selectedValue in selectedValues %}
+                    {% if (selectedValue | number_format) is same as (item.id | number_format) %}
+                        {{ 'selected' }}
+                    {%  endif %}
+                {%  endfor %}
+            {% endif %}
+    >
+        {{ item.title }}
+    </option>
+{% endfor %}

@@ -10,14 +10,14 @@
             {% set optGroups = buildOptGroups(settings) %}
             {% for key, optGroup in optGroups %}
                 <optgroup label="{{ key }}">
-                    {{ include ('chuncks/selectpicker-option.html.twig', {
+                    {{ include ('chunks/selectpicker-option.html.twig', {
                         optionArray: optGroup,
                         type: type
                     }) }}
                 </optgroup>
             {% endfor %}
         {% else %}
-            {{ include ('chuncks/selectpicker-option.html.twig',
+            {{ include ('chunks/selectpicker-option.html.twig',
                 {
                     optionArray: options,
                     type: type

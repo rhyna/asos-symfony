@@ -11,11 +11,11 @@ class HelpersExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new \Twig\TwigFunction('buildOptGroups', [$this, 'buildOptGroups1']),
+            new \Twig\TwigFunction('buildOptGroups', [$this, 'buildOptGroupsFunc']),
         ];
     }
 
-    public function buildOptGroups1($settings): array
+    public function buildOptGroupsFunc($settings): array
     {
         $optGroups = [];
 

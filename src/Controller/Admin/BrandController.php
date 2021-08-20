@@ -16,12 +16,19 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class BrandController extends AbstractController
 {
+    private EntityManagerInterface $em;
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
     /**
      * @Route(path="/", methods={"GET"}, name="list")
      */
-    public function list(Request $request, EntityManagerInterface $em): Response
+    public function list(Request $request): Response
     {
-        $repository = $em->getRepository(Brand::class);
+        $repository = $this->em->getRepository(Brand::class);
 
         $brands = $repository->findBy(array(), array('title' => 'ASC'));
 
@@ -47,7 +54,7 @@ class BrandController extends AbstractController
     /**
      * @Route(path="/add", methods={"POST"}, name="add.action")
      */
-    public function addAction(Request $request, EntityManagerInterface $em): Response
+    public function addAction(Request $request): Response
     {
         $title = (string)$request->get('title');
 
@@ -61,9 +68,9 @@ class BrandController extends AbstractController
 
         $brand->setDescriptionMen($descriptionMen);
 
-        $em->persist($brand);
+        $this->em->persist($brand);
 
-        $em->flush();
+        $this->em->flush();
 
         return $this->redirectToRoute('admin.brand.list');
 
@@ -72,11 +79,11 @@ class BrandController extends AbstractController
     /**
      * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
      */
-    public function editForm(Request $request, EntityManagerInterface $em): Response
+    public function editForm(Request $request): Response
     {
         $id = (int)$request->get('id');
 
-        $brand = $em->getRepository(Brand::class)->find($id);
+        $brand = $this->em->getRepository(Brand::class)->find($id);
 
         return $this->render('admin/brand/form.html.twig',
             [
@@ -88,11 +95,11 @@ class BrandController extends AbstractController
     /**
      * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
      */
-    public function editAction(Request $request, EntityManagerInterface $em): Response
+    public function editAction(Request $request): Response
     {
         $id = (int)$request->get('id');
 
-        $brand = $em->getRepository(Brand::class)->find($id);
+        $brand = $this->em->getRepository(Brand::class)->find($id);
 
         $title = (string)$request->get('title');
 
@@ -106,7 +113,7 @@ class BrandController extends AbstractController
 
         $brand->setDescriptionMen($descriptionMen);
 
-        $em->flush();
+        $this->em->flush();
 
         return $this->redirectToRoute('admin.brand.list');
     }
@@ -114,7 +121,7 @@ class BrandController extends AbstractController
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")
      */
-    public function deleteAction(Request $request, EntityManagerInterface $em): Response
+    public function deleteAction(Request $request): Response
     {
         $id = $request->get('id');
 
@@ -125,7 +132,7 @@ class BrandController extends AbstractController
 
             $id = (int)$id;
 
-            $brand = $em->getRepository(Brand::class)->find($id);
+            $brand = $this->em->getRepository(Brand::class)->find($id);
 
             if (!$brand) {
                 throw new \NotFoundException('Such a brand does not exist');
@@ -137,9 +144,9 @@ class BrandController extends AbstractController
 //                throw new ValidationErrorException("Cannot delete a brand that has products linked to it. <br> Delete the products first");
 //            }
 
-            $em->remove($brand);
+            $this->em->remove($brand);
 
-            $em->flush();
+            $this->em->flush();
 
             return new Response('Successfully deleted the brand', 200);
 
