@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\Banner;
+use App\Entity\Brand;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class BannerRepository extends ServiceEntityRepository
+class BrandRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Banner::class);
+        parent::__construct($registry, Brand::class);
     }
 
-    public function getBannersList(int $limit, int $offset): array
+    public function getBrandList(int $limit, int $offset): array
     {
-        $qb = $this->createQueryBuilder('b');
+        $qb = $this->createQueryBuilder('br');
 
-        $qb->leftJoin('b.bannerPlace', 'bp');
-
-        $qb->orderBy('bp.alias', 'ASC');
+        $qb->orderBy('br.title', 'ASC');
 
         $qb->setMaxResults($limit);
 
@@ -34,11 +32,11 @@ class BannerRepository extends ServiceEntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function countBannerList(): int
+    public function countBrandList(): int
     {
-        $qb = $this->createQueryBuilder('b');
+        $qb = $this->createQueryBuilder('br');
 
-        $qb->select("count(b)");
+        $qb->select("count(br)");
 
         return (int)$qb->getQuery()->getSingleScalarResult();
     }

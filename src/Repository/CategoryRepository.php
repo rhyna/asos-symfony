@@ -6,7 +6,6 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Statement;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,7 +16,7 @@ class CategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Category::class);
     }
 
-    public function getRootCategories(): array
+    private function getRootCategories(): array
     {
         $qb = $this->createQueryBuilder('c');
 
@@ -28,7 +27,7 @@ class CategoryRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getFirstLevelCategories(array $categoryLevels): array
+    private function getFirstLevelCategories(array $categoryLevels): array
     {
         foreach ($categoryLevels as &$categoryLevel) {
             $qb = $this->createQueryBuilder('c');
@@ -42,11 +41,10 @@ class CategoryRepository extends ServiceEntityRepository
             $categoryLevel['childCategory1'] = $qb->getQuery()->getResult();
         }
 
-
         return $categoryLevels;
     }
 
-    public function getSecondLevelCategories(array $categoryLevels): array
+    private function getSecondLevelCategories(array $categoryLevels): array
     {
         foreach ($categoryLevels as &$categoryLevel) {
 
@@ -66,7 +64,16 @@ class CategoryRepository extends ServiceEntityRepository
         return $categoryLevels;
     }
 
-    private function getCategoryListQueryBuilder(): QueryBuilder
+    public function getCategoryLevels(): array
+    {
+        $categoryLevels = $this->getRootCategories();
+
+        $categoryLevels = $this->getFirstLevelCategories($categoryLevels);
+
+        return $this->getSecondLevelCategories($categoryLevels);
+    }
+
+    private function getCategoryListQB(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('c');
 
@@ -81,7 +88,7 @@ class CategoryRepository extends ServiceEntityRepository
 
     public function getCategoryList(array $whereClauses, int $limit, int $offset): array
     {
-        $qb = $this->getCategoryListQueryBuilder();
+        $qb = $this->getCategoryListQB();
 
         $qb->addSelect("c.title, cp.id as parentId, cp.title as parentTitle, cp1.title as rootCategory");
 
@@ -102,46 +109,20 @@ class CategoryRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function countCategoriesInList(array $whereClauses): int
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function countCategoriesList(array $whereClauses): int
     {
-        $qb = $this->getCategoryListQueryBuilder();
+        $qb = $this->getCategoryListQB();
+
+        $qb->select("count(distinct c.id)");
 
         foreach ($whereClauses as $clause) {
             $qb->andWhere($clause);
         }
 
-        return count($qb->getQuery()->getResult());
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
-
-//    public function countCategoriesInList(string $where, array $params)
-//    {
-//        $sql = <<<SQL
-//                select count(distinct c.id)
-//                from category c
-//                where c.root_men_category = 0
-//                and c.root_women_category = 0
-//                %s
-//        SQL;
-//
-//        $stmt = $this->prepareFilterStatement($sql, $where, $params);
-//
-//        $result = $stmt->executeQuery();
-//
-//        return $result->fetchOne();
-//    }
-//
-//    private function prepareFilterStatement(string $sql, string $where, array $params): Statement
-//    {
-//        $newSQL = sprintf($sql, $where);
-//
-//        $stmt = $this->_em->getConnection()->prepare($newSQL);
-//
-//        foreach ($params as $key => $value) {
-//            if ($key === 'ids') {
-//                $stmt->bindValue('ids', implode(',', $value));
-//            }
-//        }
-//
-//        return $stmt;
-//    }
 }

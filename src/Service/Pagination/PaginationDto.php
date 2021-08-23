@@ -10,7 +10,7 @@ class PaginationDto
     public int $offset = 0;
     public int $previous = 0;
     public int $next = 0;
-    public float $totalPages = 0;
+    public int $totalPages = 0;
     public string $token = '';
     public string $baseUrl = '';
 }

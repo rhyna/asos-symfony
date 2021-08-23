@@ -54,8 +54,10 @@
         </div>
     </div>
 
-    {% include('/admin/delete-entity-confirmation.html.twig') %}
+    {{ include("/chunks/pagination.html.twig") }}
 
-    {% include('/admin/on-entity-deletion-modal.html.twig') %}
+    {{ include('/admin/delete-entity-confirmation.html.twig') }}
+
+    {{ include('/admin/on-entity-deletion-modal.html.twig') }}
 
 {% endblock %}

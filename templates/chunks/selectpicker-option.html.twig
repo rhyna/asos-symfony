@@ -3,7 +3,7 @@
             {% set selectedValues = app.request.query.get(type) %}
             {% if selectedValues is defined %}
                 {% for selectedValue in selectedValues %}
-                    {% if (selectedValue | number_format) is same as (item.id | number_format) %}
+                    {% if (stringToInt(selectedValue)) is same as (stringToInt(item.id)) %}
                         {{ 'selected' }}
                     {%  endif %}
                 {%  endfor %}

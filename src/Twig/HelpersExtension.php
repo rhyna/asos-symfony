@@ -12,6 +12,7 @@ class HelpersExtension extends AbstractExtension
     {
         return [
             new \Twig\TwigFunction('buildOptGroups', [$this, 'buildOptGroupsFunc']),
+            new \Twig\TwigFunction('stringToInt', [$this, 'stringToInteger'])
         ];
     }
 
@@ -31,5 +32,10 @@ class HelpersExtension extends AbstractExtension
         }
 
         return $optGroups;
+    }
+
+    public function stringToInteger(string $string): int
+    {
+        return (int)$string;
     }
 }

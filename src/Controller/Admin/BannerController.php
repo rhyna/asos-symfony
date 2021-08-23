@@ -6,6 +6,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Banner;
 use App\Entity\BannerPlace;
+use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -21,11 +22,13 @@ class BannerController extends AbstractController
 {
     private EntityManagerInterface $em;
     private Filesystem $fileSystem;
+    private PaginationService $paginationService;
 
-    public function __construct(EntityManagerInterface $em, Filesystem $fileSystem)
+    public function __construct(EntityManagerInterface $em, Filesystem $fileSystem, PaginationService $paginationService)
     {
         $this->em = $em;
         $this->fileSystem = $fileSystem;
+        $this->paginationService = $paginationService;
     }
 
     /**
@@ -35,13 +38,27 @@ class BannerController extends AbstractController
     {
         $repository = $this->em->getRepository(Banner::class);
 
-        $banners = $repository->getAllBannersSortedByPlaceAlias();
+        $page = $request->get('page');
+
+        if (!$page || (string)(int)$page !== $page) {
+            $page = 1;
+        }
+
+        $page = (int)$page;
+
+        $totalBanners = $repository->countBannerList();
+
+        $pagination = $this->paginationService->calculate($page, 10, $totalBanners);
+
+        $banners = $repository->getBannersList($pagination->limit, $pagination->offset);
 
         return $this->render('admin/banner/list.html.twig',
             [
                 'banners' => $banners,
                 'title' => 'Banner List',
-                'entityType' => 'banner'
+                'entityType' => 'banner',
+                'pagination' => $pagination,
+                'page' => $page,
             ]);
     }
 

@@ -6,6 +6,9 @@ namespace App\Service\Pagination;
 
 class PaginationService
 {
+    /**
+     * @throws \SystemErrorException
+     */
     public function calculate(int $page, int $itemsPerPage, int $totalItems): PaginationDto
     {
         $dto = new PaginationDto();
@@ -21,15 +24,11 @@ class PaginationService
 
         $totalPages = ceil($totalItems / $itemsPerPage);
 
-//        $totalPages = false;
+        if (!$totalPages) {
+            throw new \SystemErrorException();
+        }
 
-//        if (!$totalPages) {
-//            throw new \SystemErrorException();
-//        }
-
-        $dto->totalPages = $totalPages;
-
-        //$dto->totalPages = ceil($totalItems / $itemsPerPage);
+        $dto->totalPages = (int)$totalPages;
 
         if ($page > 1) {
             $dto->previous = $page - 1;

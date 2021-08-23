@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Brand;
+use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,10 +18,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class BrandController extends AbstractController
 {
     private EntityManagerInterface $em;
+    private PaginationService $paginationService;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, PaginationService $paginationService)
     {
         $this->em = $em;
+        $this->paginationService = $paginationService;
     }
 
     /**
@@ -30,13 +33,29 @@ class BrandController extends AbstractController
     {
         $repository = $this->em->getRepository(Brand::class);
 
-        $brands = $repository->findBy(array(), array('title' => 'ASC'));
+        //$brands = $repository->findBy(array(), array('title' => 'ASC'));
+
+        $totalBrands = $repository->countBrandList();
+
+        $page = $request->get('page');
+
+        if (!$page || (string)(int)$page !== $page) {
+            $page = 1;
+        }
+
+        $page = (int)$page;
+
+        $pagination = $this->paginationService->calculate($page, 10, $totalBrands);
+
+        $brands = $repository->getBrandList($pagination->limit, $pagination->offset);
 
         return $this->render('admin/brand/list.html.twig',
             [
                 'brands' => $brands,
                 'title' => 'Brand List',
                 'entityType' => 'brand',
+                'pagination' => $pagination,
+                'page' => $page,
             ]);
     }
 

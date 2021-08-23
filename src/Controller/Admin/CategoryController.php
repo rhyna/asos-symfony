@@ -28,20 +28,15 @@ class CategoryController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
+     * @throws \SystemErrorException
      */
     public function list(Request $request): Response
     {
         $repository = $this->em->getRepository(Category::class);
 
-        $categoryLevels = $repository->getRootCategories();
-
-        $categoryLevels = $repository->getFirstLevelCategories($categoryLevels);
-
-        $categoryLevels = $repository->getSecondLevelCategories($categoryLevels);
-
-        $repository = $this->em->getRepository(Category::class);
-
         $categoriesByGender = [];
+
+        $categoryLevels = $repository->getCategoryLevels();
 
         foreach ($categoryLevels as $gender) {
             foreach ($gender['childCategory1'] as $category) {
@@ -73,7 +68,7 @@ class CategoryController extends AbstractController
 
         $page = (int)$page;
 
-        $totalItems = $repository->countCategoriesInList($whereClauses);
+        $totalItems = $repository->countCategoriesList($whereClauses);
 
         $pagination = $this->paginationService->calculate($page, 10, $totalItems);
 
@@ -94,7 +89,14 @@ class CategoryController extends AbstractController
      */
     public function addForm(Request $request): Response
     {
+        $repository = $this->em->getRepository(Category::class);
 
+        $categoryLevels = $repository->getCategoryLevels();
+
+        return $this->render('admin/category/form.html.twig', [
+            'title' => 'Add Category',
+            'categories' => $categoryLevels,
+        ]);
     }
 
     /**
