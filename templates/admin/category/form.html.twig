@@ -14,13 +14,13 @@
                 {% for rootCategory in categories %}
                     <option value="{{ rootCategory.id }}"
                             style='font-weight: bold;'
-                            {{ category is defined and category.parentId is same as rootCategory.id ? 'selected' : '' }}
+                            {{ category is defined and category.parent.id is same as rootCategory.id ? 'selected' : '' }}
                     >
                         {{ rootCategory.title }}
                     </option>
                     {% for firstLevelCategory in rootCategory.childCategory1 %}
                         <option value="{{ firstLevelCategory.id }}"
-                                {{ category is defined and category.parentId is same as firstLevelCategory.id ? 'selected' : '' }}
+                                {{ category is defined and category.parent.id is same as firstLevelCategory.id ? 'selected' : '' }}
                         >
                             -- {{ firstLevelCategory.title }}
                         </option>
@@ -30,28 +30,31 @@
         </div>
         <div class="form-image">
             <div class="form-group">
-                <div class="entity-form-image entity-form-image--category <?= $category->image ? '' : 'entity-form-image--deleted' ?>"
-                <?= ($category->image ? 'style="background-image: url(' . $category->image . ')"' : '') ?>>
-                <?= !$category->image ? 'No image' : '' ?>
-                <?php if ($category->image): ?>
-                <button type="button"
-                        class="entity-form-delete-image-button"
-                        name="delete-image"
-                        data-id="<?= $category->id ?>"
-                        data-image="<?= $category->image ?>"
-                        data-type="category"
-                        onclick="deleteEntityImage(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-                <?php endif; ?>
+                <div class="entity-form-image entity-form-image--category {{ category is defined and category.image ? '' : 'entity-form-image--deleted' }}"
+                        {% if category is defined and category.image %}
+                            style="background-image: url('{{ category.image | trim('.') }}')"
+                        {% endif %}
+                >
+                    {{ category is not defined or not category.image ? 'No image' : '' }}
+                    {% if category is defined and category.image %}
+                        <button type="button"
+                                class="entity-form-delete-image-button"
+                                name="delete-image"
+                                data-id="{{ category is defined and category.id }}"
+                                data-image="category.image"
+                                data-type="category"
+                                onclick="deleteEntityImage(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                <input class="form-control-file" name="image" id="image" type="file">
             </div>
-            <input class="form-control-file" name="image" id="image" type="file">
-        </div>
         </div>
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea class="form-control" type="text" name="description" id="description"
-                      rows="5"><?= htmlspecialchars($category->description) ?></textarea>
+            <textarea class="form-control" name="description" id="description"
+                      rows="5">{{ category is defined and category.description ? category.description : '' }}</textarea>
         </div>
         <button type="submit" class="entity-form-submit">Submit</button>
     </form>

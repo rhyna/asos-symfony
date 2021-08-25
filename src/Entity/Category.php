@@ -48,12 +48,12 @@ class Category
     /**
      * @ORM\Column(type="boolean")
      */
-    private bool $rootMenCategory;
+    private bool $rootMenCategory = false;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private bool $rootWomenCategory;
+    private bool $rootWomenCategory = false;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="categories")
@@ -65,12 +65,12 @@ class Category
      */
     private Collection $products;
 
-    public function __construct(string $title, ?int $parent, bool $rootMenCategory, bool $rootWomenCategory)
+    public function __construct(string $title, ?Category $parent)
     {
         $this->title = $title;
         $this->parent = $parent;
-        $this->rootMenCategory = $rootMenCategory;
-        $this->rootWomenCategory = $rootWomenCategory;
+//        $this->rootMenCategory = $rootMenCategory;
+//        $this->rootWomenCategory = $rootWomenCategory;
 
         $this->children = new ArrayCollection();
         $this->sizes = new ArrayCollection();

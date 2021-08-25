@@ -185,7 +185,6 @@ class BannerController extends AbstractController
 
         $banner = $this->em->getRepository(Banner::class)->find($bannerId);
 
-
         $banner->setLink($link);
 
         $banner->setTitle($title);
@@ -215,9 +214,9 @@ class BannerController extends AbstractController
 
         if ($image) {
             $image->move($imageDirectory, $imageUniqueName);
-        }
 
-        $this->fileSystem->remove($previousImage);
+            $this->fileSystem->remove($previousImage);
+        }
 
         return $this->redirectToRoute('admin.banner.list');
     }
