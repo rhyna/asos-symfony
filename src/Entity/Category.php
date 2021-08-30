@@ -69,9 +69,6 @@ class Category
     {
         $this->title = $title;
         $this->parent = $parent;
-//        $this->rootMenCategory = $rootMenCategory;
-//        $this->rootWomenCategory = $rootWomenCategory;
-
         $this->children = new ArrayCollection();
         $this->sizes = new ArrayCollection();
         $this->products = new ArrayCollection();
