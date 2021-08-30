@@ -40,10 +40,10 @@
                         <button type="button"
                                 class="entity-form-delete-image-button"
                                 name="delete-image"
-                                data-id="{{ category is defined and category.id }}"
-                                data-image="category.image"
+                                data-id="{{ category.id }}"
+                                data-image="{{ category.image }}"
                                 data-type="category"
-                                onclick="deleteEntityImage(this)">
+                                onclick="deleteEntityImage(this, '/admin/category/delete-image')">
                             <i class="fas fa-times"></i>
                         </button>
                     {% endif %}

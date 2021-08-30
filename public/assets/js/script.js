@@ -11,7 +11,7 @@ $('.subbar-item').hover(function () {
 
 $('.entity-form-option--disabled').prop('disabled', true);
 
-function deleteEntityImage(buttonElement) {
+function deleteEntityImage(buttonElement, url) {
     let button = $(buttonElement);
 
     let entityType = button.data('type');
@@ -23,7 +23,7 @@ function deleteEntityImage(buttonElement) {
     let image = button.closest('.form-image');
 
     $.ajax({
-        url: '/admin/delete-' + entityType + '-image.php',
+        url: url,
         type: 'POST',
         data: {
             id: entityId,

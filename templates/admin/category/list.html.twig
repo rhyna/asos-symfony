@@ -26,7 +26,7 @@
         <div class="entity-list-content">
             {% for category in categories %}
                 <div class="entity-list-item__wrapper">
-                    <div class="entity-list-item">
+                    <div class="entity-list-item" data-id="{{ category.id }}">
                         <div class="row entity-list-item__row">
                             <div class="col">
                                 <a href="{{ path('admin.category.edit.form', {

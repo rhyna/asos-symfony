@@ -163,6 +163,7 @@ class CategoryController extends AbstractController
             'title' => 'Edit Category',
             'categories' => $categoryLevels,
             'category' => $category,
+            'entityType' => 'category',
         ]);
     }
 
@@ -217,19 +218,82 @@ class CategoryController extends AbstractController
     }
 
     /**
-     * @Route(path="/delete", methods={"GET"}, name="delete.form")
-     */
-    public function deleteForm(Request $request): Response
-    {
-
-    }
-
-    /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")
      */
     public function deleteAction(Request $request): Response
     {
+        $id = (int)$request->get('id');
 
+        try {
+            if (!$id) {
+                throw new \BadRequestException('The id is not provided');
+            }
+
+            $category = $this->em->getRepository(Category::class)->find($id);
+
+            if (!$category) {
+                throw new \NotFoundException('Such a category does not exist');
+            }
+
+            $categoryImage = $category->getImage();
+
+            $this->em->remove($category);
+
+            $this->em->flush();
+
+            $this->fileSystem->remove($categoryImage);
+
+            return new Response('Successfully deleted the category', 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
+    /**
+     * @Route(path="/delete-image", methods={"POST"}, name="delete-image.action")
+     */
+    public function deleteImageAction(Request $request): Response
+    {
+        try {
+            $repository = $this->em->getRepository(Category::class);
+
+            $categoryId = (int)$request->get('id');
+
+            if (!$categoryId) {
+                throw new \BadRequestException('No category id provided');
+            }
+
+            $category = $repository->find($categoryId);
+
+            if (!$category) {
+                throw new \NotFoundException('Such a category does not exist');
+            }
+
+            $imageToDelete = $category->getImage();
+
+            $category->setImage(null);
+
+            $this->em->flush();
+
+            $this->fileSystem->remove($imageToDelete);
+
+            return new Response();
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
+    }
 }
