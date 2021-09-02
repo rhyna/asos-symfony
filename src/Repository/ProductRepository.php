@@ -22,6 +22,10 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->select("distinct p.id");
 
+        $qb->leftJoin("p.brand", "b");
+
+        $qb->join("p.category", "c");
+
         return $qb;
     }
 
@@ -38,10 +42,6 @@ class ProductRepository extends ServiceEntityRepository
             c.id as categoryId, 
             c.title as categoryTitle, 
             p.image");
-
-        $qb->leftJoin("p.brand", "b");
-
-        $qb->join("p.category", "c");
 
         if ($whereClauses) {
             foreach ($whereClauses as $i => $clause) {
@@ -62,5 +62,22 @@ class ProductRepository extends ServiceEntityRepository
         $qb->setFirstResult($offset);
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function countProductList(array $whereClauses): int
+    {
+        $qb = $this->getProductListQB();
+
+        $qb->select('count(distinct p.id)');
+
+        foreach ($whereClauses as $clause) {
+            $qb->andWhere($clause);
+        }
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
 }

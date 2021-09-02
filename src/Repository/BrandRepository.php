@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Brand;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 class BrandRepository extends ServiceEntityRepository
@@ -15,11 +16,25 @@ class BrandRepository extends ServiceEntityRepository
         parent::__construct($registry, Brand::class);
     }
 
-    public function getBrandList(int $limit, int $offset): array
+    private function getBrandListSortedByTitleQB(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('br');
 
         $qb->orderBy('br.title', 'ASC');
+
+        return $qb;
+    }
+
+    public function getBrandListSortedByTitle(): array
+    {
+        $qb = $this->getBrandListSortedByTitleQB();
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getBrandList(int $limit, int $offset): array
+    {
+        $qb = $this->getBrandListSortedByTitleQB();
 
         $qb->setMaxResults($limit);
 
@@ -39,5 +54,16 @@ class BrandRepository extends ServiceEntityRepository
         $qb->select("count(br)");
 
         return (int)$qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function getAllBrandsIdAndTitle(): array
+    {
+        $qb = $this->createQueryBuilder('br');
+
+        $qb->select("br.id, br.title");
+
+        $qb->orderBy("br.title", "asc");
+
+        return $qb->getQuery()->getResult();
     }
 }

@@ -28,12 +28,11 @@ class BrandController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
+     * @throws \SystemErrorException
      */
     public function list(Request $request): Response
     {
         $repository = $this->em->getRepository(Brand::class);
-
-        //$brands = $repository->findBy(array(), array('title' => 'ASC'));
 
         $totalBrands = $repository->countBrandList();
 

@@ -1,0 +1,8 @@
+{% for gender, category  in categoriesByGender %}
+    {{ include('chunks/selectpicker.html.twig', {
+        options: category,
+        type: 'ids',
+        label: (gender ~ ' categories'),
+        settings: '',
+    }) }}
+{% endfor %}

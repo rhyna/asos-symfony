@@ -33,6 +33,7 @@ class BannerController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
+     * @throws \SystemErrorException
      */
     public function list(Request $request): Response
     {

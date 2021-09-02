@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Entity\Brand;
+use App\Entity\Category;
 use App\Entity\Product;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +33,7 @@ class ProductController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
+     * @throws \SystemErrorException
      */
     public function list(Request $request): Response
     {
@@ -74,14 +77,21 @@ class ProductController extends AbstractController
             $order = ["p.price", "DESC"];
         }
 
-        $products = $repository->getProductList($whereClauses, $order, 10000, 0);
+        $totalProducts = $repository->countProductList($whereClauses);
+
+        $pagination = $this->paginationService->calculate($page, 10, $totalProducts);
+
+        $products = $repository->getProductList($whereClauses, $order, $pagination->limit, $pagination->offset);
+
+        $brandsData = $this->em->getRepository(Brand::class)->getAllBrandsIdAndTitle();
 
         return $this->render('admin/product/list.html.twig', [
-            'categories' => $products,
+            'products' => $products,
             'title' => 'Product List',
             'entityType' => 'product',
-            //'pagination' => $pagination,
+            'pagination' => $pagination,
             'page' => $page,
+            'brandsData' => $brandsData,
         ]);
     }
 
@@ -90,7 +100,23 @@ class ProductController extends AbstractController
      */
     public function addForm(Request $request): Response
     {
+        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
 
+        $brands = $this->em->getRepository(Brand::class)->getBrandListSortedByTitle();
+
+        return $this->render('admin/product/form.html.twig', [
+            'title' => 'Add Product',
+            'mode' => 'add-product',
+            'categoryLevels' => $categoryLevels,
+            'sizeIds' => [],
+            'brands' => $brands,
+            'images' => [
+                'image' => '',
+                'image1' => '',
+                'image2' => '',
+                'image3' => '',
+            ],
+        ]);
     }
 
     /**

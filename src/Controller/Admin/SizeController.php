@@ -9,7 +9,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
+/**
+ * @Route(path="/admin/size", name="admin.size.")
+ */
 class SizeController extends AbstractController
 {
     /**

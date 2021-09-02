@@ -1,0 +1,129 @@
+{% extends '/admin/base.html.twig' %}
+
+{% block body %}
+    <div class="add-product-page">
+        <div class="admin-title">{{ title }}</div>
+        <form action="" method="post" enctype="multipart/form-data" id="productForm" class="entity-form product-form">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input class="form-control" type="text" name="title" id="title" required
+                       value="{{ product.title | default('') }}">
+            </div>
+            <div class="form-group">
+                <label for="productCode">Product Code</label>
+                <input class="form-control" type="text" name="productCode" id="productCode" required
+                       value="{{ product.productCode | default('') }}"
+                        {{ mode is same as 'edit-product' ? 'readonly' : '' }}>
+            </div>
+            <div class="form-group">
+                <label for="price">Price, €</label>
+                <input class="form-control" type="number" step='any' min='0.01' name="price" id="price" required
+                       value="{{ product.price | default('') | number_format(2, '.', ' ') }}">
+            </div>
+            <div class="form-group">
+                <label for="productDetails">Details</label>
+                <textarea class="form-control" name="productDetails" id="productDetails"
+                          rows="5">{{ product.details | default('') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="categoryId">Category</label>
+                <select class="form-control" id="categoryId" name="categoryId" required
+                        onchange="showSizes()">
+                    {% for rootLevel in categoryLevels %}
+                        <option class="entity-form-option--disabled" value=""
+                                style=" font-weight: 600;
+                        text-transform: uppercase">
+                            {{ rootLevel.title }}
+                        </option>
+                        {% for child1 in rootLevel.childCategory1 %}
+                            <option class="entity-form-option--disabled"
+                                    value=""
+                                    style="font-weight: 600">
+                                -- {{ child1.title }}
+                            </option>
+                            {% for child2 in child1.childCategory2 %}
+                                <option value="{{ child2.id }}"
+                                        {% if product is defined and child2.id is same as product.categoryId %}
+                                            selected="selected"
+                                        {% endif %}
+                                >
+                                    ---- {{ child2.title }}
+                                </option>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group product-size-list">
+                <input type="hidden" id="productSizes" value="{{ sizeIds | json_encode | e('js') }}">
+                <label>Select sizes</label>
+                <div class="product-size-list-empty product-size-list-empty--productForm">
+                    Please select a category first
+                </div>
+                <div class="product-size-list__content">
+                    <!--            content uploaded via JS-->
+                </div>
+            </div>
+            <div class="manage-sizes">
+                <a class="manage-sizes-link" href="/">Manage sizes</a>
+            </div>
+            <div class="form-group">
+                <label for="brand">Brand</label>
+                <select class="form-control" id="brand" name="brandId">
+                    <option value="">NO BRAND</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand.id }}"
+                                {% if product is defined and brand.id is same as product.brandId %}
+                                    selected="selected"
+                                {% endif %}
+                        >
+                            {{ brand.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="add-brand" data-toggle="modal" data-target="#addBrand">
+                    + new brand
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="lookAfterMe">Look After Me</label>
+                <textarea class="form-control" name="lookAfterMe" id="lookAfterMe"
+                          rows="5">{{ product.lookAfterMe | default('') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="aboutMe">About Me</label>
+                <textarea class="form-control" name="aboutMe" id="aboutMe"
+                          rows="5">{{ product.aboutMe | default('') }}</textarea>
+            </div>
+            <div class="row">
+                {% for name, url in images %}
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="form-image">
+                            <div class="form-group">
+                                <div class="entity-form-image {{ url ? '' : 'entity-form-image--deleted' }}"
+                                        {{ url ? 'style="background-image: url(' ~ url ~ ')"' : '' }}
+                                >
+                                    {{ not url ? 'No image' : '' }}
+                                    {% if url %}
+                                        <button type="button"
+                                                class="entity-form-delete-image-button"
+                                                name="delete-image"
+                                                data-id="{{ product.id }}"
+                                                data-image="{{ name }}"
+                                                data-type="product"
+                                                onclick="deleteEntityImage(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <input class="form-control-file" name="{{ name }}" id="{{ name }}"
+                                       type="file">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="entity-form-submit">Submit</button>
+        </form>
+    </div>
+{% endblock %}

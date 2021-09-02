@@ -1,0 +1,26 @@
+{% set sort = [
+    {
+        'value' :'price-asc',
+        'text' : 'Price low to high',
+    },
+    {
+        'value' : 'price-desc',
+        'text' : 'Price high to low',
+    }
+] %}
+
+{% set getParam = app.request.query.get('sort') %}
+
+<div class='form-group'>
+    <label for='sort'>Sort</label>
+    <select class='selectpicker show-tick'
+            name='sort'
+            id='sort'
+            title='Nothing selected'>
+        {% for item in sort %}
+            <option value="{{ item.value }}" {{ getParam is same as item.value ? ' selected' : '' }}>
+                {{ item.text }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
