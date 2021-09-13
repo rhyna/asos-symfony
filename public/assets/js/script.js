@@ -346,7 +346,7 @@ function createSizeItem(size) {
     deleteIcon.appendTo(deleteButton);
 }
 
-function manageSizes() {
+function manageSizes(url) {
     let productCategoryId = $('#categoryId--sizeList option:selected').val();
 
     let productCategoryTitle = $('#categoryId--sizeList option:selected').text().trim().replace('-- ', '');
@@ -365,7 +365,7 @@ function manageSizes() {
     }
 
     $.ajax({
-        url: '../admin/manage-sizes.php',
+        url: url,
         type: 'POST',
         data: {
             categoryId: productCategoryId,
@@ -388,8 +388,6 @@ function manageSizes() {
                 $('.product-size-list__header').addClass('product-size-list__header--show');
 
                 sizes.forEach(function (size) {
-                    size['id'] = Number(size['id']);
-
                     createSizeItem(size);
                 })
             }

@@ -1,0 +1,54 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block body %}
+    <div class="manage-sizes-page">
+        <div class="admin-title">
+            {{ title }}
+        </div>
+    </div>
+    <form action="" method="post" enctype="multipart/form-data" id="sizeForm" class="entity-form size-form">
+        <div class="form-group">
+            <label for="categoryId--sizeList">Select category</label>
+            <select class="form-control" id="categoryId--sizeList" name="categoryId--sizeList"
+                    onchange="manageSizes('{{ path('admin.size.list.form') }}')">
+                {% for rootLevel in categoryLevels %}
+                    <option class="entity-form-option--disabled" value=""
+                            style=" font-weight: 600;
+                        text-transform: uppercase">
+                        {{ rootLevel.title }}
+                    </option>
+                    {% for child1 in rootLevel.childCategory1 %}
+                        <option value="{{ child1.id }}">
+                            -- {{ child1.title }}
+                        </option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+        <button type="button"
+                class="admin-button add-size-button"
+                data-toggle="modal"
+                data-target="#addSize">
+            Add size
+        </button>
+        <div class="form-group product-size-list">
+            <div class="product-size-list-empty product-size-list-empty--manageSizes">
+                Please select a category first
+            </div>
+            <div class="product-size-list__header">
+                <div class="row">
+                    <div class="col">Size</div>
+                    <div class="col-3">Size sorting order</div>
+                    <div class="col-1"></div>
+                </div>
+            </div>
+            <div class="product-size-list__content">
+                <div class="entity-list entity-list--size">
+                    <div class="entity-list-content">
+                        <!--                                content uploaded via JS-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

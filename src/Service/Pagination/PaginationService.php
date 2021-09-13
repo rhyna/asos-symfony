@@ -24,7 +24,7 @@ class PaginationService
 
         $totalPages = ceil($totalItems / $itemsPerPage);
 
-        if (!$totalPages) {
+        if ($totalPages === false) {
             throw new \SystemErrorException();
         }
 

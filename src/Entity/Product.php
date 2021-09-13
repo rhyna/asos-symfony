@@ -83,12 +83,12 @@ class Product
     private Brand $brand;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\SearchWord", inversedBy="products")
+     * @ORM\ManyToMany(targetEntity="App\Entity\SearchWord", inversedBy="products", fetch="EAGER")
      */
     private Collection $searchWords;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="products")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="products", fetch="EAGER")
      */
     private Collection $sizes;
 

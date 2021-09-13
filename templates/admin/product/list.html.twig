@@ -6,13 +6,27 @@
     <h1 class="entity-list-title">Products</h1>
     <div class="catalog-filters">
         <form>
+            {% for gender, category in categoriesByGender %}
+                {% set settings = {
+                    'optGroups': category
+                } %}
+                {{ include('chunks/selectpicker.html.twig', {
+                    options: category,
+                    type: 'categories',
+                    label: gender ~ ' categories',
+                    settings: settings
+                }) }}
+            {% endfor %}
+
             {{ include('chunks/selectpicker.html.twig', {
                 options: brandsData,
                 type: 'brands',
                 label: 'Brand',
                 settings: [],
             }) }}
+
             {{ include('chunks/sort-selectpicker.html.twig') }}
+
             <button type="submit" class="catalog-filters-submit">Filter</button>
         </form>
     </div>

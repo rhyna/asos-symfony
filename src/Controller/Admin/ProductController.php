@@ -85,6 +85,24 @@ class ProductController extends AbstractController
 
         $brandsData = $this->em->getRepository(Brand::class)->getAllBrandsIdAndTitle();
 
+        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
+
+        $categoriesByGender = [];
+
+        foreach ($categoryLevels as $root) {
+            $categoriesByGender[$root['title']] = [];
+
+            foreach ($root['childCategory1'] as $level1) {
+                foreach ($level1['childCategory2'] as $level2) {
+                    $array = [];
+                    $array['id'] = $level2['id'];
+                    $array['title'] = $level2['title'];
+                    $array['parentCategoryTitle'] = $level2['parentTitle'];
+                    $categoriesByGender[$root['title']][] = $array;
+                }
+            }
+        }
+
         return $this->render('admin/product/list.html.twig', [
             'products' => $products,
             'title' => 'Product List',
@@ -92,6 +110,7 @@ class ProductController extends AbstractController
             'pagination' => $pagination,
             'page' => $page,
             'brandsData' => $brandsData,
+            'categoriesByGender' => $categoriesByGender,
         ]);
     }
 
@@ -128,11 +147,43 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route(path="/edit", methods={"GET"}, name="edit.form")
+     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
      */
     public function editForm(Request $request): Response
     {
+        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
 
+        $brands = $this->em->getRepository(Brand::class)->getBrandListSortedByTitle();
+
+        $id = (int)$request->get('id');
+
+        /**
+         * @var Product $product;
+         */
+        $product = $this->em->getRepository(Product::class)->find($id);
+
+        $sizes = $product->getSizes();
+
+//        $sizes1 = [];
+//
+//        foreach ($sizes as $size) {
+//            $sizes1[] = $size;
+//        }
+
+        return $this->render('admin/product/form.html.twig', [
+            'title' => 'Edit Product',
+            'mode' => 'edit-product',
+            'product' => $product,
+            'categoryLevels' => $categoryLevels,
+            'sizeIds' => [],
+            'brands' => $brands,
+            'images' => [
+                'image' => $product->getImage(),
+                'image1' => $product->getImage1(),
+                'image2' => $product->getImage2(),
+                'image3' => $product->getImage3(),
+            ],
+        ]);
     }
 
     /**

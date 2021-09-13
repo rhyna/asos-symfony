@@ -43,7 +43,7 @@
                             </option>
                             {% for child2 in child1.childCategory2 %}
                                 <option value="{{ child2.id }}"
-                                        {% if product is defined and child2.id is same as product.categoryId %}
+                                        {% if product is defined and child2.id is same as product.category.id %}
                                             selected="selected"
                                         {% endif %}
                                 >
@@ -65,7 +65,7 @@
                 </div>
             </div>
             <div class="manage-sizes">
-                <a class="manage-sizes-link" href="/">Manage sizes</a>
+                <a class="manage-sizes-link" href="{{ path('admin.size.list') }}">Manage sizes</a>
             </div>
             <div class="form-group">
                 <label for="brand">Brand</label>
@@ -73,7 +73,7 @@
                     <option value="">NO BRAND</option>
                     {% for brand in brands %}
                         <option value="{{ brand.id }}"
-                                {% if product is defined and brand.id is same as product.brandId %}
+                                {% if product is defined and brand.id is same as product.brand.id %}
                                     selected="selected"
                                 {% endif %}
                         >
@@ -97,33 +97,35 @@
             </div>
             <div class="row">
                 {% for name, url in images %}
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="form-image">
-                            <div class="form-group">
-                                <div class="entity-form-image {{ url ? '' : 'entity-form-image--deleted' }}"
-                                        {{ url ? 'style="background-image: url(' ~ url ~ ')"' : '' }}
-                                >
-                                    {{ not url ? 'No image' : '' }}
-                                    {% if url %}
-                                        <button type="button"
-                                                class="entity-form-delete-image-button"
-                                                name="delete-image"
-                                                data-id="{{ product.id }}"
-                                                data-image="{{ name }}"
-                                                data-type="product"
-                                                onclick="deleteEntityImage(this)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    {% endif %}
+                <div class="col-sm-6 col-lg-3">
+                    <div class="form-image">
+                        <div class="form-group">
+                            {% if not url %}
+                                <div class="entity-form-image entity-form-image--deleted">
+                            {% else %}
+                                <div class="entity-form-image" style="background-image: url('{{ url }}')">
+                            {% endif %}
+                            {{ not url ? 'No image' : '' }}
+                            {% if url %}
+                                <button type="button"
+                                        class="entity-form-delete-image-button"
+                                        name="delete-image"
+                                        data-id="{{ product.id }}"
+                                        data-image="{{ name }}"
+                                        data-type="product"
+                                        onclick="deleteEntityImage(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            {% endif %}
                                 </div>
                                 <input class="form-control-file" name="{{ name }}" id="{{ name }}"
                                        type="file">
                             </div>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-            <button type="submit" class="entity-form-submit">Submit</button>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="entity-form-submit">Submit</button>
         </form>
     </div>
 {% endblock %}

@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -56,7 +57,7 @@ class Category
     private bool $rootWomenCategory = false;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="categories")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="categories", fetch="EAGER")
      */
     private Collection $sizes;
 
@@ -181,6 +182,15 @@ class Category
         }
 
         $this->products->add($product);
+    }
+
+    public function getSizesOrderedBySort(): Collection
+    {
+        $criteria = Criteria::create();
+
+        $criteria->orderBy(['sortOrder' => 'asc']);
+
+        return $this->sizes->matching($criteria);
     }
 
 }
