@@ -200,10 +200,8 @@ function showSizes() {
 
     let productSizes = JSON.parse(productSizeList);
 
-    return;
-
     $.ajax({
-        url: '../admin/get-product-sizes.php',
+        url: '/admin/product/product-sizes',
         type: 'POST',
         data: {
             categoryId: productCategoryId,
@@ -211,6 +209,8 @@ function showSizes() {
     })
         .done(function (response) {
             let sizes = JSON.parse(response);
+
+            console.log(sizes);
 
             $('.product-size-list__content').remove();
 

@@ -23,7 +23,7 @@
             <div class="form-group">
                 <label for="productDetails">Details</label>
                 <textarea class="form-control" name="productDetails" id="productDetails"
-                          rows="5">{{ product.details | default('') }}</textarea>
+                          rows="5">{{ product.productDetails | default('') }}</textarea>
             </div>
             <div class="form-group">
                 <label for="categoryId">Category</label>
@@ -55,7 +55,7 @@
                 </select>
             </div>
             <div class="form-group product-size-list">
-                <input type="hidden" id="productSizes" value="{{ sizeIds | json_encode | e('js') }}">
+                <input type="hidden" id="productSizes" value="{{ sizeIds | json_encode }}">
                 <label>Select sizes</label>
                 <div class="product-size-list-empty product-size-list-empty--productForm">
                     Please select a category first

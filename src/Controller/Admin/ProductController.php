@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Entity\Size;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -158,24 +159,29 @@ class ProductController extends AbstractController
         $id = (int)$request->get('id');
 
         /**
-         * @var Product $product;
+         * @var Product $product ;
          */
         $product = $this->em->getRepository(Product::class)->find($id);
 
         $sizes = $product->getSizes();
 
-//        $sizes1 = [];
-//
-//        foreach ($sizes as $size) {
-//            $sizes1[] = $size;
-//        }
+        $sizeIds = [];
+
+        /**
+         * @var Size $size
+         */
+        foreach ($sizes as $size) {
+            $sizeId = $size->getId();
+
+            $sizeIds[] = $sizeId;
+        }
 
         return $this->render('admin/product/form.html.twig', [
             'title' => 'Edit Product',
             'mode' => 'edit-product',
             'product' => $product,
             'categoryLevels' => $categoryLevels,
-            'sizeIds' => [],
+            'sizeIds' => $sizeIds,
             'brands' => $brands,
             'images' => [
                 'image' => $product->getImage(),
@@ -208,6 +214,66 @@ class ProductController extends AbstractController
     public function deleteAction(Request $request): Response
     {
 
+    }
+
+    /**
+     * @Route(path="/product-sizes", methods={"POST"}, name="product-sizes")
+     */
+    public function getProductSizes(Request $request): Response
+    {
+        try {
+            $categoryId = (int)$request->get('categoryId');
+
+            if (!$categoryId) {
+                throw new \BadRequestException('Category id not provided');
+            }
+
+            /**
+             * @var Category $category
+             */
+            $category = $this->em->getRepository(Category::class)->find($categoryId);
+
+            if (!$category) {
+                throw new \NotFoundException('Category not found');
+            }
+
+            /**
+             * @var Category $parentCategory
+             */
+            $parentCategory = $category->getParent();
+
+            if (!$parentCategory) {
+                throw new \NotFoundException('Parent category not found');
+            }
+
+            $sizes = $parentCategory->getSizesOrderedBySort();
+
+            $sizeData = [];
+
+            /**
+             * @var Size $size
+             */
+            foreach ($sizes as $size) {
+                $arr = [];
+
+                $arr['id'] = $size->getId();
+
+                $arr['title'] = $size->getTitle();
+
+                $sizeData[] = $arr;
+            }
+
+            return new Response(json_encode($sizeData), 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
 }
