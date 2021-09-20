@@ -91,27 +91,118 @@ class SizeController extends AbstractController
     }
 
     /**
-     * @Route(path="/add", methods={"GET"}, name="add.form")
-     */
-    public function addForm(Request $request): Response
-    {
-
-    }
-
-    /**
      * @Route(path="/add", methods={"POST"}, name="add.action")
      */
     public function addAction(Request $request): Response
     {
+        try {
+            $response = [
+                'errors' => []
+            ];
 
-    }
+            $sizeTitle = $request->get('size');
 
-    /**
-     * @Route(path="/edit", methods={"GET"}, name="edit.form")
-     */
-    public function editForm(Request $request): Response
-    {
+            if (!$sizeTitle) {
+                throw new \BadRequestException('No size title provided');
+            }
 
+            $categoryId = $request->get('categoryId');
+
+            if (!$categoryId) {
+                throw new \BadRequestException('No category id provided');
+            }
+
+            $categoryId = (int)$categoryId;
+
+            $category = $this->em->getRepository(Category::class)->find($categoryId);
+
+            if (!$category) {
+                throw new \NotFoundException('Such a category does not exist');
+            }
+
+            $sortOrder = $request->get('sortOrder');
+
+            if (!isset($sortOrder)) {
+                throw new \BadRequestException('No sorting number field provided in the request');
+            }
+
+            $sortOrder = (int)$sortOrder;
+
+            $lowerCaseTitle = mb_strtolower($sizeTitle);
+
+            $normalizedTitle = str_replace(' ', '', $lowerCaseTitle);
+
+            /**
+             * @var Size $sizeByNormalizedTitle
+             */
+            $sizeByNormalizedTitle = $this->em->getRepository(Size::class)->findOneBy(['normalizedTitle' => $normalizedTitle]);
+
+            /**
+             * @var Size $sizeBySortOrder
+             */
+            $sizeBySortOrder = $this->em->getRepository(Size::class)->findOneBy(['sortOrder' => $sortOrder]);
+
+            if ($sizeByNormalizedTitle) {
+                $sizeByNormTitleCategories = $sizeByNormalizedTitle->getCategories();
+
+                if ($sizeByNormTitleCategories->contains($category)) {
+                    $response['errors'][] = 'Such a size already exists in the current category';
+                }
+            }
+
+            if ($sizeBySortOrder) {
+                $clause1 = !$sizeByNormalizedTitle;
+
+                $clause2 = $sizeByNormalizedTitle && $sortOrder !== (int)$sizeByNormalizedTitle->getSortOrder();
+
+                if ($clause1 || $clause2) {
+                    $response['errors'][] = 'A size with such a sorting order already exists';
+                }
+            }
+
+            if ($response['errors']) {
+                return new Response(json_encode($response));
+            }
+
+            $size = $sizeByNormalizedTitle;
+
+            if (!$sizeByNormalizedTitle) {
+                $size = new Size($sizeTitle);
+
+                if ($sortOrder) {
+                    $size->setSortOrder($sortOrder);
+                }
+
+                $this->em->persist($size);
+            }
+
+            $this->em->getRepository(Category::class)->find($categoryId)->addSize($size);
+
+            $this->em->flush();
+
+            $addedSizeId = $size->getId();
+
+            $addedSizeTitle = $size->getTitle();
+
+            $addedSizeSortOrder = $size->getSortOrder();
+
+            $sizeData = [
+                'id' => $addedSizeId,
+                'title' => $addedSizeTitle,
+                'sortOrder' => $addedSizeSortOrder,
+            ];
+
+            return new Response(json_encode($sizeData), 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
     /**
@@ -119,15 +210,106 @@ class SizeController extends AbstractController
      */
     public function editAction(Request $request): Response
     {
+        try {
+            $response = [
+                'errors' => []
+            ];
 
-    }
+            $sizeTitle = $request->get('sizeTitle');
 
-    /**
-     * @Route(path="/delete", methods={"GET"}, name="delete.form")
-     */
-    public function deleteForm(Request $request): Response
-    {
+            if (!$sizeTitle) {
+                throw new \BadRequestException('No size title provided');
+            }
 
+            $sizeId = $request->get('sizeId');
+
+            if (!$sizeId) {
+                throw new \BadRequestException('No size id provided');
+            }
+
+            $sizeId = (int)$sizeId;
+
+            $sortOrder = $request->get('sortOrder');
+
+            if (!isset($sortOrder)) {
+                throw new \BadRequestException('No sorting number field provided in the request');
+            }
+
+            $sortOrder = (int)$sortOrder;
+
+            $lowerCaseTitle = mb_strtolower($sizeTitle);
+
+            $normalizedTitle = str_replace(' ', '', $lowerCaseTitle);
+
+            /**
+             * @var Size $currentSize ;
+             */
+            $currentSize = $this->em->getRepository(Size::class)->find($sizeId);
+
+            if (!$currentSize) {
+                throw new \NotFoundException('Such a size does not exist');
+            }
+
+            /**
+             * @var Size $sizeByNormalizedTitle
+             */
+            $sizeByNormalizedTitle = $this->em->getRepository(Size::class)->findOneBy(['normalizedTitle' => $normalizedTitle]);
+
+            /**
+             * @var Size $sizeBySortOrder
+             */
+            $sizeBySortOrder = $this->em->getRepository(Size::class)->findOneBy(['sortOrder' => $sortOrder]);
+
+            if ($sizeByNormalizedTitle) {
+                $sizeByNormalizedTitleId = $sizeByNormalizedTitle->getId();
+
+                if ($sizeId !== (int)$sizeByNormalizedTitleId) {
+                    $response['errors'][] = 'Such a size already exists';
+                }
+            }
+
+            if ($sizeBySortOrder) {
+                $sizeBySortOrderId = $sizeBySortOrder->getId();
+
+                if ($sizeId !== (int)$sizeBySortOrderId) {
+                    $response['errors'][] = 'A size with such a sorting order already exists';
+                }
+            }
+
+            if ($response['errors']) {
+                return new Response(json_encode($response));
+            }
+
+            $currentSize->setTitle($sizeTitle);
+
+            $currentSize->setNormalizedTitle($normalizedTitle);
+
+            $sortOrder = $sortOrder ?: null;
+
+            $currentSize->setSortOrder($sortOrder);
+
+            $this->em->flush();
+
+            $currentSizeTitle = $currentSize->getTitle();
+
+            $currentSizeSortOrder = $currentSize->getSortOrder();
+
+            $currentSizeData = [
+                'title' => $currentSizeTitle,
+                'sortOrder' => $currentSizeSortOrder,
+            ];
+
+            return new Response(json_encode($currentSizeData), 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
     /**
@@ -135,6 +317,63 @@ class SizeController extends AbstractController
      */
     public function deleteAction(Request $request): Response
     {
+        try {
+            $id = (int)$request->get('id');
 
+            if (!$id) {
+                throw new \BadRequestException('The id is not provided');
+            }
+
+            $categoryId = (int)$request->get('categoryId');
+
+            if (!$categoryId) {
+                throw new \BadRequestException('The category id is not provided');
+            }
+
+            /**
+             * @var Size $size
+             */
+            $size = $this->em->getRepository(Size::class)->find($id);
+
+            if (!$size) {
+                throw new \NotFoundException('Such a size does not exist');
+            }
+
+            $sizeCategories = $size->getCategories();
+
+            /**
+             * @var Category $currentCategory ;
+             */
+            $currentCategory = $this->em->getRepository(Category::class)->find($categoryId);
+
+            if (!$currentCategory) {
+                throw new \NotFoundException('Such a category does not exist');
+            }
+
+            $currentCategorySizes = $currentCategory->getSizes();
+
+            if ($sizeCategories->contains($currentCategory)) {
+                $sizeCategories->removeElement($currentCategory);
+            }
+
+            if ($currentCategorySizes->contains($size)) {
+                $currentCategorySizes->removeElement($size);
+            }
+
+            $this->em->flush();
+
+            // сделать проверку на то, есть ли товары с таким размером в этой категории
+
+            return new Response('Successfully deleted the size', 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 }

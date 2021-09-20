@@ -237,6 +237,8 @@ class CategoryController extends AbstractController
 
             $categoryImage = $category->getImage();
 
+            // делать проверку на существование продуктов в категории
+
             $this->em->remove($category);
 
             $this->em->flush();

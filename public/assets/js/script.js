@@ -337,7 +337,7 @@ function createSizeItem(size) {
     let deleteButton = $(`<button type="button"
         data-toggle="modal"
         data-target="#deleteEntity"
-        onclick="passEntityInfo(JSON.stringify([${size['id']}, '']))">`);
+        onclick="passEntityInfo(JSON.stringify([${size['id']}, '${size['title']}']))">`);
 
     deleteButton.appendTo(iconsInner);
 
@@ -398,7 +398,7 @@ function manageSizes(url) {
 }
 
 if ($('.size-form #categoryId--sizeList').length) {
-    manageSizes();
+    manageSizes($(location).attr('href'));
 }
 
 function addSize(form) {
@@ -420,10 +420,10 @@ function addSize(form) {
         .done(function (response) {
             let addSizeResponse = JSON.parse(response);
 
-            if (addSizeResponse['errorMessages']) {
+            if (addSizeResponse['errors']) {
                 $('.error-warning--add').empty();
 
-                addSizeResponse['errorMessages'].forEach(function (error) {
+                addSizeResponse['errors'].forEach(function (error) {
                     let errorMessage = $(`<li class="error-warning-item error-warning-item--add">${error}</li>`)
 
                     errorMessage.appendTo($('.error-warning--add'));
@@ -433,9 +433,9 @@ function addSize(form) {
 
                 $('.add-size-modal').modal('hide');
 
-                createSizeItem(addSizeResponse);
+                //createSizeItem(addSizeResponse);
 
-                manageSizes();
+                 manageSizes($(location).attr('href'));
             }
 
             $(".add-size-modal").on("hidden.bs.modal", function () {
@@ -478,10 +478,10 @@ function editSize(form) {
         .done(function (response) {
             let editSizeResponse = JSON.parse(response);
 
-            if (editSizeResponse['errorMessages']) {
+            if (editSizeResponse['errors']) {
                 $('.error-warning--edit').empty();
 
-                editSizeResponse['errorMessages'].forEach(function (error) {
+                editSizeResponse['errors'].forEach(function (error) {
                     let errorMessage = $(`<li class="error-warning-item error-warning-item--edit">${error}</li>`)
 
                     errorMessage.appendTo($('.error-warning--edit'));
