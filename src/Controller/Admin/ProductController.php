@@ -367,11 +367,209 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route(path="/edit", methods={"POST"}, name="edit.action")
+     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
      */
     public function editAction(Request $request): Response
     {
+        try {
+            $id = (int)$request->get('id');
 
+            if (!$id) {
+                throw new \BadRequestException('No id provided');
+            }
+
+            /**
+             * @var Product $product
+             */
+            $product = $this->em->getRepository(Product::class)->find($id);
+
+            $title = $request->get('title');
+
+            if (!$title) {
+                throw new \BadRequestException('No title provided');
+            }
+
+            $productCode = (int)$request->get('productCode');
+
+            if (!$productCode) {
+                throw new \BadRequestException('No product code provided');
+            }
+
+            /**
+             * @var Product $productByProductCode
+             */
+            $productByProductCode = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productCode]);
+
+            if ($productByProductCode) {
+                $productByProductCodeId = (int)$productByProductCode->getId();
+
+                if ($productByProductCodeId !== $id) {
+                    throw new \ValidationErrorException('A product with such a product code already exists');
+                }
+            }
+
+            $price = $request->get('price');
+
+            if (!$price) {
+                throw new \BadRequestException('No price provided');
+            }
+
+            $price = (float)$price;
+
+            $details = $request->get('productDetails') ?: null;
+
+            $categoryId = (int)$request->get('categoryId');
+
+            if (!$categoryId) {
+                throw new \BadRequestException('No category id provided');
+            }
+
+            $category = $this->em->getRepository(Category::class)->find($categoryId);
+
+            if (!$category) {
+                throw new \NotFoundException('Category not found');
+            }
+
+            $sizeIds = $request->get('sizes');
+
+            if (!$sizeIds) {
+                throw new \BadRequestException('No size id(s) provided');
+            }
+
+            $sizes = [];
+
+            foreach ($sizeIds as &$sizeId) {
+                $sizeId = (int)$sizeId;
+
+                $size = $this->em->getRepository(Size::class)->find($sizeId);
+
+                if (!$size) {
+                    throw new \NotFoundException('Size not found');
+                }
+
+                $sizes[] = $size;
+            }
+
+            $brandId = $request->get('brandId') ? (int)$request->get('brandId') : null;
+
+            $brand = null;
+
+            if ($brandId) {
+                $brand = $this->em->getRepository(Brand::class)->find($brandId);
+
+                if (!$brand) {
+                    throw new \NotFoundException('Brand not found');
+                }
+            }
+
+            $lookAfterMe = $request->get('lookAfterMe') ?: null;
+
+            $aboutMe = $request->get('aboutMe') ?: null;
+
+            $imageNames = ['image', 'image1', 'image2', 'image3'];
+
+            $imageData = [];
+
+            foreach ($imageNames as $imageName) {
+                /**
+                 * @var UploadedFile $image
+                 */
+                $image = $request->files->get($imageName) ?: null;
+
+                if ($image) {
+                    $this->validateImage($image);
+
+                    $uniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
+
+                    $directory = './upload/product/';
+
+                    $destination = $directory . $uniqueName;
+
+                    $arr = [];
+
+                    $arr['object'] = $image;
+
+                    $arr['directory'] = $directory;
+
+                    $arr['uniqueName'] = $uniqueName;
+
+                    $arr['destination'] = $destination;
+
+                    $imageData[$imageName] = $arr;
+
+                } else {
+                    $imageData[$imageName] = null;
+                }
+            }
+
+            $product->setTitle($title);
+
+            $product->setProductCode($productCode);
+
+            $product->setPrice($price);
+
+            $product->setCategory($category);
+
+            $product->setBrand($brand);
+
+            $product->setProductDetails($details);
+
+            $product->setAboutMe($aboutMe);
+
+            $product->setLookAfterMe($lookAfterMe);
+
+            // остановилась здесь, дальше надо переделать работу с размерами (удалять список старых, добавлять новые)
+            // переделать обновление размеров
+
+            foreach ($sizes as $size) {
+                $product->addSize($size);
+            }
+
+            foreach ($imageData as $image => $data) {
+                if (!$data) {
+                    continue;
+                }
+
+                if ($image === 'image') {
+                    $product->setImage($data['destination']);
+
+                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                }
+
+                if ($image === 'image1') {
+                    $product->setImage1($data['destination']);
+
+                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                }
+
+                if ($image === 'image2') {
+                    $product->setImage2($data['destination']);
+
+                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                }
+
+                if ($image === 'image3') {
+                    $product->setImage3($data['destination']);
+
+                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                }
+            }
+
+//            $this->em->flush();
+
+            return $this->redirectToRoute('admin.product.list');
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\ValidationErrorException $e) {
+            return new Response($e->getMessage(), 422);
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
     /**
