@@ -178,4 +178,48 @@ class BrandController extends AbstractController
             return new Response($e->getMessage(), 500);
         }
     }
+
+    /**
+     * @Route(path="/add-from-product", methods={"POST"}, name="add-from-product.action")
+     */
+    public function addFromProductAction(Request $request): Response
+    {
+        try {
+            $title = $request->get('title');
+
+            if (!$title) {
+                throw new \BadRequestException('Brand title not provided');
+            }
+
+            $descriptionWomen = $request->get('descriptionWomen') ?: null;
+
+            $descriptionMen = $request->get('descriptionMen') ?: null;
+
+            $brand = new Brand($title);
+
+            $brand->setDescriptionMen($descriptionMen);
+
+            $brand->setDescriptionWomen($descriptionWomen);
+
+            $this->em->persist($brand);
+
+            $this->em->flush();
+
+            $brandData = [
+                'id' => $brand->getId(),
+                'title' => $brand->getTitle(),
+            ];
+
+            return new Response(json_encode($brandData), 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
+    }
 }

@@ -362,13 +362,15 @@ label {
   color: #0770cf;
   border-bottom: 1px solid #0770cf;
 }
-.product-size-list-empty {
+.product-size-list-empty,
+.product-size-list-nosizes {
   display: none;
   margin-left: 20px;
   font-style: italic;
   margin-bottom: 10px;
 }
-.product-size-list-empty--show {
+.product-size-list-empty--show,
+.product-size-list-nosizes--show {
   display: block;
 }
 .product-size-list__header {

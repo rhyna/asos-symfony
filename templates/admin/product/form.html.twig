@@ -60,6 +60,9 @@
                 <div class="product-size-list-empty product-size-list-empty--productForm">
                     Please select a category first
                 </div>
+                <div class="product-size-list-nosizes product-size-list-nosizes--productForm">
+                    No sizes in the category yet. Add some new ones via 'Manage sizes' link below
+                </div>
                 <div class="product-size-list__content">
                     <!--            content uploaded via JS-->
                 </div>
@@ -73,7 +76,7 @@
                     <option value="">NO BRAND</option>
                     {% for brand in brands %}
                         <option value="{{ brand.id }}"
-                                {% if product is defined and brand.id is same as product.brand.id %}
+                                {% if product is defined and product.brand.id is defined and brand.id is same as product.brand.id %}
                                     selected="selected"
                                 {% endif %}
                         >
@@ -103,7 +106,7 @@
                             {% if not url %}
                                 <div class="entity-form-image entity-form-image--deleted">
                             {% else %}
-                                <div class="entity-form-image" style="background-image: url('{{ url }}')">
+                                <div class="entity-form-image" style="background-image: url('{{ url | trim('.') }}')">
                             {% endif %}
                             {{ not url ? 'No image' : '' }}
                             {% if url %}
@@ -126,6 +129,9 @@
                     {% endfor %}
                 </div>
                 <button type="submit" class="entity-form-submit">Submit</button>
+            </div>
         </form>
     </div>
+
+    {{ include('/admin/add-brand-from-product-modal.html.twig') }}
 {% endblock %}

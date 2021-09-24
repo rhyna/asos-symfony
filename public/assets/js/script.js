@@ -167,8 +167,6 @@ function addBrandFromProduct(form) {
         url: url,
         type: 'POST',
         data: {
-            productId: productId,
-            productMode: productMode,
             title: title,
             descriptionWomen: descriptionWomen,
             descriptionMen: descriptionMen,
@@ -210,8 +208,6 @@ function showSizes() {
         .done(function (response) {
             let sizes = JSON.parse(response);
 
-            console.log(sizes);
-
             $('.product-size-list__content').remove();
 
             let content = "<div class='product-size-list__content'></div>";
@@ -221,9 +217,19 @@ function showSizes() {
             $('.product-size-list__content').removeClass('product-size-list__content--show');
 
             if (sizes.length === 0 && !$('#categoryId option:selected').attr('value')) {
+                $('.product-size-list-nosizes').removeClass('product-size-list-nosizes--show');
+
                 $('.product-size-list-empty').addClass('product-size-list-empty--show')
+
+            } else if (sizes.length === 0 && $('#categoryId option:selected').attr('value')) {
+                $('.product-size-list-empty').removeClass('product-size-list-empty--show');
+
+                $('.product-size-list-nosizes').addClass('product-size-list-nosizes--show')
+
             } else {
                 $('.product-size-list-empty').removeClass('product-size-list-empty--show');
+
+                $('.product-size-list-nosizes').removeClass('product-size-list-nosizes--show');
 
                 $('.product-size-list__content').addClass('product-size-list__content--show');
             }

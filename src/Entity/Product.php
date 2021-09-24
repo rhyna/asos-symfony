@@ -80,7 +80,7 @@ class Product
      * @ORM\ManyToOne(targetEntity="App\Entity\Brand", inversedBy="products")
      * @ORM\JoinColumn(onDelete="RESTRICT")
      */
-    private Brand $brand;
+    private ?Brand $brand = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\SearchWord", inversedBy="products", fetch="EAGER")
@@ -92,14 +92,12 @@ class Product
      */
     private Collection $sizes;
 
-    public function __construct(int $productCode, float $price, string $title, Category $category, Brand $brand)
+    public function __construct(int $productCode, float $price, string $title, Category $category)
     {
         $this->productCode = $productCode;
         $this->price = $price;
         $this->title = $title;
         $this->category = $category;
-        //???? как быть с брендом, он не обяз, но принимает тайтл
-        $this->brand = $brand;
         $this->searchWords = new ArrayCollection();
         $this->sizes = new ArrayCollection();
     }
@@ -220,12 +218,12 @@ class Product
         $this->category = $category;
     }
 
-    public function getBrand(): Brand
+    public function getBrand(): ?Brand
     {
         return $this->brand;
     }
 
-    public function setBrand(Brand $brand): void
+    public function setBrand(?Brand $brand): void
     {
         $this->brand = $brand;
     }

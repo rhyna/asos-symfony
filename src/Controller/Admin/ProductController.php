@@ -15,6 +15,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @Route(path="/admin/product", name="admin.product.")
@@ -144,7 +145,180 @@ class ProductController extends AbstractController
      */
     public function addAction(Request $request): Response
     {
+        try {
+            $title = $request->get('title');
 
+            if (!$title) {
+                throw new \BadRequestException('No title provided');
+            }
+
+            $productCode = (int)$request->get('productCode');
+
+            if (!$productCode) {
+                throw new \BadRequestException('No product code provided');
+            }
+
+            $productCodeExists = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productCode]);
+
+            if ($productCodeExists) {
+                throw new \ValidationErrorException('A product with such a product code already exists');
+            }
+
+            $price = $request->get('price');
+
+            if (!$price) {
+                throw new \BadRequestException('No price provided');
+            }
+
+            $price = (float)$price;
+
+            $details = $request->get('productDetails') ?: null;
+
+            $categoryId = (int)$request->get('categoryId');
+
+            if (!$categoryId) {
+                throw new \BadRequestException('No category id provided');
+            }
+
+            $category = $this->em->getRepository(Category::class)->find($categoryId);
+
+            if (!$category) {
+                throw new \NotFoundException('Category not found');
+            }
+
+            $sizeIds = $request->get('sizes');
+
+            if (!$sizeIds) {
+                throw new \BadRequestException('No size id(s) provided');
+            }
+
+            $sizes = [];
+
+            foreach ($sizeIds as &$sizeId) {
+                $sizeId = (int)$sizeId;
+
+                $size = $this->em->getRepository(Size::class)->find($sizeId);
+
+                if (!$size) {
+                    throw new \NotFoundException('Size not found');
+                }
+
+                $sizes[] = $size;
+            }
+
+            $brandId = $request->get('brandId') ? (int)$request->get('brandId') : null;
+
+            $brand = null;
+
+            if ($brandId) {
+                $brand = $this->em->getRepository(Brand::class)->find($brandId);
+
+                if (!$brand) {
+                    throw new \NotFoundException('Brand not found');
+                }
+            }
+
+            $lookAfterMe = $request->get('lookAfterMe') ?: null;
+
+            $aboutMe = $request->get('aboutMe') ?: null;
+
+            $imageNames = ['image', 'image1', 'image2', 'image3'];
+
+            $imageData = [];
+
+            foreach ($imageNames as $imageName) {
+                /**
+                 * @var UploadedFile $image
+                 */
+                $image = $request->files->get($imageName) ?: null;
+
+                if ($image) {
+                    $this->validateImage($image);
+
+                    $uniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
+
+                    $directory = './upload/product/';
+
+                    $destination = $directory . $uniqueName;
+
+                    $arr = [];
+
+                    $arr['object'] = $image;
+
+                    $arr['directory'] = $directory;
+
+                    $arr['uniqueName'] = $uniqueName;
+
+                    $arr['destination'] = $destination;
+
+                    $imageData[$imageName] = $arr;
+
+                } else {
+                    $imageData[$imageName] = null;
+                }
+            }
+
+            $product = new Product($productCode, $price, $title, $category);
+
+            $product->setBrand($brand);
+
+            $product->setProductDetails($details);
+
+            $product->setAboutMe($aboutMe);
+
+            $product->setLookAfterMe($lookAfterMe);
+
+            foreach ($sizes as $size) {
+                $product->addSize($size);
+            }
+
+            foreach ($imageData as $image => $data) {
+                if (!$data) {
+                    continue;
+                }
+
+                if ($image === 'image') {
+                    $product->setImage($data['destination']);
+
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+                }
+
+                if ($image === 'image1') {
+                    $product->setImage1($data['destination']);
+
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+                }
+
+                if ($image === 'image2') {
+                    $product->setImage2($data['destination']);
+
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+                }
+
+                if ($image === 'image3') {
+                    $product->setImage3($data['destination']);
+
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+                }
+            }
+
+            $this->em->persist($product);
+
+            $this->em->flush();
+
+            return $this->redirectToRoute('admin.product.list');
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\ValidationErrorException $e) {
+            return new Response($e->getMessage(), 422);
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
     /**
@@ -222,11 +396,9 @@ class ProductController extends AbstractController
     public function getProductSizes(Request $request): Response
     {
         try {
-            $categoryId = (int)$request->get('categoryId');
+            $categoryId = $request->get('categoryId') ?: null;
 
-            if (!$categoryId) {
-                throw new \BadRequestException('Category id not provided');
-            }
+            $categoryId = (int)$categoryId;
 
             /**
              * @var Category $category
@@ -234,7 +406,9 @@ class ProductController extends AbstractController
             $category = $this->em->getRepository(Category::class)->find($categoryId);
 
             if (!$category) {
-                throw new \NotFoundException('Category not found');
+                $sizeData = [];
+
+                return new Response(json_encode($sizeData), 200);
             }
 
             /**
@@ -275,5 +449,19 @@ class ProductController extends AbstractController
             return new Response($e->getMessage(), 500);
         }
     }
+
+    private function validateImage(UploadedFile $image)
+    {
+        $extensions = ['png', 'jpeg', 'jpg', 'gif'];
+
+        $extension = $image->getClientOriginalExtension();
+
+        if (!in_array($extension, $extensions)) {
+            throw new \ValidationErrorException("File extension should be: 'png', 'jpeg', 'jpg', 'gif'");
+        }
+
+        //$size = $image->getMaxFilesize();
+    }
+
 
 }
