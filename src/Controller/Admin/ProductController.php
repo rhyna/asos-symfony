@@ -127,7 +127,6 @@ class ProductController extends AbstractController
 
         return $this->render('admin/product/form.html.twig', [
             'title' => 'Add Product',
-            'mode' => 'add-product',
             'categoryLevels' => $categoryLevels,
             'sizeIds' => [],
             'brands' => $brands,
@@ -352,7 +351,6 @@ class ProductController extends AbstractController
 
         return $this->render('admin/product/form.html.twig', [
             'title' => 'Edit Product',
-            'mode' => 'edit-product',
             'product' => $product,
             'categoryLevels' => $categoryLevels,
             'sizeIds' => $sizeIds,
@@ -382,6 +380,10 @@ class ProductController extends AbstractController
              * @var Product $product
              */
             $product = $this->em->getRepository(Product::class)->find($id);
+
+            if (!$product) {
+                throw new \BadRequestException('Product not found');
+            }
 
             $title = $request->get('title');
 
@@ -518,8 +520,7 @@ class ProductController extends AbstractController
 
             $product->setLookAfterMe($lookAfterMe);
 
-            // остановилась здесь, дальше надо переделать работу с размерами (удалять список старых, добавлять новые)
-            // переделать обновление размеров
+            $product->deleteSizes();
 
             foreach ($sizes as $size) {
                 $product->addSize($size);
@@ -531,31 +532,47 @@ class ProductController extends AbstractController
                 }
 
                 if ($image === 'image') {
+                    $prevImage = $product->getImage();
+
                     $product->setImage($data['destination']);
 
-                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+
+                    $this->fileSystem->remove($prevImage);
                 }
 
                 if ($image === 'image1') {
+                    $prevImage = $product->getImage1();
+
                     $product->setImage1($data['destination']);
 
-                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+
+                    $this->fileSystem->remove($prevImage);
                 }
 
                 if ($image === 'image2') {
+                    $prevImage = $product->getImage2();
+
                     $product->setImage2($data['destination']);
 
-                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+
+                    $this->fileSystem->remove($prevImage);
                 }
 
                 if ($image === 'image3') {
+                    $prevImage = $product->getImage3();
+
                     $product->setImage3($data['destination']);
 
-                    //$data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($data['directory'], $data['uniqueName']);
+
+                    $this->fileSystem->remove($prevImage);
                 }
             }
 
-//            $this->em->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('admin.product.list');
 
@@ -567,6 +584,7 @@ class ProductController extends AbstractController
 
         } catch (\ValidationErrorException $e) {
             return new Response($e->getMessage(), 422);
+
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);
         }
@@ -661,5 +679,80 @@ class ProductController extends AbstractController
         //$size = $image->getMaxFilesize();
     }
 
+    /**
+     * @Route(path="/delete-image", methods={"POST"}, name="delete-image.action")
+     */
+    public function deleteImageAction(Request $request): Response
+    {
+        try {
+            $repository = $this->em->getRepository(Product::class);
+
+            $productId = (int)$request->get('id');
+
+            if (!$productId) {
+                throw new \BadRequestException('No product id provided');
+            }
+
+            /**
+             * @var Product $product
+             */
+            $product = $repository->find($productId);
+
+            if (!$product) {
+                throw new \NotFoundException('Product not found');
+            }
+
+            $imageName = $request->get('image');
+
+            if (!$imageName) {
+                throw new \NotFoundException('Image not found');
+            }
+
+            if ($imageName === 'image') {
+                $prevImage = $product->getImage();
+
+                $product->setImage(null);
+
+                $this->fileSystem->remove($prevImage);
+            }
+
+            if ($imageName === 'image1') {
+                $prevImage = $product->getImage1();
+
+                $product->setImage1(null);
+
+                $this->fileSystem->remove($prevImage);
+            }
+
+            if ($imageName === 'image2') {
+                $prevImage = $product->getImage2();
+
+                $product->setImage2(null);
+
+                $this->fileSystem->remove($prevImage);
+            }
+
+            if ($imageName === 'image3') {
+                $prevImage = $product->getImage3();
+
+                $product->setImage3(null);
+
+                $this->fileSystem->remove($prevImage);
+            }
+
+            $this->em->flush();
+
+            return new Response();
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
+    }
 
 }

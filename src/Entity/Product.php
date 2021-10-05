@@ -256,4 +256,9 @@ class Product
         $this->sizes->add($size);
     }
 
+    public function deleteSizes()
+    {
+        $this->sizes = new ArrayCollection();
+    }
+
 }

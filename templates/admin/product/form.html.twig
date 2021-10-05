@@ -11,9 +11,8 @@
             </div>
             <div class="form-group">
                 <label for="productCode">Product Code</label>
-                <input class="form-control" type="text" name="productCode" id="productCode" required
-                       value="{{ product.productCode | default('') }}"
-                        {{ mode is same as 'edit-product' ? 'readonly' : '' }}>
+                <input class="form-control" type="number" name="productCode" id="productCode" required
+                       value="{{ product.productCode | default('') }}">
             </div>
             <div class="form-group">
                 <label for="price">Price, €</label>
@@ -116,7 +115,7 @@
                                         data-id="{{ product.id }}"
                                         data-image="{{ name }}"
                                         data-type="product"
-                                        onclick="deleteEntityImage(this)">
+                                        onclick="deleteEntityImage(this, '/admin/product/delete-image')">
                                     <i class="fas fa-times"></i>
                                 </button>
                             {% endif %}
