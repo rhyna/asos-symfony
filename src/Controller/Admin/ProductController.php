@@ -591,19 +591,53 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route(path="/delete", methods={"GET"}, name="delete.form")
-     */
-    public function deleteForm(Request $request): Response
-    {
-
-    }
-
-    /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")
      */
     public function deleteAction(Request $request): Response
     {
+        try {
+            $id = (int)$request->get('id');
 
+            if (!$id) {
+                throw new \BadRequestException('No product id provided');
+            }
+
+            /**
+             * @var Product $product
+             */
+            $product = $this->em->getRepository(Product::class)->find($id);
+
+            if (!$product) {
+                throw new \NotFoundException('Product not found');
+            }
+
+            $image = $product->getImage();
+
+            $image1 = $product->getImage1();
+
+            $image2 = $product->getImage2();
+
+            $image3 = $product->getImage3();
+
+            $images = [$image, $image1, $image2, $image3];
+
+            $this->em->remove($product);
+
+            $this->em->flush();
+
+            $this->fileSystem->remove($images);
+
+            return new Response('Successfully deleted the product', 200);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
     }
 
     /**

@@ -38,6 +38,7 @@ class Size
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Category", mappedBy="sizes", fetch="EAGER")
+     * @ORM\JoinColumn(onDelete="RESTRICT")
      */
     private Collection $categories;
 

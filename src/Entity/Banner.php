@@ -20,6 +20,7 @@ class Banner
 
     /**
      * @ORM\OneToOne(targetEntity="App\Entity\BannerPlace", inversedBy="banner")
+     * @ORM\JoinColumn(onDelete="RESTRICT")
      */
     private ?BannerPlace $bannerPlace = null;
 

@@ -229,6 +229,9 @@ class CategoryController extends AbstractController
                 throw new \BadRequestException('The id is not provided');
             }
 
+            /**
+             * @var Category $category
+             */
             $category = $this->em->getRepository(Category::class)->find($id);
 
             if (!$category) {
@@ -237,7 +240,23 @@ class CategoryController extends AbstractController
 
             $categoryImage = $category->getImage();
 
-            // делать проверку на существование продуктов в категории
+            $childCategories = $category->getChildren();
+
+            if ($childCategories->count()) {
+                throw new \ValidationErrorException('There are child category/ies in this category. Delete the child category/ies first');
+            }
+
+            $productsByCategory = $category->getProducts();
+
+            if ($productsByCategory->count()) {
+                throw new \ValidationErrorException('There are product(s) in this category. Delete the product(s) first');
+            }
+
+            $sizesByCategory = $category->getSizes();
+
+            if ($sizesByCategory->count()) {
+                throw new \ValidationErrorException('There are size(s) in this category. Delete the size(s) first');
+            }
 
             $this->em->remove($category);
 
@@ -252,6 +271,9 @@ class CategoryController extends AbstractController
 
         } catch (\NotFoundException $e) {
             return new Response($e->getMessage(), 404);
+
+        } catch (\ValidationErrorException $e) {
+            return new Response($e->getMessage(), 422);
 
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);

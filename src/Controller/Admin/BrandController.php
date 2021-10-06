@@ -150,17 +150,20 @@ class BrandController extends AbstractController
 
             $id = (int)$id;
 
+            /**
+             * @var Brand $brand
+             */
             $brand = $this->em->getRepository(Brand::class)->find($id);
 
             if (!$brand) {
                 throw new \NotFoundException('Such a brand does not exist');
             }
 
-//            $hasProducts = $brand->checkBrandProducts($conn);
-//
-//            if ($hasProducts) {
-//                throw new ValidationErrorException("Cannot delete a brand that has products linked to it. <br> Delete the products first");
-//            }
+            $productsByBrand = $brand->getProducts();
+
+            if ($productsByBrand->count()) {
+                throw new \ValidationErrorException('This brand has product(s). Delete the product(s) first');
+            }
 
             $this->em->remove($brand);
 
@@ -173,6 +176,9 @@ class BrandController extends AbstractController
 
         } catch (\NotFoundException $e) {
             return new Response($e->getMessage(), 404);
+
+        } catch (\ValidationErrorException $e) {
+            return new Response($e->getMessage(), 422);
 
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);
@@ -214,9 +220,6 @@ class BrandController extends AbstractController
 
         } catch (\BadRequestException $e) {
             return new Response($e->getMessage(), 400);
-
-        } catch (\NotFoundException $e) {
-            return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);
