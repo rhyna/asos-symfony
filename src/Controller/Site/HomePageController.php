@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomePageController extends AbstractController
 {
     /**
-     * @Route("/home", name="home.page")
+     * @Route("/", name="women")
      */
     public function index(Request $request): Response
     {
