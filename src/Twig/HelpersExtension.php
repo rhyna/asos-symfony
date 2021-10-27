@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Twig;
 
 use App\Entity\Category;
+use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Extension\AbstractExtension;
 
@@ -22,7 +23,7 @@ class HelpersExtension extends AbstractExtension
         return [
             new \Twig\TwigFunction('buildOptGroups', [$this, 'buildOptGroupsFunc']),
             new \Twig\TwigFunction('stringToInt', [$this, 'stringToInteger']),
-            new \Twig\TwigFunction('getCategoryLevels', [$this, 'getCategoryLevels'])
+            new \Twig\TwigFunction('getMenuConfig', [$this, 'getMenuConfig']),
         ];
     }
 
@@ -49,10 +50,11 @@ class HelpersExtension extends AbstractExtension
         return (int)$string;
     }
 
-    public function getCategoryLevels(): array
+    public function getMenuConfig(): array
     {
         $repository = $this->em->getRepository(Category::class);
 
-        return $repository->getCategoryLevels();
+        return $repository->getMenuConfig();
+
     }
 }

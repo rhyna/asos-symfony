@@ -80,4 +80,68 @@ class ProductRepository extends ServiceEntityRepository
 
         return (int)$qb->getQuery()->getSingleScalarResult();
     }
+
+    public function getProductBrandsByCategories(array $categoryIds): array
+    {
+        $result = [];
+
+        $brandIds = [];
+
+        foreach ($categoryIds as $categoryId) {
+            $qb = $this->createQueryBuilder('p');
+
+            $qb->select("b.id as brandId, b.title as brandTitle, p.image as productImage, cp.id as parentId");
+
+            $qb->join('p.brand', 'b');
+
+            $qb->join('p.category', 'c');
+
+            $qb->join('c.parent', 'cp');
+
+            $qb->where("c.id = $categoryId");
+
+            $qb->andWhere('p.image is not null');
+
+            if ($brandIds) {
+                $qb->andWhere("b.id not in (:brandIds)");
+                $qb->setParameter(':brandIds', $brandIds);
+            }
+
+            $qb->setMaxResults(1);
+
+            $fetchedResult = $qb->getQuery()->getResult();
+
+            if ($fetchedResult) {
+                foreach ($fetchedResult as $item) {
+                    $brandIds[] = $item['brandId'];
+
+                    $result['data'][] = $item;
+                }
+
+                $result['ids'] = $brandIds;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getPreviewCategory(int $categoryId): ?array
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        $qb->select("c.id, c.title, c.image");
+
+        $qb->join('p.category', 'c');
+
+        $qb->where("c.id = $categoryId");
+
+        $qb->andWhere('c.image is not null');
+
+        $qb->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

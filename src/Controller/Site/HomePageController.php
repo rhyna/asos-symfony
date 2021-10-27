@@ -12,9 +12,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomePageController extends AbstractController
 {
     /**
-     * @Route("/", name="women")
+     * @Route("/", name="index")
      */
     public function index(Request $request): Response
+    {
+        return $this->redirectToRoute('women');
+    }
+
+    /**
+     * @Route("/women", name="women")
+     */
+    public function homeWomen(Request $request): Response
     {
         return $this->render('site/index.html.twig', [
         ]);

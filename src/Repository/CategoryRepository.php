@@ -10,6 +10,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\ProductRepository;
 
 class CategoryRepository extends ServiceEntityRepository
 {
@@ -53,7 +54,7 @@ class CategoryRepository extends ServiceEntityRepository
             foreach ($categoryLevel['childCategory1'] as &$childCategory) {
                 $qb = $this->createQueryBuilder('c');
 
-                $qb->select('c.title', 'c.id', 'cp.id as parentId', 'cp.title as parentTitle');
+                $qb->select('c.title', 'c.id', 'cp.id as parentId', 'cp.title as parentTitle', 'c.image');
 
                 $qb->leftJoin('c.parent', 'cp');
 
@@ -73,6 +74,66 @@ class CategoryRepository extends ServiceEntityRepository
         $categoryLevels = $this->getFirstLevelCategories($categoryLevels);
 
         return $this->getSecondLevelCategories($categoryLevels);
+    }
+
+    public function getMenuConfig(): array
+    {
+        $config = $this->getCategoryLevels();
+
+        $config = array_map(/**
+         * @throws NonUniqueResultException
+         */ function ($root) {
+            $productRepository = $this->getEntityManager()->getRepository('App:Product');
+
+            $config1 = [];
+
+            $config1['flag'] = strtolower($root['title']);
+
+            $categoryIdsForAllBrandsMenu = [];
+
+            foreach ($root['childCategory1'] as $firstLevel) {
+                $config1['categories'][$firstLevel['title']]['subCategories'] = $firstLevel['childCategory2'];
+
+                $secondLevelCategoryIds = [];
+
+                foreach ($firstLevel['childCategory2'] as $secondLevel) {
+                    $secondLevelCategoryIds[] = (int)$secondLevel['id'];
+                }
+
+                $brandInfo = $productRepository->getProductBrandsByCategories($secondLevelCategoryIds);
+
+                $config1['categories'][$firstLevel['title']]['brandsData'] = $brandInfo;
+
+                $config1['categories'][$firstLevel['title']]['subCategoryIds'] = $secondLevelCategoryIds;
+
+                $previewCategoryIds = array_slice($secondLevelCategoryIds, 0, 2);
+
+                $previewCategories = [];
+
+                foreach ($previewCategoryIds as $id) {
+                    $previewCategory = $productRepository->getPreviewCategory($id);
+
+                    if ($previewCategory) {
+                        $previewCategories[] = $previewCategory;
+                    }
+                }
+
+                $config1['categories'][$firstLevel['title']]['previewCategories'] = $previewCategories;
+
+                for ($i = 0; $i <= 3; $i++) {
+                    if (isset($secondLevelCategoryIds[$i])) {
+                        $categoryIdsForAllBrandsMenu[] = $secondLevelCategoryIds[$i];
+                    }
+                }
+            }
+
+            $config1['brands'] = $productRepository->getProductBrandsByCategories($categoryIdsForAllBrandsMenu);
+
+            return $config1;
+
+        }, $config);
+
+        return $config;
     }
 
     private function getCategoryListQB(): QueryBuilder
