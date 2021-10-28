@@ -22,9 +22,7 @@
 <body>
 {{ include('/site/header.html.twig') }}
 <main>
-    <div class="container">
-        {% block body %}{% endblock %}
-    </div>
+    {% block body %}{% endblock %} 
 </main>
 {{ include('/site/footer.html.twig') }}
 <script

@@ -81,6 +81,9 @@ class ProductRepository extends ServiceEntityRepository
         return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getProductBrandsByCategories(array $categoryIds): array
     {
         $result = [];
@@ -109,14 +112,12 @@ class ProductRepository extends ServiceEntityRepository
 
             $qb->setMaxResults(1);
 
-            $fetchedResult = $qb->getQuery()->getResult();
+            $fetchedResult = $qb->getQuery()->getOneOrNullResult();
 
             if ($fetchedResult) {
-                foreach ($fetchedResult as $item) {
-                    $brandIds[] = $item['brandId'];
+                    $brandIds[] = $fetchedResult['brandId'];
 
-                    $result['data'][] = $item;
-                }
+                    $result['data'][] = $fetchedResult;
 
                 $result['ids'] = $brandIds;
             }

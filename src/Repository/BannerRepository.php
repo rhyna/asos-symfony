@@ -42,4 +42,36 @@ class BannerRepository extends ServiceEntityRepository
 
         return (int)$qb->getQuery()->getSingleScalarResult();
     }
+
+    public function getBannersByGender(string $gender): array
+    {
+        $qb = $this->createQueryBuilder('b');
+
+        $qb->select("b.id, 
+        bp.id as bannerPlaceId, 
+        b.image, 
+        b.link, 
+        b.title, 
+        b.description, 
+        b.buttonLabel as buttonLabel,
+        bp.alias,
+        bp.title as aliasTitle, 
+        bp.gender");
+
+        $qb->join('b.bannerPlace', 'bp');
+
+        $qb->where("bp.gender = '$gender'");
+
+        $result = $qb->getQuery()->getResult();
+
+        $formatted = [];
+
+        foreach ($result as $banner) {
+            $formatted[$banner['alias']] = $banner;
+        }
+
+        return $formatted;
+    }
+
+
 }
