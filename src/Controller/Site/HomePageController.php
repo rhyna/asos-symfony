@@ -47,7 +47,7 @@ class HomePageController extends AbstractController
 
         $trendingBrandsBanners = $this->bannerService->getTrendingBrandsBannersByGender($banners);
 
-        return $this->render('site/index.html.twig', [
+        return $this->render('site/women.html.twig', [
             'bigTopBanner' => $banners['big_top_banner'],
             'fullWidthBanner' => $banners['full_width_banner'],
             'hotCategoryBigBanners' => $hotCategoryBigBanners,
@@ -61,7 +61,21 @@ class HomePageController extends AbstractController
      */
     public function homeMen(Request $request): Response
     {
+        $repository = $this->em->getRepository(Banner::class);
+
+        $banners = $repository->getBannersByGender('men');
+
+        $hotCategorySmallBanners = $this->bannerService->getHotCategorySmallBannersByGender($banners);
+
+        $hotCategoryBigBanners = $this->bannerService->getHotCategoryBigBannersByGender($banners);
+
+        $trendingBrandsBanners = $this->bannerService->getTrendingBrandsBannersByGender($banners);
+
         return $this->render('site/men.html.twig', [
+            'bigTopBanner' => $banners['big_top_banner'],
+            'hotCategoryBigBanners' => $hotCategoryBigBanners,
+            'hotCategorySmallBanners' => $hotCategorySmallBanners,
+            'trendingBrandsBanners' => $trendingBrandsBanners,
         ]);
     }
 }

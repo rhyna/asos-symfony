@@ -1,40 +1,36 @@
-{% extends '/site/base.html.twig' %}
-
-{% block title %}ASOS Home | Women {% endblock %}
-
-{% block body %}
-    <div class="banner-bigtop">
-        <a href="{{ bigTopBanner['link'] }}">
-            <img src="{{ bigTopBanner['image'] }}" alt="">
-            <div class="banner-bigtop-label">
-                <div class="banner-bigtop-title">
-                    {{ bigTopBanner['title'] | default('') }}
-                </div>
-                <div class="banner-bigtop-button">
-                    {{ bigTopBanner['buttonLabel'] | default('') }}
-                </div>
+<div class="banner-bigtop">
+    <a href="{{ bigTopBanner['link'] }}">
+        <img src="{{ bigTopBanner['image'] }}" alt="">
+        <div class="banner-bigtop-label">
+            <div class="banner-bigtop-title">
+                {{ bigTopBanner['title'] | default('') }}
             </div>
-        </a>
-    </div>
-    <div class="banner-hotcategorysmall__wrapper">
-        <div class="row">
-            {% for banner in hotCategorySmallBanners %}
-                <div class="col-xl-3 col-md-4 col-sm-6 col-12">
-                    <div class="banner-hotcategorysmall">
-                        <a href="{{ banner['link'] }}">
-                            <img src="{{ banner['image'] }}" alt="">
-                        </a>
-                        <div class="banner-hotcategorysmall-title">
-                            {{ banner['title'] | default('') }}
-                        </div>
-                        <div class="banner-hotcategorysmall-description">
-                            {{ banner['description'] | default('') }}
-                        </div>
+            <div class="banner-bigtop-button">
+                {{ bigTopBanner['buttonLabel'] | default('') }}
+            </div>
+        </div>
+    </a>
+</div>
+<div class="banner-hotcategorysmall__wrapper">
+    <div class="row">
+        {% for banner in hotCategorySmallBanners %}
+            <div class="col-xl-3 col-md-4 col-sm-6 col-12">
+                <div class="banner-hotcategorysmall">
+                    <a href="{{ banner['link'] }}">
+                        <img src="{{ banner['image'] }}" alt="">
+                    </a>
+                    <div class="banner-hotcategorysmall-title">
+                        {{ banner['title'] | default('') }}
+                    </div>
+                    <div class="banner-hotcategorysmall-description">
+                        {{ banner['description'] | default('') }}
                     </div>
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% endfor %}
     </div>
+</div>
+{% if fullWidthBanner is defined %}
     <div class="banner-fullwidth"
          style="background-image: url('{{ fullWidthBanner['image'] }}')">
         <a href="{{ fullWidthBanner['link'] }}">
@@ -44,46 +40,46 @@
             <div class="banner-fullwidth-description">{{ fullWidthBanner['description'] | default('') }}</div>
         </a>
     </div>
-    <div class="banner-hotcategorybig__wrapper">
+{% endif %}
+<div class="banner-hotcategorybig__wrapper">
+    <div class="row">
+        {% for banner in hotCategoryBigBanners %}
+            <div class="col-12 col-sm-6">
+                <div class="banner-hotcategorybig">
+                    <a href="{{ banner['link'] }}">
+                        <img src="{{ banner['image'] }}" alt="">
+                    </a>
+                    <div class="banner-hotcategorybig-title">
+                        {{ banner['title'] | default('') }}
+                    </div>
+                    <div class="banner-hotcategorybig-description">
+                        {{ banner['description'] | default('') }}
+                    </div>
+                    <div class="banner-hotcategorybig-button">
+                        <a href="{{ banner['link'] }}">
+                            {{ banner['buttonLabel'] | default('') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="trending-brands">
+    <h2 class="trending-brands-title">
+        Trending brands
+    </h2>
+    <div class="trending-brands__content">
         <div class="row">
-            {% for banner in hotCategoryBigBanners %}
-                <div class="col-12 col-sm-6">
-                    <div class="banner-hotcategorybig">
+            {% for banner in trendingBrandsBanners %}
+                <div class="col-md-2 col-4">
+                    <div class="trending-brands-item">
                         <a href="{{ banner['link'] }}">
                             <img src="{{ banner['image'] }}" alt="">
                         </a>
-                        <div class="banner-hotcategorybig-title">
-                            {{ banner['title'] | default('') }}
-                        </div>
-                        <div class="banner-hotcategorybig-description">
-                            {{ banner['description'] | default('') }}
-                        </div>
-                        <div class="banner-hotcategorybig-button">
-                            <a href="{{ banner['link'] }}">
-                                {{ banner['buttonLabel'] | default('') }}
-                            </a>
-                        </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     </div>
-    <div class="trending-brands">
-        <h2 class="trending-brands-title">
-            Trending brands
-        </h2>
-        <div class="trending-brands__content">
-            <div class="row">
-                {% for banner in trendingBrandsBanners %}
-                    <div class="col-md-2 col-4">
-                        <div class="trending-brands-item">
-                            <a href="{{ banner['link'] }}">
-                                <img src="{{ banner['image'] }}" alt="">
-                            </a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-{% endblock %}
+</div>

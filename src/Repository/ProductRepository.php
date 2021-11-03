@@ -26,6 +26,8 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->join("p.category", "c");
 
+        $qb->join('p.sizes', 's');
+
         return $qb;
     }
 

@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\SizeRepository")
  */
 class Size
 {
@@ -43,7 +43,7 @@ class Size
     private Collection $categories;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Product", mappedBy="sizes")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Product", mappedBy="sizes", fetch="EAGER")
      */
     private Collection $products;
 

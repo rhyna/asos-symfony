@@ -47,7 +47,7 @@
                                         <div class="subbar-dropdown-menu__content">
                                             {% for category in category['subCategories'] %}
                                                 <a class="subbar-dropdown-item"
-                                                   href="">
+                                                   href="{{ path('category', { gender: configItem['flag'], id: category['id'] }) }}">
                                                     {{ category['title'] }}
                                                 </a>
                                             {% endfor %}
