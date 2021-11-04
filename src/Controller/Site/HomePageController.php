@@ -53,6 +53,7 @@ class HomePageController extends AbstractController
             'hotCategoryBigBanners' => $hotCategoryBigBanners,
             'hotCategorySmallBanners' => $hotCategorySmallBanners,
             'trendingBrandsBanners' => $trendingBrandsBanners,
+            'gender' => 'women',
         ]);
     }
 
@@ -76,6 +77,7 @@ class HomePageController extends AbstractController
             'hotCategoryBigBanners' => $hotCategoryBigBanners,
             'hotCategorySmallBanners' => $hotCategorySmallBanners,
             'trendingBrandsBanners' => $trendingBrandsBanners,
+            'gender' => 'men',
         ]);
     }
 }

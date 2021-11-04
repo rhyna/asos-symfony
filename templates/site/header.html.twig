@@ -1,4 +1,5 @@
 {% set config = getMenuConfig() %}
+
 <header>
     <nav class="topbar">
         <div class="topbar__content">
@@ -13,7 +14,7 @@
             <ul class="topbar-nav">
                 {% for configItem in config %}
                     <li class="topbar-nav-item
-                            {% if app.request.pathInfo is same as ('/' ~ configItem['flag']) %}
+                            {% if gender is same as configItem['flag'] %}
                                 topbar-nav-item--active
                             {% endif %}
                     ">
@@ -34,7 +35,7 @@
     <div class="subbar__wrapper">
         <ul class="subbar">
             {% for configItem in config %}
-                {% if app.request.pathInfo is same as ('/' ~ configItem['flag']) %}
+                {% if  gender is same as configItem['flag'] %}
                     {% for name, category in configItem['categories'] %}
                         <li class="subbar-item">
                             <button type="button" class="subbar-button">{{ name }}</button>

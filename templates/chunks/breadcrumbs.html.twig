@@ -1,0 +1,17 @@
+{% set length = breadcrumbs | length %}
+
+<ul class="breadcrumbs">
+    {% for breadcrumb in breadcrumbs %}
+        {% set title = breadcrumb['title'] | lower | capitalize %}
+        <li class='breadcrumbs-item'>
+            {% if loop.index < length %}
+                <a href="{{ breadcrumb['url'] }}">{{ title }}</a>
+            {% else %}
+                {{ title }}
+            {% endif %}
+        </li>
+        {% if loop.index < length %}
+            <span class='breadcrumbs-arrow'>›</span>
+        {% endif %}
+    {% endfor %}
+</ul>

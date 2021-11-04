@@ -1,0 +1,82 @@
+{# <?php renderBreadcrumbs($breadCrumbsData); ?> #}
+{{ include('chunks/breadcrumbs.html.twig') }}
+<div class="catalog-info__wrapper">
+    <div class="catalog-info">
+        <h1 class="catalog-info-title">
+            {{ gender }}
+            {{ entity.title }}
+        </h1>
+        <div class="catalog-info-description text-collapsible text-collapsible--catalog">
+            {{ entity.description }}
+        </div>
+        {% if entity.description %}
+            <button class="text-collapsible-toggle">View more</button>
+        {% endif %}
+    </div>
+</div>
+<div class="catalog-filters__wrapper">
+    <div class="catalog-filters">
+        <form>
+            {% if entityType is same as 'brand' %}
+                {# add selectpickers for brand catalog #}
+
+            {% elseif entityType is same as 'category' %}
+                {{ include('chunks/selectpicker.html.twig', {
+                    options: brandsConfig,
+                    type: 'brands',
+                    label: 'Brand',
+                    settings: [],
+                }) }}
+
+                {{ include('chunks/selectpicker.html.twig', {
+                    options: sizesConfig,
+                    type: 'sizes',
+                    label: 'Size',
+                    settings: [],
+                }) }}
+            {% endif %}
+
+            {{ include('chunks/sort-selectpicker.html.twig') }}
+
+            <button type="submit" class="catalog-filters-submit">Filter</button>
+        </form>
+    </div>
+</div>
+<div class="catalog">
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="catalog-item">
+                        <a href="/">
+                            {% if product.image %}
+                                <div class="catalog-item-image"
+                                     style="background-image: url('{{ product.image }}')">
+                                </div>
+                            {% else %}
+                                <div class="catalog-item-image catalog-item-image--noimage">
+                                    No image
+                                </div>
+                            {% endif %}
+                            <div class="catalog-item-title">
+                                {{ product.title }}
+                            </div>
+                            <div class="catalog-item-price">
+                                <span>€</span>
+                                {{ product.price | number_format(2, '.', ' ') }}
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col">
+                <p class="catalog-no-products">No products matching the selected criteria</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if products %}
+    {{ include("/chunks/pagination.html.twig") }}
+{% endif %}

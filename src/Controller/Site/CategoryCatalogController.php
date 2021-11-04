@@ -44,6 +44,8 @@ class CategoryCatalogController extends AbstractController
                 throw new \NotFoundException('No category found');
             }
 
+            $categoryTitle = $category->getTitle();
+
             $productsByCategory = $category->getProducts();
 
             $brandsConfig = [];
@@ -119,12 +121,33 @@ class CategoryCatalogController extends AbstractController
 
             $products = $productRepository->getProductList($whereClauses, $order, $pagination->limit, $pagination->offset);
 
-            $ss = '';
+            $breadcrumbs = [
+                [
+                    'title' => $gender,
+                    'url' => $this->generateUrl($gender),
+
+                ],
+                [
+                    'title' => $categoryTitle,
+                    'url' => $this->generateUrl('category', ['gender' => $gender, 'id' => $categoryId]),
+                ],
+            ];
+
+            return $this->render('site/category.html.twig', [
+                'entity' => $category,
+                'entityType' => 'category',
+                'title' => ucwords("$gender $categoryTitle"),
+                'gender' => $gender,
+                'brandsConfig' => $brandsConfig,
+                'sizesConfig' => $sizesConfig,
+                'products' => $products,
+                'pagination' => $pagination,
+                'page' => $page,
+                'breadcrumbs' => $breadcrumbs,
+            ]);
 
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);
         }
-
-        return $this->render('site/category.html.twig');
     }
 }
