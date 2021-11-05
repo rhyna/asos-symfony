@@ -1,0 +1,83 @@
+{% extends '/site/base.html.twig' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block body %}
+    {{ include('chunks/breadcrumbs.html.twig') }}
+    <div class="product">
+        <div class="product-top">
+            <div class="product-gallery">
+                {% if images %}
+                    <div class="previews">
+                        {% for image in images %}
+                            <span class="{{ loop.first ? 'selected' : '' }}"
+                                  data-full="{{ image }}">
+                                <img alt='' src="{{ image }}"/>
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="full">
+                    {% for image in images %}
+                        {% if loop.first %}
+                            <img src="{{ image }}" alt=""/>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not images %}
+                        <div class="no-image">
+                            No image
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="product-top-info">
+                <h1 class="product-title">{{ product.title }}</h1>
+                <div class="product-price"><span>€</span>{{ product.price | number_format(2, '.', ' ') }}</div>
+                <div class="product-sizes">
+                    <label for="sizes">Size</label>
+                    <select class="form-control" name="sizes" id="sizes">
+                       {% for size in product.sizes %}
+                        <option value="{{ size.id }}">
+                            {{ size.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="product-bottom text-collapsible text-collapsible--product">
+            <div class="row">
+                <div class="product-bottom-col col">
+                    <div class="product-bottom-col-info">
+                        <h2 class="product-bottom-title">Product details</h2>
+                        {{ product.productDetails | raw }}
+                    </div>
+                </div>
+                <div class="product-bottom-col col">
+                    <div class="product-bottom-col-info">
+                        <h2 class="product-bottom-title">Product code</h2>
+                        {{ product.productCode }}
+                    </div>
+                    <div class="product-bottom-col-info">
+                        <h2 class="product-bottom-title">Brand</h2>
+                        {{ brandDescription | raw }}
+                    </div>
+                </div>
+                <div class="product-bottom-col col">
+                    <div class="product-bottom-col-info">
+                        <h2 class="product-bottom-title">Look after me</h2>
+                        {{ product.lookAfterMe | raw }}
+                    </div>
+                    <div class="product-bottom-col-info">
+                        <h2 class="product-bottom-title">About me</h2>
+                       {{ product.aboutMe | raw }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="text-collapsible-toggle__wrapper">
+            <button class="text-collapsible-toggle text-collapsible-toggle--product">View more</button>
+        </div>
+    </div>
+{% endblock %}

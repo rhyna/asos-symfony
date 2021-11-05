@@ -33,6 +33,10 @@ class CategoryCatalogController extends AbstractController
         try {
             $categoryId = (int)$request->get('id');
 
+            if (!$categoryId) {
+                throw new \BadRequestException('No id provided');
+            }
+
             $gender = $request->get('gender');
 
             /**
@@ -136,7 +140,7 @@ class CategoryCatalogController extends AbstractController
             return $this->render('site/category.html.twig', [
                 'entity' => $category,
                 'entityType' => 'category',
-                'title' => ucwords("$gender $categoryTitle"),
+                'title' => ucwords("$gender $categoryTitle | ASOS"),
                 'gender' => $gender,
                 'brandsConfig' => $brandsConfig,
                 'sizesConfig' => $sizesConfig,
@@ -145,6 +149,12 @@ class CategoryCatalogController extends AbstractController
                 'page' => $page,
                 'breadcrumbs' => $breadcrumbs,
             ]);
+
+        } catch (\BadRequestException $e) {
+            return new Response($e->getMessage(), 400);
+
+        } catch (\NotFoundException $e) {
+            return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);
