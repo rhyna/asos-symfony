@@ -24,7 +24,6 @@ class HelpersExtension extends AbstractExtension
             new \Twig\TwigFunction('buildOptGroups', [$this, 'buildOptGroupsFunc']),
             new \Twig\TwigFunction('stringToInt', [$this, 'stringToInteger']),
             new \Twig\TwigFunction('getMenuConfig', [$this, 'getMenuConfig']),
-            new \Twig\TwigFunction('htmlEntityDecode', [$this, 'htmlEntityDecode']),
         ];
     }
 
@@ -57,14 +56,5 @@ class HelpersExtension extends AbstractExtension
 
         return $repository->getMenuConfig();
 
-    }
-
-    public function htmlEntityDecode(?string $string): string
-    {
-        if ($string) {
-            return html_entity_decode($string);
-        } else {
-            return '';
-        }
     }
 }

@@ -96,8 +96,12 @@ class CategoryRepository extends ServiceEntityRepository
 
                 $secondLevelCategoryIds = [];
 
+                //$subCategoryIdsGETParams = '';
+
                 foreach ($firstLevel['childCategory2'] as $secondLevel) {
                     $secondLevelCategoryIds[] = (int)$secondLevel['id'];
+
+                    //$subCategoryIdsGETParams .= "&categories[]=" . (int)$secondLevel['id'];
                 }
 
                 $brandInfo = $productRepository->getProductBrandsByCategories($secondLevelCategoryIds);
@@ -105,6 +109,8 @@ class CategoryRepository extends ServiceEntityRepository
                 $config1['categories'][$firstLevel['title']]['brandsData'] = $brandInfo;
 
                 $config1['categories'][$firstLevel['title']]['subCategoryIds'] = $secondLevelCategoryIds;
+
+                //$config1['categories'][$firstLevel['title']]['subCategoryIdsGETParams'] = $subCategoryIdsGETParams;
 
                 $previewCategoryIds = array_slice($secondLevelCategoryIds, 0, 2);
 
@@ -187,5 +193,49 @@ class CategoryRepository extends ServiceEntityRepository
         }
 
         return (int)$qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function getWomenCategories(): array
+    {
+        $qb = $this->createQueryBuilder('c');
+
+        $qb->join("c.parent", "cp");
+
+        $qb->join("cp.parent", "cp1");
+
+        $qb->select("c.id");
+
+        $qb->where("cp1.rootWomenCategory = true");
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getWomenCategoriesByBrand(int $brandId): array
+    {
+        $womenCategories = $this->getWomenCategories();
+
+        $arr = [];
+
+        foreach ($womenCategories as $item) {
+            $arr[] = $item['id'];
+        }
+
+        $womenCategories = implode(',', $arr);
+
+        $qb = $this->createQueryBuilder('c');
+
+        $qb->select("c.id, c.title, cp.title as parentCategoryTitle");
+
+        $qb->join("c.products", "p");
+
+        $qb->join("c.parent", "cp");
+
+        $qb->where("p.brand = $brandId");
+
+        $qb->andWhere("c.id in ($womenCategories)");
+
+        $qb->orderBy('c.title', 'asc');
+
+        return $qb->getQuery()->getResult();
     }
 }

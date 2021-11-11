@@ -16,19 +16,43 @@ class SizeRepository extends ServiceEntityRepository
         parent::__construct($registry, Size::class);
     }
 
-    public function getUniqueSizesOfProductsByCategory(int $categoryId): array
+    private function GetUniqueSizesOfProductsQB(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('s');
 
-        $qb->select("distinct s.id, s.title");
+        $qb->select("distinct s.id, s.title, s.sortOrder");
 
         $qb->join("s.products", "p");
+
+        return $qb;
+    }
+
+    public function getUniqueSizesOfProductsByCategory(int $categoryId): array
+    {
+        $qb = $this->GetUniqueSizesOfProductsQB();
 
         $qb->join("p.category", "c");
 
         $qb->where("c.id = $categoryId");
 
-        $dd = $qb->getDQL();
+        $qb->orderBy('s.sortOrder', 'asc');
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+    public function getUniqueSizesOfProductsByCategoryAndBrand(int $brandId, string $categoryIds): array
+    {
+        $qb = $this->GetUniqueSizesOfProductsQB();
+
+        $qb->join("p.category", "c");
+
+        $qb->join("p.brand", "b");
+
+        $qb->where("c.id in ($categoryIds)");
+
+        $qb->andWhere("b.id = $brandId");
+
+        $qb->orderBy('s.sortOrder', 'asc');
 
         return $qb->getQuery()->getArrayResult();
     }

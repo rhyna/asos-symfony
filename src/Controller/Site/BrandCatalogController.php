@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Site;
 
+use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Size;
@@ -14,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CategoryCatalogController extends AbstractController
+class BrandCatalogController extends AbstractController
 {
     private EntityManagerInterface $em;
     private PaginationService $paginationService;
@@ -26,58 +27,39 @@ class CategoryCatalogController extends AbstractController
     }
 
     /**
-     * @Route("/{gender}/category/{id}", name="category")
+     * @Route("/{gender}/brand/{id}", name="brand")
      */
-    public function category(Request $request): Response
+    public function brand(Request $request): Response
     {
         try {
-            $categoryId = (int)$request->get('id');
+            $id = (int)$request->get('id');
 
-            if (!$categoryId) {
+            if (!$id) {
                 throw new \BadRequestException('No id provided');
             }
 
             $gender = $request->get('gender');
 
             /**
-             * @var Category $category
+             * @var Brand $brand
              */
-            $category = $this->em->getRepository(Category::class)->find($categoryId);
+            $brand = $this->em->getRepository(Brand::class)->find($id);
 
-            if (!$category) {
-                throw new \NotFoundException('No category found');
+            if (!$brand) {
+                throw new \NotFoundException('No brand found');
             }
 
-            $categoryTitle = $category->getTitle();
+            $description = '';
 
-            $categoryDescription = $category->getDescription();
-
-            $productsByCategory = $category->getProducts();
-
-            $brandConfig = [];
-
-            /**
-             * @var Product $product
-             */
-            foreach ($productsByCategory as $product) {
-                $brandData = [];
-
-                $brand = $product->getBrand();
-
-                if ($brand) {
-                    $brandId = $product->getBrand()->getId();
-
-                    $brandTitle = $product->getBrand()->getTitle();
-
-                    $brandData['id'] = $brandId;
-
-                    $brandData['title'] = $brandTitle;
-
-                    $brandConfig[] = $brandData;
-                }
+            if ($gender === 'women') {
+                $description = $brand->getDescriptionWomen();
             }
 
-            $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategory($categoryId);
+            if ($gender === 'men') {
+                $description = $brand->getDescriptionMen();
+            }
+
+            $brandTitle = $brand->getTitle();
 
             $page = $request->get('page');
 
@@ -91,7 +73,7 @@ class CategoryCatalogController extends AbstractController
 
             $order = [];
 
-            $whereClauses[] = "c.id = $categoryId";
+            $whereClauses[] = "b.id = $id";
 
             $sizeIds = $request->get('sizes');
 
@@ -101,12 +83,12 @@ class CategoryCatalogController extends AbstractController
                 $whereClauses[] = "s.id in ($sizeIds)";
             }
 
-            $brandIds = $request->get('brands');
+            $categoryIds = $request->get('categories');
 
-            if ($brandIds) {
-                $brandIds = implode(",", $brandIds);
+            if ($categoryIds) {
+                $categoryIds = implode(",", $categoryIds);
 
-                $whereClauses[] = "b.id in ($brandIds)";
+                $whereClauses[] = "c.id in ($categoryIds)";
             }
 
             $sort = $request->get('sort');
@@ -118,6 +100,20 @@ class CategoryCatalogController extends AbstractController
             if ($sort === 'price-desc') {
                 $order = ["p.price", "DESC"];
             }
+
+            $categoryRepository = $this->em->getRepository(Category::class);
+
+            $categoryConfig = $categoryRepository->getWomenCategoriesByBrand($id);
+
+            $categoryIds = [];
+
+            foreach ($categoryConfig as $data) {
+                $categoryIds[] = $data['id'];
+            }
+
+            $categoryIds = implode(',', $categoryIds);
+
+            $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategoryAndBrand($id, $categoryIds);
 
             $productRepository = $this->em->getRepository(Product::class);
 
@@ -134,18 +130,22 @@ class CategoryCatalogController extends AbstractController
 
                 ],
                 [
-                    'title' => $categoryTitle,
-                    'url' => $this->generateUrl('category', ['gender' => $gender, 'id' => $categoryId]),
+                    'title' => "All $gender brands",
+                    'url' => '/'
+                ],
+                [
+                    'title' => $brandTitle,
+                    'url' => '',
                 ],
             ];
 
             return $this->render('site/catalog.html.twig', [
-                'entity' => $category,
-                'entityType' => 'category',
-                'title' => ucwords("$gender $categoryTitle | ASOS"),
-                'description' => $categoryDescription,
+                'entity' => $brand,
+                'entityType' => 'brand',
+                'title' => ucwords("$gender $brandTitle | ASOS"),
+                'description' => $description,
                 'gender' => $gender,
-                'brandConfig' => $brandConfig,
+                'categoryConfig' => $categoryConfig,
                 'sizeConfig' => $sizeConfig,
                 'products' => $products,
                 'pagination' => $pagination,

@@ -1,14 +1,16 @@
 <div class="banner-bigtop">
     <a href="{{ bigTopBanner['link'] }}">
         <img src="{{ bigTopBanner['image'] }}" alt="">
-        <div class="banner-bigtop-label">
-            <div class="banner-bigtop-title">
-                {{ bigTopBanner['title'] | default('') }}
+        {% if bigTopBanner['title'] or bigTopBanner['buttonLabel'] %}
+            <div class="banner-bigtop-label">
+                <div class="banner-bigtop-title">
+                    {{ bigTopBanner['title'] }}
+                </div>
+                <div class="banner-bigtop-button">
+                    {{ bigTopBanner['buttonLabel'] }}
+                </div>
             </div>
-            <div class="banner-bigtop-button">
-                {{ bigTopBanner['buttonLabel'] | default('') }}
-            </div>
-        </div>
+        {% endif %}
     </a>
 </div>
 <div class="banner-hotcategorysmall__wrapper">

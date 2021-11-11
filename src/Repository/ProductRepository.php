@@ -147,4 +147,19 @@ class ProductRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    public function getProductSizesSortedByOrder(int $productId): array
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        $qb->join('p.sizes', 's');
+
+        $qb->select('s.id, s.title');
+
+        $qb->where("p.id = $productId");
+
+        $qb->orderBy('s.sortOrder', 'asc');
+
+        return $qb->getQuery()->getResult();
+    }
 }

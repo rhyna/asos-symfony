@@ -44,20 +44,6 @@ class ProductPageController extends AbstractController
 
             $sizes = $product->getSizes();
 
-//            $sizesConfig = [];
-//
-//            /**
-//             * @var Size $size
-//             */
-//            foreach ($sizes as $size) {
-//                $data = [];
-//
-//                $data['id'] = $size->getId();
-//                $data['title'] = $size->getTitle();
-//
-//                $sizesConfig[] = $data;
-//            }
-
             $isRootMen = $product->getCategory()->getParent()->getParent()->isRootMenCategory();
 
             $isRootWomen = $product->getCategory()->getParent()->getParent()->isRootWomenCategory();
@@ -99,6 +85,8 @@ class ProductPageController extends AbstractController
 
             $productTitle = $product->getTitle();
 
+            $productSizes = $this->em->getRepository(Product::class)->getProductSizesSortedByOrder($id);
+
             $breadcrumbs = [
                 [
                     'title' => $gender,
@@ -121,6 +109,7 @@ class ProductPageController extends AbstractController
                 'breadcrumbs' => $breadcrumbs,
                 'brandDescription' => $brandDescription,
                 'images' => $images,
+                'sizes' => $productSizes,
                 'gender' => $gender,
             ]);
 

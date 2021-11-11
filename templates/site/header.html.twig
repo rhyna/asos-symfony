@@ -1,5 +1,7 @@
 {% set config = getMenuConfig() %}
 
+{{ dump(config) }}
+
 <header>
     <nav class="topbar">
         <div class="topbar__content">
@@ -35,7 +37,7 @@
     <div class="subbar__wrapper">
         <ul class="subbar">
             {% for configItem in config %}
-                {% if  gender is same as configItem['flag'] %}
+                {% if gender is same as configItem['flag'] %}
                     {% for name, category in configItem['categories'] %}
                         <li class="subbar-item">
                             <button type="button" class="subbar-button">{{ name }}</button>
@@ -63,7 +65,11 @@
                                                 {% if category['brandsData'] %}
                                                     {% for brand in category['brandsData']['data'] | slice(0, 5) %}
                                                         <li class="subbar-dropdown-item--brand">
-                                                            <a href="">
+                                                            <a href="{{ path('brand', {
+                                                                'gender': gender,
+                                                                'id': brand['brandId'],
+                                                                'categories': category['subCategoryIds']
+                                                            }) }}">
                                                                 <div class="subbar-dropdown-item--brand-image"
                                                                      style="background-image: url('{{ brand['productImage'] }}')">
                                                                 </div>

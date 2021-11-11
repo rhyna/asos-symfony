@@ -36,7 +36,7 @@
                 <div class="product-sizes">
                     <label for="sizes">Size</label>
                     <select class="form-control" name="sizes" id="sizes">
-                       {% for size in product.sizes %}
+                       {% for size in sizes %}
                         <option value="{{ size.id }}">
                             {{ size.title }}
                         </option>

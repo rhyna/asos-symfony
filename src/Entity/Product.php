@@ -260,5 +260,4 @@ class Product
     {
         $this->sizes = new ArrayCollection();
     }
-
 }
