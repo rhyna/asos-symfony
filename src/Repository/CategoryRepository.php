@@ -195,7 +195,7 @@ class CategoryRepository extends ServiceEntityRepository
         return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
-    private function getWomenCategories(): array
+    public function getRootSubCategories(string $gender): array
     {
         $qb = $this->createQueryBuilder('c');
 
@@ -205,22 +205,28 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->select("c.id");
 
-        $qb->where("cp1.rootWomenCategory = true");
+        if ($gender === 'women') {
+            $qb->where("cp1.rootWomenCategory = true");
+        }
+
+        if ($gender === 'men') {
+            $qb->where("cp1.rootMenCategory = true");
+        }
 
         return $qb->getQuery()->getResult();
     }
 
-    public function getWomenCategoriesByBrand(int $brandId): array
+    public function getRootSubCategoriesByBrand(int $brandId, string $gender): array
     {
-        $womenCategories = $this->getWomenCategories();
+        $rootSubCategories = $this->getRootSubCategories($gender);
 
         $arr = [];
 
-        foreach ($womenCategories as $item) {
+        foreach ($rootSubCategories as $item) {
             $arr[] = $item['id'];
         }
 
-        $womenCategories = implode(',', $arr);
+        $rootSubCategories = implode(',', $arr);
 
         $qb = $this->createQueryBuilder('c');
 
@@ -232,7 +238,7 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->where("p.brand = $brandId");
 
-        $qb->andWhere("c.id in ($womenCategories)");
+        $qb->andWhere("c.id in ($rootSubCategories)");
 
         $qb->orderBy('c.title', 'asc');
 

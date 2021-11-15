@@ -34,10 +34,6 @@ class BrandCatalogController extends AbstractController
         try {
             $id = (int)$request->get('id');
 
-            if (!$id) {
-                throw new \BadRequestException('No id provided');
-            }
-
             $gender = $request->get('gender');
 
             /**
@@ -60,6 +56,16 @@ class BrandCatalogController extends AbstractController
             }
 
             $brandTitle = $brand->getTitle();
+
+            $categoryRepository = $this->em->getRepository(Category::class);
+
+            $rootSubCategories = $categoryRepository->getRootSubCategories($gender);
+
+            $rootSubCategoryIds = [];
+
+            foreach ($rootSubCategories as $category) {
+                $rootSubCategoryIds[] = $category['id'];
+            }
 
             $page = $request->get('page');
 
@@ -91,6 +97,12 @@ class BrandCatalogController extends AbstractController
                 $whereClauses[] = "c.id in ($categoryIds)";
             }
 
+            if (!$categoryIds) {
+                $categoryIds = implode(",", $rootSubCategoryIds);
+
+                $whereClauses[] = "c.id in ($categoryIds)";
+            }
+
             $sort = $request->get('sort');
 
             if ($sort === 'price-asc') {
@@ -101,9 +113,7 @@ class BrandCatalogController extends AbstractController
                 $order = ["p.price", "DESC"];
             }
 
-            $categoryRepository = $this->em->getRepository(Category::class);
-
-            $categoryConfig = $categoryRepository->getWomenCategoriesByBrand($id);
+            $categoryConfig = $categoryRepository->getRootSubCategoriesByBrand($id, $gender);
 
             $categoryIds = [];
 
@@ -131,7 +141,7 @@ class BrandCatalogController extends AbstractController
                 ],
                 [
                     'title' => "All $gender brands",
-                    'url' => '/'
+                    'url' => '/',
                 ],
                 [
                     'title' => $brandTitle,
@@ -153,11 +163,26 @@ class BrandCatalogController extends AbstractController
                 'breadcrumbs' => $breadcrumbs,
             ]);
 
-        } catch (\BadRequestException $e) {
-            return new Response($e->getMessage(), 400);
-
         } catch (\NotFoundException $e) {
             return new Response($e->getMessage(), 404);
+
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * @Route("/{gender}/brands", name="all-brands")
+     */
+    public function allBrands(Request $request): Response
+    {
+        try {
+            $gender = $request->get('gender');
+
+            return $this->render('site/all-brands.html.twig', [
+                'title' => "All $gender brands | ASOS",
+                'gender' => $gender,
+            ]);
 
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 500);
