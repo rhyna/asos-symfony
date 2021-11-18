@@ -8,6 +8,7 @@ use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Size;
+use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,11 +20,13 @@ class BrandCatalogController extends AbstractController
 {
     private EntityManagerInterface $em;
     private PaginationService $paginationService;
+    private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(EntityManagerInterface $em, PaginationService $paginationService)
+    public function __construct(EntityManagerInterface $em, PaginationService $paginationService, PageDeterminerService  $pageDeterminerService)
     {
         $this->em = $em;
         $this->paginationService = $paginationService;
+        $this->pageDeterminerService = $pageDeterminerService;
     }
 
     /**
@@ -59,21 +62,9 @@ class BrandCatalogController extends AbstractController
 
             $categoryRepository = $this->em->getRepository(Category::class);
 
-            $rootSubCategories = $categoryRepository->getRootSubCategories($gender);
+            $rootSubCategoryIds = $categoryRepository->getRootSubCategories($gender);
 
-            $rootSubCategoryIds = [];
-
-            foreach ($rootSubCategories as $category) {
-                $rootSubCategoryIds[] = $category['id'];
-            }
-
-            $page = $request->get('page');
-
-            if (!$page || (string)(int)$page !== $page) {
-                $page = 1;
-            }
-
-            $page = (int)$page;
+            $page = $this->pageDeterminerService->determinePage();
 
             $whereClauses = [];
 
@@ -127,11 +118,11 @@ class BrandCatalogController extends AbstractController
 
             $productRepository = $this->em->getRepository(Product::class);
 
-            $totalProducts = $productRepository->countProductList($whereClauses);
+            $totalProducts = $productRepository->countProductsInList($whereClauses, []);
 
-            $pagination = $this->paginationService->calculate($page, 10, $totalProducts);
+            $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
-            $products = $productRepository->getProductList($whereClauses, $order, $pagination->limit, $pagination->offset);
+            $products = $productRepository->getProductList($whereClauses, [], $order, $pagination->limit, $pagination->offset);
 
             $breadcrumbs = [
                 [
@@ -141,7 +132,7 @@ class BrandCatalogController extends AbstractController
                 ],
                 [
                     'title' => "All $gender brands",
-                    'url' => '/',
+                    'url' => $this->generateUrl('all-brands', ['gender' => $gender]),
                 ],
                 [
                     'title' => $brandTitle,
@@ -179,9 +170,33 @@ class BrandCatalogController extends AbstractController
         try {
             $gender = $request->get('gender');
 
+            $categoryRepository = $this->em->getRepository(Category::class);
+
+            $categoryIdsByGender = $categoryRepository->getRootSubCategories($gender);
+
+            $categoryIdsByGender = implode(',', $categoryIdsByGender);
+
+            $brandRepository = $this->em->getRepository(Brand::class);
+
+            $brandsByGender = $brandRepository->getBrandsByGender($categoryIdsByGender);
+
+            $breadcrumbs = [
+        [
+            'title' => $gender,
+            'url' => $this->generateUrl($gender),
+
+        ],
+        [
+            'title' => "All $gender Brands",
+            'url' => "",
+        ],
+    ];
+
             return $this->render('site/all-brands.html.twig', [
                 'title' => "All $gender brands | ASOS",
                 'gender' => $gender,
+                'breadcrumbs' => $breadcrumbs,
+                'brandsByGender' => $brandsByGender,
             ]);
 
         } catch (\Throwable $e) {

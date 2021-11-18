@@ -1,0 +1,52 @@
+{% extends '/site/base.html.twig' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block body %}
+    {{ include('chunks/breadcrumbs.html.twig') }}
+    <div class="search-query">
+        <div class="search-query-title">You searched:</div>
+        <div class="search-query-text">
+            {{ query }}
+        </div>
+        <div class="search-query-divider"></div>
+    </div>
+    <div class="catalog">
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                        <div class="catalog-item">
+                            <a href="{{ path('product', { id: product['id'] }) }}">
+
+                                {% if product['image'] %}
+                                    <div class="catalog-item-image"
+                                         style="background-image: url({{ product['image'] }})">
+                                    </div>
+                                {% else %}
+                                    <div class="catalog-item-image catalog-item-image--noimage">
+                                        No image
+                                    </div>
+                                {% endif %}
+                                <div class="catalog-item-title">
+                                    {{ product['title'] }}
+                                </div>
+                                <div class="catalog-item-price">
+                                    <span>€</span>
+                                    {{ product['price'] | number_format(2, '.', ' ') }}
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col">
+                    <p class="catalog-no-products">Such a page does not exist</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% if products %}
+        {{ include("/chunks/pagination.html.twig") }}
+    {% endif %}
+{% endblock %}

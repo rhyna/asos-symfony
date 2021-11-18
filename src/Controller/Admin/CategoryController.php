@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Category;
+use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,12 +22,17 @@ class CategoryController extends AbstractController
     private PaginationService $paginationService;
     private EntityManagerInterface $em;
     private Filesystem $fileSystem;
+    private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(PaginationService $paginationService, EntityManagerInterface $em, Filesystem $fileSystem)
+    public function __construct(PaginationService      $paginationService,
+                                EntityManagerInterface $em,
+                                Filesystem             $fileSystem,
+                                PageDeterminerService  $pageDeterminerService)
     {
         $this->paginationService = $paginationService;
         $this->em = $em;
         $this->fileSystem = $fileSystem;
+        $this->pageDeterminerService = $pageDeterminerService;
     }
 
     /**
@@ -63,13 +69,7 @@ class CategoryController extends AbstractController
             $whereClauses[] = "cp.id IN ($ids)";
         }
 
-        $page = $request->get('page');
-
-        if (!$page || (string)(int)$page !== $page) {
-            $page = 1;
-        }
-
-        $page = (int)$page;
+        $page = $this->pageDeterminerService->determinePage();
 
         $totalItems = $repository->countCategoriesList($whereClauses);
 

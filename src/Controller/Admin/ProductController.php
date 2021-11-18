@@ -8,6 +8,7 @@ use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Size;
+use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,12 +26,17 @@ class ProductController extends AbstractController
     private PaginationService $paginationService;
     private EntityManagerInterface $em;
     private Filesystem $fileSystem;
+    private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(PaginationService $paginationService, EntityManagerInterface $em, Filesystem $fileSystem)
+    public function __construct(PaginationService      $paginationService,
+                                EntityManagerInterface $em,
+                                Filesystem             $fileSystem,
+                                PageDeterminerService  $pageDeterminerService)
     {
         $this->paginationService = $paginationService;
         $this->em = $em;
         $this->fileSystem = $fileSystem;
+        $this->pageDeterminerService = $pageDeterminerService;
     }
 
     /**
@@ -45,13 +51,7 @@ class ProductController extends AbstractController
 
         $order = [];
 
-        $page = $request->get('page');
-
-        if (!$page || (string)(int)$page !== $page) {
-            $page = 1;
-        }
-
-        $page = (int)$page;
+        $page = $this->pageDeterminerService->determinePage();
 
         $categoryIds = $request->get('categories');
 
@@ -79,11 +79,11 @@ class ProductController extends AbstractController
             $order = ["p.price", "DESC"];
         }
 
-        $totalProducts = $repository->countProductList($whereClauses);
+        $totalProducts = $repository->countProductsInList($whereClauses, []);
 
         $pagination = $this->paginationService->calculate($page, 10, $totalProducts);
 
-        $products = $repository->getProductList($whereClauses, $order, $pagination->limit, $pagination->offset);
+        $products = $repository->getProductList($whereClauses, [], $order, $pagination->limit, $pagination->offset);
 
         $brandsData = $this->em->getRepository(Brand::class)->getAllBrandsIdAndTitle();
 

@@ -1,0 +1,23 @@
+{% extends '/site/base.html.twig' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block body %}
+    {{ include('chunks/breadcrumbs.html.twig') }}
+    {% if query %}
+        <div class="search-query">
+            <div class="search-query-title">You searched:</div>
+            <div class="search-query-text">
+                {{ query }}
+            </div>
+            <div class="search-query-divider"></div>
+        </div>
+    {% endif %}
+    <div class="catalog">
+        <div class="row">
+            <div class="col">
+                <p class="catalog-no-products">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

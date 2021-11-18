@@ -1,6 +1,20 @@
 {% extends '/site/base.html.twig' %}
 
 {% block title %} {{ title }} {% endblock %}
-
 {% block body %}
+    {{ include('chunks/breadcrumbs.html.twig') }}
+    <div class="brands-catalog">
+        <h1 class="brands-catalog-title">
+            A-Z {{ gender }} Brands
+        </h1>
+        <ul>
+            {% for brand in brandsByGender %}
+                <li class="brands-catalog-item">
+                    <a href="{{ path('brand', { gender: gender, id: brand['id'] }) }}">
+                        {{ brand['title'] }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

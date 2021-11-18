@@ -1,7 +1,4 @@
 {% set config = getMenuConfig() %}
-
-{{ dump(config) }}
-
 <header>
     <nav class="topbar">
         <div class="topbar__content">
@@ -24,7 +21,7 @@
                     </li>
                 {% endfor %}
             </ul>
-            <form action="" class="search" method="get">
+            <form action="{{ path('search') }}" class="search" method="get">
                 <input type="text"
                        placeholder="Search for items, brands, and inspiration"
                        name="query">

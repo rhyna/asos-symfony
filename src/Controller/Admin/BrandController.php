@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Brand;
+use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,11 +20,15 @@ class BrandController extends AbstractController
 {
     private EntityManagerInterface $em;
     private PaginationService $paginationService;
+    private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(EntityManagerInterface $em, PaginationService $paginationService)
+    public function __construct(EntityManagerInterface $em,
+                                PaginationService      $paginationService,
+                                PageDeterminerService  $pageDeterminerService)
     {
         $this->em = $em;
         $this->paginationService = $paginationService;
+        $this->pageDeterminerService = $pageDeterminerService;
     }
 
     /**
@@ -36,13 +41,7 @@ class BrandController extends AbstractController
 
         $totalBrands = $repository->countBrandList();
 
-        $page = $request->get('page');
-
-        if (!$page || (string)(int)$page !== $page) {
-            $page = 1;
-        }
-
-        $page = (int)$page;
+        $page = $this->pageDeterminerService->determinePage();
 
         $pagination = $this->paginationService->calculate($page, 10, $totalBrands);
 

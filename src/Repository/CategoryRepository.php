@@ -10,7 +10,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Repository\ProductRepository;
 
 class CategoryRepository extends ServiceEntityRepository
 {
@@ -213,20 +212,22 @@ class CategoryRepository extends ServiceEntityRepository
             $qb->where("cp1.rootMenCategory = true");
         }
 
-        return $qb->getQuery()->getResult();
+        $fetchedResult = $qb->getQuery()->getResult();
+
+        $result = [];
+
+        foreach ($fetchedResult as $item) {
+            $result[] = $item['id'];
+        }
+
+        return $result;
     }
 
     public function getRootSubCategoriesByBrand(int $brandId, string $gender): array
     {
-        $rootSubCategories = $this->getRootSubCategories($gender);
+        $rootSubCategoryIds = $this->getRootSubCategories($gender);
 
-        $arr = [];
-
-        foreach ($rootSubCategories as $item) {
-            $arr[] = $item['id'];
-        }
-
-        $rootSubCategories = implode(',', $arr);
+        $rootSubCategories = implode(',', $rootSubCategoryIds);
 
         $qb = $this->createQueryBuilder('c');
 

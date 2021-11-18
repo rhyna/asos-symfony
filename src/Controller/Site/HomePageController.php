@@ -15,7 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomePageController extends AbstractController
 {
     private EntityManagerInterface $em;
-
     private BannerService $bannerService;
 
     public function __construct(EntityManagerInterface $em, BannerService $bannerService)

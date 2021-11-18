@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d1098258c6b6bf711afe15b7e7ca177",
+    "content-hash": "60926d9c5225f25e17c1e7806cb28a98",
     "packages": [
         {
             "name": "composer/package-versions-deprecated",
@@ -1780,6 +1780,49 @@
                 }
             ],
             "time": "2020-09-14T14:23:00+00:00"
+        },
+        {
+            "name": "markfullmer/porter2",
+            "version": "1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/markfullmer/porter2.git",
+                "reference": "99b356c203cd52af62c57a8f9f1f7a9784e75352"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/markfullmer/porter2/zipball/99b356c203cd52af62c57a8f9f1f7a9784e75352",
+                "reference": "99b356c203cd52af62c57a8f9f1f7a9784e75352",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "markfullmer\\porter2\\": [
+                        "src/",
+                        "test/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "markfullmer",
+                    "email": "mfullmer@gmail.com"
+                }
+            ],
+            "description": "Stem words using the English Porter 2 algorithm",
+            "support": {
+                "issues": "https://github.com/markfullmer/porter2/issues",
+                "source": "https://github.com/markfullmer/porter2/tree/master"
+            },
+            "time": "2017-05-12T22:10:48+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -9802,9 +9845,11 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.2.5",
+        "php": ">=7.4",
         "ext-ctype": "*",
-        "ext-iconv": "*"
+        "ext-iconv": "*",
+        "ext-json": "*",
+        "ext-pdo": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.0.0"

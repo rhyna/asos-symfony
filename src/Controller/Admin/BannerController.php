@@ -6,6 +6,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Banner;
 use App\Entity\BannerPlace;
+use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,12 +24,17 @@ class BannerController extends AbstractController
     private EntityManagerInterface $em;
     private Filesystem $fileSystem;
     private PaginationService $paginationService;
+    private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(EntityManagerInterface $em, Filesystem $fileSystem, PaginationService $paginationService)
+    public function __construct(EntityManagerInterface $em,
+                                Filesystem             $fileSystem,
+                                PaginationService      $paginationService,
+                                PageDeterminerService  $pageDeterminerService)
     {
         $this->em = $em;
         $this->fileSystem = $fileSystem;
         $this->paginationService = $paginationService;
+        $this->pageDeterminerService = $pageDeterminerService;
     }
 
     /**
@@ -39,13 +45,7 @@ class BannerController extends AbstractController
     {
         $repository = $this->em->getRepository(Banner::class);
 
-        $page = $request->get('page');
-
-        if (!$page || (string)(int)$page !== $page) {
-            $page = 1;
-        }
-
-        $page = (int)$page;
+        $page = $this->pageDeterminerService->determinePage();
 
         $totalBanners = $repository->countBannerList();
 

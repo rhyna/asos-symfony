@@ -66,4 +66,21 @@ class BrandRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function getBrandsByGender(string $categoryIdsByGender): array
+    {
+        $qb = $this->createQueryBuilder('br');
+
+        $qb->select("br.id, br.title");
+
+        $qb->join("br.products", 'p');
+
+        $qb->where("p.category in ($categoryIdsByGender)");
+
+        $qb->orderBy("br.title", "asc");
+
+        $fetchedResult = $qb->getQuery()->getResult();
+
+        return array_unique($fetchedResult, SORT_REGULAR);
+    }
 }

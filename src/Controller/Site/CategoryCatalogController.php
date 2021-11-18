@@ -7,6 +7,7 @@ namespace App\Controller\Site;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Size;
+use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,11 +19,15 @@ class CategoryCatalogController extends AbstractController
 {
     private EntityManagerInterface $em;
     private PaginationService $paginationService;
+    private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(EntityManagerInterface $em, PaginationService $paginationService)
+    public function __construct(EntityManagerInterface $em,
+                                PaginationService      $paginationService,
+                                PageDeterminerService  $pageDeterminerService)
     {
         $this->em = $em;
         $this->paginationService = $paginationService;
+        $this->pageDeterminerService = $pageDeterminerService;
     }
 
     /**
@@ -79,13 +84,7 @@ class CategoryCatalogController extends AbstractController
 
             $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategory($categoryId);
 
-            $page = $request->get('page');
-
-            if (!$page || (string)(int)$page !== $page) {
-                $page = 1;
-            }
-
-            $page = (int)$page;
+            $page = $this->pageDeterminerService->determinePage();
 
             $whereClauses = [];
 
@@ -121,11 +120,11 @@ class CategoryCatalogController extends AbstractController
 
             $productRepository = $this->em->getRepository(Product::class);
 
-            $totalProducts = $productRepository->countProductList($whereClauses);
+            $totalProducts = $productRepository->countProductsInList($whereClauses, []);
 
-            $pagination = $this->paginationService->calculate($page, 10, $totalProducts);
+            $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
-            $products = $productRepository->getProductList($whereClauses, $order, $pagination->limit, $pagination->offset);
+            $products = $productRepository->getProductList($whereClauses, [], $order, $pagination->limit, $pagination->offset);
 
             $breadcrumbs = [
                 [

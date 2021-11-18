@@ -31,7 +31,7 @@ class ProductRepository extends ServiceEntityRepository
         return $qb;
     }
 
-    public function getProductList(array $whereClauses, array $order, int $limit, int $offset): array
+    public function getProductList(array $whereClauses, array $joinClauses, array $order, int $limit, int $offset): array
     {
         $qb = $this->getProductListQB();
 
@@ -55,6 +55,12 @@ class ProductRepository extends ServiceEntityRepository
             }
         }
 
+        if ($joinClauses) {
+            foreach ($joinClauses as $clause) {
+                $qb->join($clause['clause'], $clause['alias']);
+            }
+        }
+
         if ($order) {
             $qb->orderBy($order[0], $order[1]);
         }
@@ -70,7 +76,7 @@ class ProductRepository extends ServiceEntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function countProductList(array $whereClauses): int
+    public function countProductsInList(array $whereClauses, array $joinClauses): int
     {
         $qb = $this->getProductListQB();
 
@@ -78,6 +84,12 @@ class ProductRepository extends ServiceEntityRepository
 
         foreach ($whereClauses as $clause) {
             $qb->andWhere($clause);
+        }
+
+        if ($joinClauses) {
+            foreach ($joinClauses as $clause) {
+                $qb->join($clause['clause'], $clause['alias']);
+            }
         }
 
         return (int)$qb->getQuery()->getSingleScalarResult();
@@ -117,9 +129,9 @@ class ProductRepository extends ServiceEntityRepository
             $fetchedResult = $qb->getQuery()->getOneOrNullResult();
 
             if ($fetchedResult) {
-                    $brandIds[] = $fetchedResult['brandId'];
+                $brandIds[] = $fetchedResult['brandId'];
 
-                    $result['data'][] = $fetchedResult;
+                $result['data'][] = $fetchedResult;
 
                 $result['ids'] = $brandIds;
             }
@@ -159,6 +171,26 @@ class ProductRepository extends ServiceEntityRepository
         $qb->where("p.id = $productId");
 
         $qb->orderBy('s.sortOrder', 'asc');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getProductsBySearchWords(array $searchWordIds): array
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        $qb->select("p.id, p.title, p.image, p.price");
+
+        foreach ($searchWordIds as $i => $id) {
+            $qb->join("p.searchWords", "sw$i");
+
+            if ($i === 0) {
+                $qb->where("sw$i.id = $id");
+
+            } else {
+                $qb->andWhere("sw$i.id = $id");
+            }
+        }
 
         return $qb->getQuery()->getResult();
     }
