@@ -80,30 +80,33 @@ class SearchController extends AbstractController
             ]);
         }
 
-        $whereClauses = [];
+        $select = "p.title, p.price, p.image";
 
-        $joinClauses = [];
+        $join = [];
+
+        $where = [];
 
         foreach ($searchWordIds as $i => $id) {
             $arr = [
                 'clause' => "p.searchWords",
-                'alias' => "sw$i"
+                'alias' => "sw$i",
+                'type' => 'join',
             ];
 
-            $joinClauses[] = $arr;
+            $join[] = $arr;
 
-            $whereClauses[] = "sw$i.id = $id";
+            $where[] = "sw$i.id = $id";
         }
 
         $page = $this->pageDeterminerService->determinePage();
 
         $productRepository = $this->em->getRepository(Product::class);
 
-        $totalProducts = $productRepository->countProductsInList($whereClauses, $joinClauses);
+        $totalProducts = $productRepository->countProductsInList($join, $where);
 
         $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
-        $products = $productRepository->getProductList($whereClauses, $joinClauses, [], $pagination->limit, $pagination->offset);
+        $products = $productRepository->getProductList($select, $join, $where, [], $pagination->limit, $pagination->offset);
 
         return $this->render("site/search.html.twig", [
             'title' => "You searched: '$query' | ASOS",

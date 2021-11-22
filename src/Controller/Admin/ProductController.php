@@ -47,7 +47,25 @@ class ProductController extends AbstractController
     {
         $repository = $this->em->getRepository(Product::class);
 
-        $whereClauses = [];
+        $select = 'p.title, p.productCode, p.price, p.image, 
+                c.id as categoryId, c.title as categoryTitle, 
+                b.id as brandId, b.title as brandTitle';
+
+        $where = [];
+
+        $join = [
+            [
+                'clause' => 'p.category',
+                'alias' => 'c',
+                'type' => 'join',
+            ],
+            [
+                'clause' => 'p.brand',
+                'alias' => 'b',
+                'type' => 'leftJoin',
+            ],
+
+        ];
 
         $order = [];
 
@@ -58,7 +76,7 @@ class ProductController extends AbstractController
         if ($categoryIds) {
             $categoryIds = implode(",", $categoryIds);
 
-            $whereClauses[] = "c.id in ($categoryIds)";
+            $where[] = "c.id in ($categoryIds)";
         }
 
         $brandIds = $request->get('brands');
@@ -66,7 +84,7 @@ class ProductController extends AbstractController
         if ($brandIds) {
             $brandIds = implode(",", $brandIds);
 
-            $whereClauses[] = "b.id in ($brandIds)";
+            $where[] = "b.id in ($brandIds)";
         }
 
         $sort = $request->get('sort');
@@ -79,11 +97,11 @@ class ProductController extends AbstractController
             $order = ["p.price", "DESC"];
         }
 
-        $totalProducts = $repository->countProductsInList($whereClauses, []);
+        $totalProducts = $repository->countProductsInList($join, $where);
 
         $pagination = $this->paginationService->calculate($page, 10, $totalProducts);
 
-        $products = $repository->getProductList($whereClauses, [], $order, $pagination->limit, $pagination->offset);
+        $products = $repository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
 
         $brandsData = $this->em->getRepository(Brand::class)->getAllBrandsIdAndTitle();
 

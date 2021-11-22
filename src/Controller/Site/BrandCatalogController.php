@@ -22,7 +22,7 @@ class BrandCatalogController extends AbstractController
     private PaginationService $paginationService;
     private PageDeterminerService $pageDeterminerService;
 
-    public function __construct(EntityManagerInterface $em, PaginationService $paginationService, PageDeterminerService  $pageDeterminerService)
+    public function __construct(EntityManagerInterface $em, PaginationService $paginationService, PageDeterminerService $pageDeterminerService)
     {
         $this->em = $em;
         $this->paginationService = $paginationService;
@@ -66,18 +66,39 @@ class BrandCatalogController extends AbstractController
 
             $page = $this->pageDeterminerService->determinePage();
 
-            $whereClauses = [];
+            $select = "p.title, p.price, p.image";
+
+            $join = [
+                [
+                    'clause' => 'p.brand',
+                    'alias' => 'b',
+                    'type' => 'leftJoin',
+                ],
+                [
+                    'clause' => 'p.category',
+                    'alias' => 'c',
+                    'type' => 'join',
+                ],
+            ];
+
+            $where = [];
 
             $order = [];
 
-            $whereClauses[] = "b.id = $id";
+            $where[] = "b.id = $id";
 
             $sizeIds = $request->get('sizes');
 
             if ($sizeIds) {
                 $sizeIds = implode(",", $sizeIds);
 
-                $whereClauses[] = "s.id in ($sizeIds)";
+                $where[] = "s.id in ($sizeIds)";
+
+                $join[] =  [
+                    'clause' => 'p.sizes',
+                    'alias' => 's',
+                    'type' => 'join',
+                ];
             }
 
             $categoryIds = $request->get('categories');
@@ -85,13 +106,13 @@ class BrandCatalogController extends AbstractController
             if ($categoryIds) {
                 $categoryIds = implode(",", $categoryIds);
 
-                $whereClauses[] = "c.id in ($categoryIds)";
+                $where[] = "c.id in ($categoryIds)";
             }
 
             if (!$categoryIds) {
                 $categoryIds = implode(",", $rootSubCategoryIds);
 
-                $whereClauses[] = "c.id in ($categoryIds)";
+                $where[] = "c.id in ($categoryIds)";
             }
 
             $sort = $request->get('sort');
@@ -118,11 +139,11 @@ class BrandCatalogController extends AbstractController
 
             $productRepository = $this->em->getRepository(Product::class);
 
-            $totalProducts = $productRepository->countProductsInList($whereClauses, []);
+            $totalProducts = $productRepository->countProductsInList($join, $where);
 
             $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
-            $products = $productRepository->getProductList($whereClauses, [], $order, $pagination->limit, $pagination->offset);
+            $products = $productRepository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
 
             $breadcrumbs = [
                 [
@@ -181,16 +202,16 @@ class BrandCatalogController extends AbstractController
             $brandsByGender = $brandRepository->getBrandsByGender($categoryIdsByGender);
 
             $breadcrumbs = [
-        [
-            'title' => $gender,
-            'url' => $this->generateUrl($gender),
+                [
+                    'title' => $gender,
+                    'url' => $this->generateUrl($gender),
 
-        ],
-        [
-            'title' => "All $gender Brands",
-            'url' => "",
-        ],
-    ];
+                ],
+                [
+                    'title' => "All $gender Brands",
+                    'url' => "",
+                ],
+            ];
 
             return $this->render('site/all-brands.html.twig', [
                 'title' => "All $gender brands | ASOS",

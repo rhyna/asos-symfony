@@ -86,18 +86,34 @@ class CategoryCatalogController extends AbstractController
 
             $page = $this->pageDeterminerService->determinePage();
 
-            $whereClauses = [];
+            $select = "p.title, p.price, p.image";
+
+            $join = [
+                [
+                    'clause' => 'p.category',
+                    'alias' => 'c',
+                    'type' => 'join',
+                ],
+            ];
+
+            $where = [];
 
             $order = [];
 
-            $whereClauses[] = "c.id = $categoryId";
+            $where[] = "c.id = $categoryId";
 
             $sizeIds = $request->get('sizes');
 
             if ($sizeIds) {
                 $sizeIds = implode(",", $sizeIds);
 
-                $whereClauses[] = "s.id in ($sizeIds)";
+                $where[] = "s.id in ($sizeIds)";
+
+                $join[] = [
+                    'clause' => 'p.sizes',
+                    'alias' => 's',
+                    'type' => 'join',
+                ];
             }
 
             $brandIds = $request->get('brands');
@@ -105,7 +121,13 @@ class CategoryCatalogController extends AbstractController
             if ($brandIds) {
                 $brandIds = implode(",", $brandIds);
 
-                $whereClauses[] = "b.id in ($brandIds)";
+                $where[] = "b.id in ($brandIds)";
+
+                $join[] = [
+                    'clause' => 'p.brand',
+                    'alias' => 'b',
+                    'type' => 'leftJoin',
+                ];
             }
 
             $sort = $request->get('sort');
@@ -120,11 +142,11 @@ class CategoryCatalogController extends AbstractController
 
             $productRepository = $this->em->getRepository(Product::class);
 
-            $totalProducts = $productRepository->countProductsInList($whereClauses, []);
+            $totalProducts = $productRepository->countProductsInList($join, $where);
 
             $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
-            $products = $productRepository->getProductList($whereClauses, [], $order, $pagination->limit, $pagination->offset);
+            $products = $productRepository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
 
             $breadcrumbs = [
                 [
