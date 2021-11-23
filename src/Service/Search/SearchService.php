@@ -34,4 +34,24 @@ class SearchService
 
         return $result;
     }
+
+    public function normalizeSearchWords(array $searchWordData): array
+    {
+        $normalizedSearchWordData = [];
+
+        foreach ($searchWordData as $item) {
+            $normalizedSearchWordData[] = $this->normalizeString((string)$item);
+        }
+
+        $normalizedSearchWords = [];
+
+        foreach ($normalizedSearchWordData as $arr) {
+            foreach ($arr as $item) {
+                $normalizedSearchWords[] = $item;
+            }
+
+        }
+
+        return array_unique($normalizedSearchWords);
+    }
 }

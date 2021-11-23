@@ -7,9 +7,11 @@ namespace App\Controller\Admin;
 use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Entity\SearchWord;
 use App\Entity\Size;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
+use App\Service\Search\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
@@ -27,16 +29,19 @@ class ProductController extends AbstractController
     private EntityManagerInterface $em;
     private Filesystem $fileSystem;
     private PageDeterminerService $pageDeterminerService;
+    private SearchService $searchService;
 
     public function __construct(PaginationService      $paginationService,
                                 EntityManagerInterface $em,
                                 Filesystem             $fileSystem,
-                                PageDeterminerService  $pageDeterminerService)
+                                PageDeterminerService  $pageDeterminerService,
+                                SearchService          $searchService)
     {
         $this->paginationService = $paginationService;
         $this->em = $em;
         $this->fileSystem = $fileSystem;
         $this->pageDeterminerService = $pageDeterminerService;
+        $this->searchService = $searchService;
     }
 
     /**
@@ -197,6 +202,9 @@ class ProductController extends AbstractController
                 throw new \BadRequestException('No category id provided');
             }
 
+            /**
+             * @var Category $category
+             */
             $category = $this->em->getRepository(Category::class)->find($categoryId);
 
             if (!$category) {
@@ -225,9 +233,13 @@ class ProductController extends AbstractController
 
             $brandId = $request->get('brandId') ? (int)$request->get('brandId') : null;
 
+
             $brand = null;
 
             if ($brandId) {
+                /**
+                 * @var Brand $brand
+                 */
                 $brand = $this->em->getRepository(Brand::class)->find($brandId);
 
                 if (!$brand) {
@@ -275,6 +287,17 @@ class ProductController extends AbstractController
                 }
             }
 
+            $searchWordData = [
+                $title,
+                $category->getTitle(),
+                $category->getParent()->getTitle(),
+                $category->getParent()->getParent()->getTitle(),
+                $details,
+                $brand ? $brand->getTitle() : null,
+            ];
+
+            $normalizedSearchWords = $this->searchService->normalizeSearchWords($searchWordData);
+
             $product = new Product($productCode, $price, $title, $category);
 
             $product->setBrand($brand);
@@ -317,6 +340,18 @@ class ProductController extends AbstractController
 
                     $data['object']->move($data['directory'], $data['uniqueName']);
                 }
+            }
+
+            foreach ($normalizedSearchWords as $word) {
+                $searchWord = $this->em->getRepository(SearchWord::class)->findOneBy(['word' => $word]);
+
+                if (!$searchWord) {
+                    $searchWord = new SearchWord($word);
+                }
+
+                $product->addSearchWord($searchWord);
+
+                $this->em->persist($searchWord);
             }
 
             $this->em->persist($product);
@@ -486,6 +521,17 @@ class ProductController extends AbstractController
 
             $aboutMe = $request->get('aboutMe') ?: null;
 
+            $searchWordData = [
+                $title,
+                $category->getTitle(),
+                $category->getParent()->getTitle(),
+                $category->getParent()->getParent()->getTitle(),
+                $details,
+                $brand ? $brand->getTitle() : null,
+            ];
+
+            $normalizedSearchWords = $this->searchService->normalizeSearchWords($searchWordData);
+
             $imageNames = ['image', 'image1', 'image2', 'image3'];
 
             $imageData = [];
@@ -542,6 +588,20 @@ class ProductController extends AbstractController
 
             foreach ($sizes as $size) {
                 $product->addSize($size);
+            }
+
+            $product->deleteSearchWords();
+
+            foreach ($normalizedSearchWords as $word) {
+                $searchWord = $this->em->getRepository(SearchWord::class)->findOneBy(['word' => $word]);
+
+                if (!$searchWord) {
+                    $searchWord = new SearchWord($word);
+                }
+
+                $product->addSearchWord($searchWord);
+
+                $this->em->persist($searchWord);
             }
 
             foreach ($imageData as $image => $data) {

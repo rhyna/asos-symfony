@@ -242,6 +242,11 @@ class Product
         $this->searchWords->add($searchWord);
     }
 
+    public function deleteSearchWords()
+    {
+        $this->searchWords = new ArrayCollection();
+    }
+
     public function getSizes(): Collection
     {
         return $this->sizes;

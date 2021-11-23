@@ -33,51 +33,29 @@ class ProductRepository extends ServiceEntityRepository
 
     public function getProductList(string $select, array $join, array $where, array $order, int $limit, int $offset): array
     {
-//        $qb = $this->getProductListQB();
-
         $qb = $this->createQueryBuilder('p');
 
         $qb->select("distinct p.id");
 
-        if ($select) {
-            $qb->addSelect($select);
+        $qb->addSelect($select);
 
-//            foreach ($select as $clause) {
-//                $qb->addSelect($clause);
-//            }
-        }
-
-//        $qb->addSelect(
-//            "p.title,
-//            p.productCode,
-//            p.price,
-//            b.id as brandId,
-//            b.title as brandTitle,
-//            c.id as categoryId,
-//            c.title as categoryTitle,
-//            p.image");
-
-        if ($where) {
-            foreach ($where as $i => $clause) {
-                if ($i === 0) {
-                    $qb->where($clause);
-                } else {
-                    $qb->andWhere($clause);
-                }
+        foreach ($where as $i => $clause) {
+            if ($i === 0) {
+                $qb->where($clause);
+            } else {
+                $qb->andWhere($clause);
             }
         }
 
-        if ($join) {
-            foreach ($join as $clause) {
-                if ($clause['type'] === 'join') {
-                    $qb->join($clause['clause'], $clause['alias']);
-                }
-
-                if ($clause['type'] === 'leftJoin') {
-                    $qb->leftJoin($clause['clause'], $clause['alias']);
-                }
-
+        foreach ($join as $clause) {
+            if ($clause['type'] === 'join') {
+                $qb->join($clause['clause'], $clause['alias']);
             }
+
+            if ($clause['type'] === 'leftJoin') {
+                $qb->leftJoin($clause['clause'], $clause['alias']);
+            }
+
         }
 
         if ($order) {
@@ -88,8 +66,6 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->setFirstResult($offset);
 
-        $dd = $qb->getDQL();
-
         return $qb->getQuery()->getResult();
     }
 
@@ -99,11 +75,7 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function countProductsInList(array $join, array $where): int
     {
-//        $qb = $this->getProductListQB();
-
         $qb = $this->createQueryBuilder('p');
-
-//        $qb->select("distinct p.id");
 
         $qb->select('count(distinct p.id)');
 
@@ -111,20 +83,16 @@ class ProductRepository extends ServiceEntityRepository
             $qb->andWhere($clause);
         }
 
-        if ($join) {
-            foreach ($join as $clause) {
-                if ($clause['type'] === 'join') {
-                    $qb->join($clause['clause'], $clause['alias']);
-                }
-
-                if ($clause['type'] === 'leftJoin') {
-                    $qb->leftJoin($clause['clause'], $clause['alias']);
-                }
-
+        foreach ($join as $clause) {
+            if ($clause['type'] === 'join') {
+                $qb->join($clause['clause'], $clause['alias']);
             }
-        }
 
-        $dd = $qb->getDQL();
+            if ($clause['type'] === 'leftJoin') {
+                $qb->leftJoin($clause['clause'], $clause['alias']);
+            }
+
+        }
 
         return (int)$qb->getQuery()->getSingleScalarResult();
     }

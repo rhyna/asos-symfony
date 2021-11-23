@@ -46,16 +46,16 @@
             <div class="entity-list-content">
                 {% for product in products %}
                     <div class="entity-list-item__wrapper">
-                        <div class="entity-list-item">
+                        <div class="entity-list-item" data-id="{{ product.id }}">
                             <div class="row entity-list-item__row">
                                 <div class="col">
                                     <div class="entity-list-item-image"
                                          style="background-image: url('{{ product.image | trim('.') }}')">
-                                        <a href="{{ path('admin.product.edit.form', {'id': product.id}) }}"></a>
+                                        <a href="{{ path('product', { 'id': product.id }) }}"></a>
                                     </div>
                                 </div>
                                 <div class="col-3">
-                                    <a href="/">
+                                    <a href="{{ path('product', { 'id': product.id }) }}">
                                         {{ product.title }}
                                     </a>
                                 </div>
