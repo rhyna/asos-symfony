@@ -104,6 +104,16 @@ class SearchController extends AbstractController
 
         $totalProducts = $productRepository->countProductsInList($join, $where);
 
+        if (!$totalProducts) {
+            return $this->render("site/search-no-result.html.twig", [
+                'title' => "You searched: '$query' | ASOS",
+                'gender' => 'women',
+                'breadcrumbs' => $breadcrumbs,
+                'query' => $query,
+                'error' => 'No products matching the search query',
+            ]);
+        }
+
         $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
         $products = $productRepository->getProductList($select, $join, $where, [], $pagination->limit, $pagination->offset);

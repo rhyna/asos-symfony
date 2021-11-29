@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\SearchWord;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 
@@ -35,5 +36,30 @@ class SearchWordRepository extends ServiceEntityRepository
          }
 
          return $result;
+    }
+
+    public function checkUsedSearchWords(string $searchWordIds, int $productId): array
+    {
+        $qb = $this->createQueryBuilder('sw');
+
+        $qb->select("distinct sw.id");
+
+        $qb->join("sw.products", "swp");
+
+        $qb->where("sw.id in ($searchWordIds)");
+
+        $qb->andWhere("swp.id != $productId");
+
+        return $qb->getQuery()->getScalarResult();
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function deleteUnusedSearchWords(string $unusedSearchWordIds): void
+    {
+        $sql = "delete from search_word sw where sw.id in ($unusedSearchWordIds)";
+
+        $this->_em->getConnection()->executeQuery($sql);
     }
 }

@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace App\Service\Search;
 
+use App\Entity\Product;
+use App\Entity\SearchWord;
+use Doctrine\ORM\EntityManagerInterface;
 use markfullmer\porter2\Porter2;
 
 class SearchService
 {
+    public EntityManagerInterface $em;
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
     public function normalizeString(string $string): array
     {
         $string = str_replace('<', ' <', $string); // adding space before each tag
@@ -53,5 +63,30 @@ class SearchService
         }
 
         return array_unique($normalizedSearchWords);
+    }
+
+    public function findUnusedSearchWordsToDelete(Product $product): array
+    {
+        $currentSearchWords = $product->getSearchWords();
+
+        $currentSearchWordIds = [];
+
+        foreach ($currentSearchWords as $searchWord) {
+            $currentSearchWordIds[] = $searchWord->getId();
+        }
+
+        $searchWordRepository = $this->em->getRepository(SearchWord::class);
+
+        $productId = $product->getId();
+
+        $usedSearchWords = $searchWordRepository->checkUsedSearchWords(implode(',', $currentSearchWordIds), $productId);
+
+        $usedSearchWordIds = [];
+
+        foreach ($usedSearchWords as $searchWord) {
+            $usedSearchWordIds[] = (int)$searchWord['id'];
+        }
+
+        return array_diff($currentSearchWordIds, $usedSearchWordIds);
     }
 }

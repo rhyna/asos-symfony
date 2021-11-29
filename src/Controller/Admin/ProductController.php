@@ -590,10 +590,16 @@ class ProductController extends AbstractController
                 $product->addSize($size);
             }
 
+            $unusedSearchWordIds = $this->searchService->findUnusedSearchWordsToDelete($product);
+
             $product->deleteSearchWords();
 
+            $searchWordRepository = $this->em->getRepository(SearchWord::class);
+
+            $searchWordRepository->deleteUnusedSearchWords(implode(',', $unusedSearchWordIds));
+
             foreach ($normalizedSearchWords as $word) {
-                $searchWord = $this->em->getRepository(SearchWord::class)->findOneBy(['word' => $word]);
+                $searchWord = $searchWordRepository->findOneBy(['word' => $word]);
 
                 if (!$searchWord) {
                     $searchWord = new SearchWord($word);
@@ -699,11 +705,15 @@ class ProductController extends AbstractController
 
             $images = [$image, $image1, $image2, $image3];
 
+            $searchWordsToDelete = $this->searchService->findUnusedSearchWordsToDelete($product);
+
             $this->em->remove($product);
 
             $this->em->flush();
 
             $this->fileSystem->remove($images);
+
+            $this->em->getRepository(SearchWord::class)->deleteUnusedSearchWords(implode(',', $searchWordsToDelete));
 
             return new Response('Successfully deleted the product', 200);
 

@@ -12,11 +12,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class AdminHomePageController extends AbstractController
 {
     /**
-     * @Route("/admin/home", name="admin. home.page")
+     * @Route("/admin", name="admin.")
      */
     public function index(Request $request): Response
     {
-        return $this->render('admin/index.html.twig', [
-        ]);
+        return $this->redirectToRoute('admin.product.list');
     }
 }
