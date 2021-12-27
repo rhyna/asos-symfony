@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Brand;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
+use App\Exception\SystemErrorException;
+use App\Exception\ValidationErrorException;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,7 +37,7 @@ class BrandController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
-     * @throws \SystemErrorException
+     * @throws SystemErrorException
      */
     public function list(Request $request): Response
     {
@@ -144,7 +148,7 @@ class BrandController extends AbstractController
 
         try {
             if (!$id) {
-                throw new \BadRequestException('The id is not provided');
+                throw new BadRequestException('The id is not provided');
             }
 
             $id = (int)$id;
@@ -155,13 +159,13 @@ class BrandController extends AbstractController
             $brand = $this->em->getRepository(Brand::class)->find($id);
 
             if (!$brand) {
-                throw new \NotFoundException('Such a brand does not exist');
+                throw new NotFoundException('Such a brand does not exist');
             }
 
             $productsByBrand = $brand->getProducts();
 
             if ($productsByBrand->count()) {
-                throw new \ValidationErrorException('This brand has product(s). Delete the product(s) first');
+                throw new ValidationErrorException('This brand has product(s). Delete the product(s) first');
             }
 
             $this->em->remove($brand);
@@ -170,13 +174,13 @@ class BrandController extends AbstractController
 
             return new Response('Successfully deleted the brand', 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
-        } catch (\ValidationErrorException $e) {
+        } catch (ValidationErrorException $e) {
             return new Response($e->getMessage(), 422);
 
         } catch (\Throwable $e) {
@@ -193,7 +197,7 @@ class BrandController extends AbstractController
             $title = $request->get('title');
 
             if (!$title) {
-                throw new \BadRequestException('Brand title not provided');
+                throw new BadRequestException('Brand title not provided');
             }
 
             $descriptionWomen = $request->get('descriptionWomen') ?: null;
@@ -217,7 +221,7 @@ class BrandController extends AbstractController
 
             return new Response(json_encode($brandData), 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
         } catch (\Throwable $e) {

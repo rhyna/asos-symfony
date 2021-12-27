@@ -83,4 +83,17 @@ class BrandRepository extends ServiceEntityRepository
 
         return array_unique($fetchedResult, SORT_REGULAR);
     }
+
+    public function getBrandsTitleAndIdByCategory(int $categoryId): array
+    {
+        $qb = $this->createQueryBuilder('br');
+
+        $qb->select("br.id, br.title");
+
+        $qb->join("br.products", "p");
+
+        $qb->where("p.category = $categoryId");
+
+        return $qb->getQuery()->getResult();
+    }
 }

@@ -6,7 +6,6 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 class ProductRepository extends ServiceEntityRepository
@@ -14,21 +13,6 @@ class ProductRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
-    }
-
-    private function getProductListQB(): QueryBuilder
-    {
-        $qb = $this->createQueryBuilder('p');
-
-        $qb->select("distinct p.id");
-
-        $qb->leftJoin("p.brand", "b");
-
-        $qb->join("p.category", "c");
-
-        $qb->join('p.sizes', 's');
-
-        return $qb;
     }
 
     public function getProductList(string $select, array $join, array $where, array $order, int $limit, int $offset): array
@@ -173,26 +157,6 @@ class ProductRepository extends ServiceEntityRepository
         $qb->where("p.id = $productId");
 
         $qb->orderBy('s.sortOrder', 'asc');
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function getProductsBySearchWords(array $searchWordIds): array
-    {
-        $qb = $this->createQueryBuilder('p');
-
-        $qb->select("p.id, p.title, p.image, p.price");
-
-        foreach ($searchWordIds as $i => $id) {
-            $qb->join("p.searchWords", "sw$i");
-
-            if ($i === 0) {
-                $qb->where("sw$i.id = $id");
-
-            } else {
-                $qb->andWhere("sw$i.id = $id");
-            }
-        }
 
         return $qb->getQuery()->getResult();
     }

@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Category;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
+use App\Exception\SystemErrorException;
+use App\Exception\ValidationErrorException;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,7 +41,7 @@ class CategoryController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
-     * @throws \SystemErrorException
+     * @throws SystemErrorException
      */
     public function list(Request $request): Response
     {
@@ -226,7 +230,7 @@ class CategoryController extends AbstractController
 
         try {
             if (!$id) {
-                throw new \BadRequestException('The id is not provided');
+                throw new BadRequestException('The id is not provided');
             }
 
             /**
@@ -235,7 +239,7 @@ class CategoryController extends AbstractController
             $category = $this->em->getRepository(Category::class)->find($id);
 
             if (!$category) {
-                throw new \NotFoundException('Such a category does not exist');
+                throw new NotFoundException('Such a category does not exist');
             }
 
             $categoryImage = $category->getImage();
@@ -243,19 +247,19 @@ class CategoryController extends AbstractController
             $childCategories = $category->getChildren();
 
             if ($childCategories->count()) {
-                throw new \ValidationErrorException('There are child category/ies in this category. Delete the child category/ies first');
+                throw new ValidationErrorException('There are child category/ies in this category. Delete the child category/ies first');
             }
 
             $productsByCategory = $category->getProducts();
 
             if ($productsByCategory->count()) {
-                throw new \ValidationErrorException('There are product(s) in this category. Delete the product(s) first');
+                throw new ValidationErrorException('There are product(s) in this category. Delete the product(s) first');
             }
 
             $sizesByCategory = $category->getSizes();
 
             if ($sizesByCategory->count()) {
-                throw new \ValidationErrorException('There are size(s) in this category. Delete the size(s) first');
+                throw new ValidationErrorException('There are size(s) in this category. Delete the size(s) first');
             }
 
             $this->em->remove($category);
@@ -266,13 +270,13 @@ class CategoryController extends AbstractController
 
             return new Response('Successfully deleted the category', 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
-        } catch (\ValidationErrorException $e) {
+        } catch (ValidationErrorException $e) {
             return new Response($e->getMessage(), 422);
 
         } catch (\Throwable $e) {
@@ -291,13 +295,13 @@ class CategoryController extends AbstractController
             $categoryId = (int)$request->get('id');
 
             if (!$categoryId) {
-                throw new \BadRequestException('No category id provided');
+                throw new BadRequestException('No category id provided');
             }
 
             $category = $repository->find($categoryId);
 
             if (!$category) {
-                throw new \NotFoundException('Such a category does not exist');
+                throw new NotFoundException('Such a category does not exist');
             }
 
             $imageToDelete = $category->getImage();
@@ -310,10 +314,10 @@ class CategoryController extends AbstractController
 
             return new Response();
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {

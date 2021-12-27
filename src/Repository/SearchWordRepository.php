@@ -6,9 +6,7 @@ namespace App\Repository;
 
 use App\Entity\SearchWord;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\ORM\QueryBuilder;
 
 class SearchWordRepository extends ServiceEntityRepository
 {
@@ -29,13 +27,7 @@ class SearchWordRepository extends ServiceEntityRepository
 
          $fetchedResult = $qb->getQuery()->getResult();
 
-         $result = [];
-
-         foreach ($fetchedResult as $item) {
-             $result[] = $item['id'];
-         }
-
-         return $result;
+         return array_column($fetchedResult, 'id');
     }
 
     public function checkUsedSearchWords(string $searchWordIds, int $productId): array
@@ -56,8 +48,10 @@ class SearchWordRepository extends ServiceEntityRepository
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function deleteUnusedSearchWords(string $unusedSearchWordIds): void
+    public function deleteUnusedSearchWords(array $unusedSearchWordIds): void
     {
+        $unusedSearchWordIds = implode(',', $unusedSearchWordIds);
+
         $sql = "delete from search_word sw where sw.id in ($unusedSearchWordIds)";
 
         $this->_em->getConnection()->executeQuery($sql);

@@ -79,7 +79,7 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $config = $this->getCategoryLevels();
 
-        $config = array_map(/**
+        return array_map(/**
          * @throws NonUniqueResultException
          */ function ($root) {
             $productRepository = $this->getEntityManager()->getRepository('App:Product');
@@ -137,8 +137,6 @@ class CategoryRepository extends ServiceEntityRepository
             return $config1;
 
         }, $config);
-
-        return $config;
     }
 
     private function getCategoryListQB(): QueryBuilder
@@ -214,13 +212,7 @@ class CategoryRepository extends ServiceEntityRepository
 
         $fetchedResult = $qb->getQuery()->getResult();
 
-        $result = [];
-
-        foreach ($fetchedResult as $item) {
-            $result[] = $item['id'];
-        }
-
-        return $result;
+        return array_column($fetchedResult, 'id');
     }
 
     public function getRootSubCategoriesByBrand(int $brandId, string $gender): array

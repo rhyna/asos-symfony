@@ -16,7 +16,7 @@ class SizeRepository extends ServiceEntityRepository
         parent::__construct($registry, Size::class);
     }
 
-    private function GetUniqueSizesOfProductsQB(): QueryBuilder
+    private function getUniqueSizesOfProductsQB(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -29,7 +29,7 @@ class SizeRepository extends ServiceEntityRepository
 
     public function getUniqueSizesOfProductsByCategory(int $categoryId): array
     {
-        $qb = $this->GetUniqueSizesOfProductsQB();
+        $qb = $this->getUniqueSizesOfProductsQB();
 
         $qb->join("p.category", "c");
 
@@ -42,7 +42,7 @@ class SizeRepository extends ServiceEntityRepository
 
     public function getUniqueSizesOfProductsByCategoryAndBrand(int $brandId, string $categoryIds): array
     {
-        $qb = $this->GetUniqueSizesOfProductsQB();
+        $qb = $this->getUniqueSizesOfProductsQB();
 
         $qb->join("p.category", "c");
 

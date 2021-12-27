@@ -6,6 +6,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\Category;
 use App\Entity\Size;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +49,7 @@ class SizeController extends AbstractController
             $categoryId = $request->get('categoryId');
 
             if (!$categoryId) {
-                throw new \BadRequestException('No category id provided');
+                throw new BadRequestException('No category id provided');
             }
 
             $categoryId = (int)$categoryId;
@@ -58,7 +60,7 @@ class SizeController extends AbstractController
             $category = $this->em->getRepository(Category::class)->find($categoryId);
 
             if (!$category) {
-                throw new \NotFoundException('Such a category does not exist');
+                throw new NotFoundException('Such a category does not exist');
             }
 
             $sizesByCategoryOrderedBySort = $category->getSizesOrderedBySort();
@@ -78,10 +80,10 @@ class SizeController extends AbstractController
 
             return new Response(json_encode($sizesData), 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {
@@ -102,13 +104,13 @@ class SizeController extends AbstractController
             $sizeTitle = $request->get('size');
 
             if (!$sizeTitle) {
-                throw new \BadRequestException('No size title provided');
+                throw new BadRequestException('No size title provided');
             }
 
             $categoryId = $request->get('categoryId');
 
             if (!$categoryId) {
-                throw new \BadRequestException('No category id provided');
+                throw new BadRequestException('No category id provided');
             }
 
             $categoryId = (int)$categoryId;
@@ -116,13 +118,13 @@ class SizeController extends AbstractController
             $category = $this->em->getRepository(Category::class)->find($categoryId);
 
             if (!$category) {
-                throw new \NotFoundException('Such a category does not exist');
+                throw new NotFoundException('Such a category does not exist');
             }
 
             $sortOrder = $request->get('sortOrder');
 
             if (!isset($sortOrder)) {
-                throw new \BadRequestException('No sorting number field provided in the request');
+                throw new BadRequestException('No sorting number field provided in the request');
             }
 
             $sortOrder = (int)$sortOrder;
@@ -193,10 +195,10 @@ class SizeController extends AbstractController
 
             return new Response(json_encode($sizeData), 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {
@@ -217,13 +219,13 @@ class SizeController extends AbstractController
             $sizeTitle = $request->get('sizeTitle');
 
             if (!$sizeTitle) {
-                throw new \BadRequestException('No size title provided');
+                throw new BadRequestException('No size title provided');
             }
 
             $sizeId = $request->get('sizeId');
 
             if (!$sizeId) {
-                throw new \BadRequestException('No size id provided');
+                throw new BadRequestException('No size id provided');
             }
 
             $sizeId = (int)$sizeId;
@@ -231,7 +233,7 @@ class SizeController extends AbstractController
             $sortOrder = $request->get('sortOrder');
 
             if (!isset($sortOrder)) {
-                throw new \BadRequestException('No sorting number field provided in the request');
+                throw new BadRequestException('No sorting number field provided in the request');
             }
 
             $sortOrder = (int)$sortOrder;
@@ -246,7 +248,7 @@ class SizeController extends AbstractController
             $currentSize = $this->em->getRepository(Size::class)->find($sizeId);
 
             if (!$currentSize) {
-                throw new \NotFoundException('Such a size does not exist');
+                throw new NotFoundException('Such a size does not exist');
             }
 
             /**
@@ -300,10 +302,10 @@ class SizeController extends AbstractController
 
             return new Response(json_encode($currentSizeData), 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {
@@ -320,13 +322,13 @@ class SizeController extends AbstractController
             $id = (int)$request->get('id');
 
             if (!$id) {
-                throw new \BadRequestException('The id is not provided');
+                throw new BadRequestException('The id is not provided');
             }
 
             $categoryId = (int)$request->get('categoryId');
 
             if (!$categoryId) {
-                throw new \BadRequestException('The category id is not provided');
+                throw new BadRequestException('The category id is not provided');
             }
 
             /**
@@ -335,7 +337,7 @@ class SizeController extends AbstractController
             $size = $this->em->getRepository(Size::class)->find($id);
 
             if (!$size) {
-                throw new \NotFoundException('Such a size does not exist');
+                throw new NotFoundException('Such a size does not exist');
             }
 
             $sizeCategories = $size->getCategories();
@@ -346,7 +348,7 @@ class SizeController extends AbstractController
             $currentCategory = $this->em->getRepository(Category::class)->find($categoryId);
 
             if (!$currentCategory) {
-                throw new \NotFoundException('Such a category does not exist');
+                throw new NotFoundException('Such a category does not exist');
             }
 
             $currentCategorySizes = $currentCategory->getSizes();
@@ -365,10 +367,10 @@ class SizeController extends AbstractController
 
             return new Response('Successfully deleted the size', 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {

@@ -15,7 +15,7 @@ class BannerService
 
             if ($isHotCategorySmall !== false) {
                 $hotCategorySmallBanners[$banner['alias']] = $banner;
-            };
+            }
         }
 
         return $hotCategorySmallBanners;
@@ -30,7 +30,7 @@ class BannerService
 
             if ($isHotCategoryBig !== false) {
                 $hotCategoryBigBanners[$banner['alias']] = $banner;
-            };
+            }
         }
 
         return $hotCategoryBigBanners;
@@ -45,7 +45,7 @@ class BannerService
 
             if ($isTrendingBrand !== false) {
                 $trendingBrands[$banner['alias']] = $banner;
-            };
+            }
         }
 
         return $trendingBrands;

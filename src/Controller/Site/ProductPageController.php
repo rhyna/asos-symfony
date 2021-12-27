@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller\Site;
 
 use App\Entity\Product;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +31,7 @@ class ProductPageController extends AbstractController
             $id = (int)$request->get('id');
 
             if (!$id) {
-                throw new \BadRequestException('No id provided');
+                throw new BadRequestException('No id provided');
             }
 
             /**
@@ -38,10 +40,8 @@ class ProductPageController extends AbstractController
             $product = $this->em->getRepository(Product::class)->find($id);
 
             if (!$product) {
-                throw new \NotFoundException('No product found');
+                throw new NotFoundException('No product found');
             }
-
-            $sizes = $product->getSizes();
 
             $isRootMen = $product->getCategory()->getParent()->getParent()->isRootMenCategory();
 
@@ -112,10 +112,10 @@ class ProductPageController extends AbstractController
                 'gender' => $gender,
             ]);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {

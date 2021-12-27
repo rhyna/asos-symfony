@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller\Site;
 
+use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Size;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,7 +42,7 @@ class CategoryCatalogController extends AbstractController
             $categoryId = (int)$request->get('id');
 
             if (!$categoryId) {
-                throw new \BadRequestException('No id provided');
+                throw new BadRequestException('No id provided');
             }
 
             $gender = $request->get('gender');
@@ -50,37 +53,14 @@ class CategoryCatalogController extends AbstractController
             $category = $this->em->getRepository(Category::class)->find($categoryId);
 
             if (!$category) {
-                throw new \NotFoundException('No category found');
+                throw new NotFoundException('No category found');
             }
 
             $categoryTitle = $category->getTitle();
 
             $categoryDescription = $category->getDescription();
 
-            $productsByCategory = $category->getProducts();
-
-            $brandConfig = [];
-
-            /**
-             * @var Product $product
-             */
-            foreach ($productsByCategory as $product) {
-                $brandData = [];
-
-                $brand = $product->getBrand();
-
-                if ($brand) {
-                    $brandId = $product->getBrand()->getId();
-
-                    $brandTitle = $product->getBrand()->getTitle();
-
-                    $brandData['id'] = $brandId;
-
-                    $brandData['title'] = $brandTitle;
-
-                    $brandConfig[] = $brandData;
-                }
-            }
+            $brandConfig = $this->em->getRepository(Brand::class)->getBrandsTitleAndIdByCategory($categoryId);
 
             $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategory($categoryId);
 
@@ -174,10 +154,10 @@ class CategoryCatalogController extends AbstractController
                 'breadcrumbs' => $breadcrumbs,
             ]);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {

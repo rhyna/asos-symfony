@@ -18,10 +18,9 @@
                     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                         <div class="catalog-item">
                             <a href="{{ path('product', { id: product['id'] }) }}">
-
                                 {% if product['image'] %}
                                     <div class="catalog-item-image"
-                                         style="background-image: url({{ product['image'] }})">
+                                         style="background-image: url({{ product['image'] | trim('.') }})">
                                     </div>
                                 {% else %}
                                     <div class="catalog-item-image catalog-item-image--noimage">

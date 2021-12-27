@@ -27,12 +27,12 @@ class Category
     private string $title;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="children", fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="children")
      */
     private ?Category $parent;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Category", mappedBy="parent", fetch="EAGER")
+     * @ORM\OneToMany(targetEntity="App\Entity\Category", mappedBy="parent")
      */
     private Collection $children;
 
@@ -57,12 +57,12 @@ class Category
     private bool $rootWomenCategory = false;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="categories", fetch="EAGER")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Size", inversedBy="categories")
      */
     private Collection $sizes;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="category", fetch="EAGER")
+     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="category")
      */
     private Collection $products;
 

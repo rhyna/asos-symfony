@@ -6,6 +6,7 @@ namespace App\Controller\Site;
 
 use App\Entity\Product;
 use App\Entity\SearchWord;
+use App\Exception\SystemErrorException;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationDto;
 use App\Service\Pagination\PaginationService;
@@ -36,7 +37,7 @@ class SearchController extends AbstractController
 
     /**
      * @Route("/search", name="search")
-     * @throws \SystemErrorException
+     * @throws SystemErrorException
      */
     public function search(Request $request): Response
     {

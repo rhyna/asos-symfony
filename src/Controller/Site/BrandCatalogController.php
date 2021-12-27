@@ -8,6 +8,7 @@ use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Size;
+use App\Exception\NotFoundException;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,7 +46,7 @@ class BrandCatalogController extends AbstractController
             $brand = $this->em->getRepository(Brand::class)->find($id);
 
             if (!$brand) {
-                throw new \NotFoundException('No brand found');
+                throw new NotFoundException('No brand found');
             }
 
             $description = '';
@@ -175,7 +176,7 @@ class BrandCatalogController extends AbstractController
                 'breadcrumbs' => $breadcrumbs,
             ]);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {

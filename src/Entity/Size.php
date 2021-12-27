@@ -37,13 +37,13 @@ class Size
     private ?int $sortOrder = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Category", mappedBy="sizes", fetch="EAGER")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Category", mappedBy="sizes")
      * @ORM\JoinColumn(onDelete="RESTRICT")
      */
     private Collection $categories;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Product", mappedBy="sizes", fetch="EAGER")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Product", mappedBy="sizes")
      */
     private Collection $products;
 

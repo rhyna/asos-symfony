@@ -4,10 +4,21 @@ declare(strict_types=1);
 
 namespace App\Service\Pagination;
 
+use App\Exception\SystemErrorException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+
 class PaginationService
 {
+    private Request $request;
+
+    public function __construct(RequestStack $requestStack)
+    {
+        $this->request = $requestStack->getCurrentRequest();
+    }
+
     /**
-     * @throws \SystemErrorException
+     * @throws SystemErrorException
      */
     public function calculate(int $page, int $itemsPerPage, int $totalItems): PaginationDto
     {
@@ -25,7 +36,7 @@ class PaginationService
         $totalPages = ceil($totalItems / $itemsPerPage);
 
         if ($totalPages === false) {
-            throw new \SystemErrorException();
+            throw new SystemErrorException();
         }
 
         $dto->totalPages = (int)$totalPages;
@@ -49,32 +60,24 @@ class PaginationService
     {
         $token = '&';
 
-        $data = parse_url($_SERVER['REQUEST_URI']);
+        $query = $this->request->query->all();
 
-        $path = $data['path'];
+        $baseUrl = $query['_url'];
 
-        $query = '';
+        unset($query['_url']);
 
-        if (isset($data['query'])) {
-            $query = $data['query'];
-        }
-
-        parse_str($query, $queryArray);
-
-        $onlyPageQuery = count($queryArray) === 1 && array_key_exists('page', $queryArray);
+        $onlyPageQuery = count($query) === 1 && array_key_exists('page', $query);
 
         if (!$query || $onlyPageQuery) {
             $token = '?';
         }
 
-        unset($queryArray['page']);
+        unset($query['page']);
 
-        $newQuery = http_build_query($queryArray);
-
-        $baseUrl = $path;
+        $newQuery = http_build_query($query);
 
         if ($newQuery) {
-            $baseUrl = $path . '?' . $newQuery;
+            $baseUrl .= '?' . $newQuery;
         }
 
         $dto->token = $token;

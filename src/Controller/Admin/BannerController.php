@@ -6,6 +6,9 @@ namespace App\Controller\Admin;
 
 use App\Entity\Banner;
 use App\Entity\BannerPlace;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
+use App\Exception\SystemErrorException;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,7 +42,7 @@ class BannerController extends AbstractController
 
     /**
      * @Route(path="/", methods={"GET"}, name="list")
-     * @throws \SystemErrorException
+     * @throws SystemErrorException
      */
     public function list(Request $request): Response
     {
@@ -231,7 +234,7 @@ class BannerController extends AbstractController
 
         try {
             if (!$id) {
-                throw new \BadRequestException('The id is not provided');
+                throw new BadRequestException('The id is not provided');
             }
 
             $id = (int)$id;
@@ -239,7 +242,7 @@ class BannerController extends AbstractController
             $banner = $this->em->getRepository(Banner::class)->find($id);
 
             if (!$banner) {
-                throw new \NotFoundException('Such a banner does not exist');
+                throw new NotFoundException('Such a banner does not exist');
             }
 
             $bannerImage = $banner->getImage();
@@ -252,10 +255,10 @@ class BannerController extends AbstractController
 
             return new Response('Successfully deleted the banner', 200);
 
-        } catch (\BadRequestException $e) {
+        } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
 
-        } catch (\NotFoundException $e) {
+        } catch (NotFoundException $e) {
             return new Response($e->getMessage(), 404);
 
         } catch (\Throwable $e) {
