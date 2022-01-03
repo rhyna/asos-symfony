@@ -192,6 +192,61 @@ class BannerController extends AbstractController
     }
 
     /**
+     * requirements в параметрах ниже - это валидация параметров зашитых в урле. \d+ означает, что мы ожидаем
+     * число (\d) и оно должно быть длиной больше нуля символов (+)
+     * @Route(path="/edit-symfony-form/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit-symfony-form")
+     */
+    public function editSymfonyFormAction(Request $request): Response
+    {
+        /** @var Banner $banner */
+        $banner = $this->em->getRepository(Banner::class)->find($request->get('id'));
+        if (!$banner) {
+            throw new NotFoundException('banner is not found');
+        }
+
+        $dto = new BannerDto();
+        $dto->bannerPlace = $banner->getBannerPlace();
+        $dto->link = $banner->getLink();
+        $dto->title = $banner->getTitle();
+        $dto->description = $banner->getDescription();
+        $dto->buttonLabel = $banner->getButtonLabel();
+
+        $form = $this->createForm(BannerAddFormType::class, $dto);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderForm('admin/banner/symfony-form.html.twig', [
+                'bannerImage' => $banner->getImage(),
+                'form' => $form,
+                'title' => 'Add Banner',
+            ]);
+        }
+
+        // переливание данных из дто в ентити
+
+        if ($dto->image) {
+            $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
+            $imageDirectory = './upload/banner/';
+            $imageDestination = $imageDirectory . $imageUniqueName;
+            $dto->image->move($imageDirectory, $imageUniqueName);
+
+            $this->fileSystem->remove($banner->getImage());
+        }
+
+        $banner->setTitle($dto->title);
+        $banner->setDescription($dto->description);
+        $banner->setButtonLabel($dto->buttonLabel);
+        $banner->setBannerPlace($dto->bannerPlace);
+        if (isset($imageDestination)) {
+            $banner->setImage($imageDestination);
+        }
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin.banner.list');
+    }
+
+    /**
      * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
      */
     public function editForm(Request $request): Response

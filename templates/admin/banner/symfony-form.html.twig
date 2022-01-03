@@ -10,9 +10,9 @@
         {{ form_row(form._token) }}
         <div class="form-image">
             <div class="form-group">
-                {% if banner is defined %}
+                {% if bannerImage is defined %}
                     <div class="entity-form-image entity-form-image--banner"
-                         style='background-image: url("{{ banner.image | trim('.') }}")'>
+                         style='background-image: url("{{ bannerImage | trim('.') }}")'>
                     </div>
                 {% endif %}
                 {{ form_widget(form.image, {'attr': {'class': 'form-control-file'}}) }}
