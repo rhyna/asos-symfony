@@ -9,6 +9,8 @@ use App\Entity\BannerPlace;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\SystemErrorException;
+use App\Form\BannerAddForm\BannerAddFormType;
+use App\Form\BannerAddForm\BannerDto;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -129,6 +131,62 @@ class BannerController extends AbstractController
         $this->em->flush();
 
         $image->move($imageDirectory, $imageUniqueName);
+
+        return $this->redirectToRoute('admin.banner.list');
+    }
+
+    /**
+     * @Route(path="/add-symfony-form", methods={"GET", "POST"}, name="add-symfony-form")
+     */
+    public function addSymfonyFormAction(Request $request): Response
+    {
+        // теперь в реквесте все отрисованные спец функциями поля будут иметь имена banner_add_form[НАЗВАНИЕ ПОЛЯ]
+
+        // создание объекта для наполнения
+        // объект можно наполнить прямо тут, если это форма редактирования
+        $dto = new BannerDto();
+        // создание формы из конфигурации
+        $form = $this->createForm(BannerAddFormType::class, $dto);
+        // проверка:
+        // - была ли отправлена форма вообще. Это проверяется, если в request есть поля формы с именами вроде banner_add_form[НАЗВАНИЕ ПОЛЯ]
+        // - валидации
+        // - наполняется дто
+        $form->handleRequest($request);
+
+        // проверка, была ли форма отправлена или это отрисовка формы
+        if (!$form->isSubmitted()) {
+            return $this->renderForm('admin/banner/symfony-form.html.twig', [
+                'form' => $form,
+                'title' => 'Add Banner',
+            ]);
+        }
+
+        // провера валидности формы
+        if (!$form->isValid()) {
+            // отрисовка ошибок
+            return $this->renderForm('admin/banner/symfony-form.html.twig', [
+                'form' => $form,
+                'title' => 'Add Banner',
+            ]);
+        }
+
+        // переливание данных из дто в ентити
+
+        $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
+        $imageDirectory = './upload/banner/';
+        $imageDestination = $imageDirectory . $imageUniqueName;
+
+        $banner = new Banner($imageDestination, $dto->link);
+        $banner->setTitle($dto->title);
+        $banner->setDescription($dto->description);
+        $banner->setButtonLabel($dto->buttonLabel);
+        $banner->setBannerPlace($dto->bannerPlace); // тут уже будет энтити, а не айди
+
+        // запись в БД
+        $this->em->persist($banner);
+        $this->em->flush();
+
+        $dto->image->move($imageDirectory, $imageUniqueName);
 
         return $this->redirectToRoute('admin.banner.list');
     }
