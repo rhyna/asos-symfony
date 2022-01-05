@@ -1,0 +1,30 @@
+{% extends '/admin/base.html.twig' %}
+
+{% block body %}
+    <div class="admin-title">{{ title }}</div>
+    <form action="" method="post" enctype="multipart/form-data" id="brandForm" class="entity-form">
+        {{ form_row(form._token) }}
+        <div class="form-group">
+            {{ form_label(form['title']) }}
+            {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">
+                {{ form_errors(form.title) }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form_label(form.descriptionWomen) }}
+            {{ form_widget(form.descriptionWomen, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+            <div class="form-error">
+                {{ form_errors(form.descriptionWomen) }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form_label(form.descriptionMen) }}
+            {{ form_widget(form.descriptionMen, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+            <div class="form-error">
+                {{ form_errors(form.descriptionMen) }}
+            </div>
+        </div>
+        <button type="submit" class="entity-form-submit">Submit</button>
+    </form>
+{% endblock %}

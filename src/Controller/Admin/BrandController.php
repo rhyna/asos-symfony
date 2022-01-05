@@ -9,6 +9,8 @@ use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\SystemErrorException;
 use App\Exception\ValidationErrorException;
+use App\Form\BrandForm\BrandFormType;
+use App\Form\BrandForm\BrandDto;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -95,6 +97,82 @@ class BrandController extends AbstractController
 
         return $this->redirectToRoute('admin.brand.list');
 
+    }
+
+    /**
+     * @Route(path="/add-symfony-form", methods={"GET", "POST"}, name="add-symfony-form")
+     */
+    public function addSymfonyFormAction(Request $request): Response
+    {
+        $dto = new BrandDto();
+
+        $form = $this->createForm(BrandFormType::class, $dto);
+
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderForm('admin/brand/symfony-form.html.twig', [
+                'form' => $form,
+                'title' => 'Add Brand',
+            ]);
+        }
+
+        $brand = new Brand($dto->title);
+
+        $brand->setDescriptionWomen($dto->descriptionWomen);
+
+        $brand->setDescriptionMen($dto->descriptionMen);
+
+        $this->em->persist($brand);
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin.brand.list');
+    }
+
+    /**
+     * @Route(path="/edit-symfony-form/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit-symfony-form")
+     * @throws NotFoundException
+     */
+    public function editSymfonyFormAction(Request $request): Response
+    {
+        $id = $request->get('id');
+
+        /** @var Brand $brand */
+        $brand = $this->em->getRepository(Brand::class)->find($id);
+
+        if (!$brand) {
+            throw new NotFoundException('Brand not found');
+        }
+
+        $dto = new BrandDto();
+
+        $dto->title = $brand->getTitle();
+
+        $dto->descriptionMen = $brand->getDescriptionMen();
+
+        $dto->descriptionWomen = $brand->getDescriptionWomen();
+
+        $form = $this->createForm(BrandFormType::class, $dto);
+
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderForm('admin/brand/symfony-form.html.twig', [
+                'form' => $form,
+                'title' => 'Edit Brand',
+            ]);
+        }
+
+        $brand->setTitle($dto->title);
+
+        $brand->setDescriptionWomen($dto->descriptionWomen);
+
+        $brand->setDescriptionMen($dto->descriptionMen);
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin.brand.list');
     }
 
     /**

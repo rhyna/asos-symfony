@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Form\BannerAddForm;
+namespace App\Form\BannerForm;
 
 use App\Entity\BannerPlace;
 use Symfony\Component\HttpFoundation\File\UploadedFile;

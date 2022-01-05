@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Form\BannerAddForm;
+namespace App\Form\BannerForm;
 
 use App\Entity\BannerPlace;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Url;
 
-class BannerAddFormType extends AbstractType
+class BannerFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -51,7 +51,7 @@ class BannerAddFormType extends AbstractType
             'label' => 'Link',
             'constraints' => [
                 new NotNull(),
-                new Url(),
+                //new Url(),
             ]
         ]);
         $builder->add('title', TextType::class, [

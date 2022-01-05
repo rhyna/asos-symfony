@@ -9,8 +9,8 @@ use App\Entity\BannerPlace;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\SystemErrorException;
-use App\Form\BannerAddForm\BannerAddFormType;
-use App\Form\BannerAddForm\BannerDto;
+use App\Form\BannerForm\BannerFormType;
+use App\Form\BannerForm\BannerDto;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -146,7 +146,7 @@ class BannerController extends AbstractController
         // объект можно наполнить прямо тут, если это форма редактирования
         $dto = new BannerDto();
         // создание формы из конфигурации
-        $form = $this->createForm(BannerAddFormType::class, $dto);
+        $form = $this->createForm(BannerFormType::class, $dto);
         // проверка:
         // - была ли отправлена форма вообще. Это проверяется, если в request есть поля формы с именами вроде banner_add_form[НАЗВАНИЕ ПОЛЯ]
         // - валидации
@@ -195,6 +195,7 @@ class BannerController extends AbstractController
      * requirements в параметрах ниже - это валидация параметров зашитых в урле. \d+ означает, что мы ожидаем
      * число (\d) и оно должно быть длиной больше нуля символов (+)
      * @Route(path="/edit-symfony-form/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit-symfony-form")
+     * @throws NotFoundException
      */
     public function editSymfonyFormAction(Request $request): Response
     {
@@ -211,7 +212,7 @@ class BannerController extends AbstractController
         $dto->description = $banner->getDescription();
         $dto->buttonLabel = $banner->getButtonLabel();
 
-        $form = $this->createForm(BannerAddFormType::class, $dto);
+        $form = $this->createForm(BannerFormType::class, $dto);
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
@@ -234,6 +235,7 @@ class BannerController extends AbstractController
         }
 
         $banner->setTitle($dto->title);
+        $banner->setLink($dto->link);
         $banner->setDescription($dto->description);
         $banner->setButtonLabel($dto->buttonLabel);
         $banner->setBannerPlace($dto->bannerPlace);
