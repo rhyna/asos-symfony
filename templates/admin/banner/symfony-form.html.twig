@@ -1,10 +1,6 @@
 {% extends '/admin/base.html.twig' %}
 
 {% block body %}
-    {#
-        части полей рисуем с помощью специальных функций
-        https://symfony.com/doc/current/form/form_customization.html#form-rendering-functions
-    #}
     <div class="admin-title">{{ title }}</div>
     <form action="" method="post" enctype="multipart/form-data" id="bannerForm" class="entity-form">
         {{ form_row(form._token) }}

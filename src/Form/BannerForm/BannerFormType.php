@@ -6,11 +6,13 @@ namespace App\Form\BannerForm;
 
 use App\Entity\BannerPlace;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\Length;
@@ -21,58 +23,85 @@ class BannerFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        // спец штуки для загрузки файлов https://symfonycasts.com/screencast/symfony-uploads
-        $builder->add('image', FileType::class, [
-            'required' => true,
-            'constraints' => [
-                new NotNull(), // todo решить c image required, если у баннера уже есть id и картинка
-                new Image([
-                    'minWidth' => 200,
-                ]),
-                new File([
-                    'maxSize' => '20M',
-                ]),
-            ]
-        ]);
-        // оно само подсосет из репозитория BannerPlace все баннерплейсы
-        // если нужны не все, то можно тут написать специальный запрос
+        if ($options['banner']) {
+            $builder->add('image', FileType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Image([
+                        'mimeTypes' => [
+                            'image/*'
+                        ],
+                    ]),
+                    new File([
+                        'maxSize' => '20M',
+                    ]),
+                ]
+            ]);
+        } else {
+            $builder->add('image', FileType::class, [
+                'required' => true,
+                'constraints' => [
+                    new NotNull(),
+                    new Image([
+                        'mimeTypes' => [
+                            'image/*'
+                        ],
+                    ]),
+                    new File([
+                        'maxSize' => '20M',
+                    ]),
+                ]
+            ]);
+        }
+
         $builder->add('banner-place', EntityType::class, [
             'label' => 'Banner place',
-            'required'   => false, // чтобы отрисовать плейсхолдер
+            'required' => false,
             'placeholder' => 'NO PLACE (Banner not posted yet)',
             'property_path' => 'bannerPlace',
             'class' => BannerPlace::class,
             'choice_label' => 'title', // название поле в BannerPlace для отображения в селекте
             'constraints' => [
-
+                new UniqueEntity([
+                    'entityClass' => BannerPlace::class,
+                    'fields' => 'id',
+                ]),
             ]
         ]);
         $builder->add('link', TextType::class, [
+            'required' => true,
             'label' => 'Link',
             'constraints' => [
                 new NotNull(),
-                //new Url(),
             ]
         ]);
         $builder->add('title', TextType::class, [
+            'required' => false,
             'label' => 'Title',
             'constraints' => [
-                new NotNull(),
-                new Length(null, 3, 10),
             ]
         ]);
         $builder->add('description', TextareaType::class, [
+            'required' => false,
             'label' => 'Description',
             'constraints' => [
-                new NotNull(),
-                new Length(null, 3, 10),
             ]
         ]);
         $builder->add('button-label', TextType::class, [
+            'required' => false,
+            'label' => 'Button label',
             'property_path' => 'buttonLabel',
             'constraints' => [
-                new NotNull(),
             ]
         ]);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'banner' => null,
+        ]);
+
+        parent::configureOptions($resolver);
     }
 }

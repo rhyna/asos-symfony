@@ -8,6 +8,7 @@ use App\Entity\Category;
 use App\Entity\Size;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
+use App\Exception\ValidationErrorException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -351,6 +352,12 @@ class SizeController extends AbstractController
                 throw new NotFoundException('Such a category does not exist');
             }
 
+            $productsExist = $this->em->getRepository(Size::class)->checkProductsBySizeAndCategoryIds($id, $categoryId);
+
+            if ($productsExist) {
+                throw new ValidationErrorException('The size has associated product(s) in this category. Delete the products first');
+            }
+
             $currentCategorySizes = $currentCategory->getSizes();
 
             if ($sizeCategories->contains($currentCategory)) {
@@ -362,8 +369,6 @@ class SizeController extends AbstractController
             }
 
             $this->em->flush();
-
-            // сделать проверку на то, есть ли товары с таким размером в этой категории
 
             return new Response('Successfully deleted the size', 200);
 

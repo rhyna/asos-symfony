@@ -343,6 +343,29 @@ class ProductController extends AbstractController
         }
     }
 
+     private function validateProductImage(array $image): bool
+    {
+        $extensions = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+
+        $errorMessages = [];
+
+        $imageErrors = [];
+
+        if ($image['size'] > 1000000) {
+            $errorMessages[] = 'A file size can be 1 Mb max';
+        }
+
+        if (!in_array($image['type'], $extensions)) {
+            $errorMessages[] = 'The file is not an image. Eligible extensions: png, jpeg, jpg, gif';
+        }
+
+        if ($errorMessages) {
+            $imageErrors[$image['name']] = $errorMessages;
+        }
+
+        return $imageErrors ? false : true;
+    }
+
     /**
      * @throws NotFoundException
      */

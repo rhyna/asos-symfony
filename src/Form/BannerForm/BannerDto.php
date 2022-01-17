@@ -7,16 +7,12 @@ namespace App\Form\BannerForm;
 use App\Entity\BannerPlace;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-/**
- * Специальная сущность, которая будет хранить в себе данные формы
- * Она используется для наполнения данными из POST-запроса
- */
 class BannerDto
 {
     /**
      * @var UploadedFile|null
      */
-    public $image = null;
+    public  $image = null;
     /**
      * @var BannerPlace|null
      */

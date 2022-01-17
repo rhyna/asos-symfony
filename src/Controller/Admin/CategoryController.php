@@ -9,6 +9,8 @@ use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\SystemErrorException;
 use App\Exception\ValidationErrorException;
+use App\Form\CategoryForm\CategoryDto;
+use App\Form\CategoryForm\CategoryFormType;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -148,6 +150,119 @@ class CategoryController extends AbstractController
         }
 
         return $this->redirectToRoute('admin.category.list');
+    }
+
+    /**
+     * @Route(path="/add-symfony-form", methods={"GET", "POST"}, name="add-symfony-form")
+     */
+    public function addSymfonyFormAction(Request $request): Response
+    {
+        $dto = new CategoryDto();
+
+        $form = $this->createForm(CategoryFormType::class, $dto);
+
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderForm('admin/category/symfony-form.html.twig', [
+                'form' => $form,
+                'title' => 'Add Category',
+            ]);
+        }
+
+        $category = new Category($dto->title, $dto->parentCategory);
+
+        $imageDestination = null;
+
+        $imageDirectory = '';
+
+        $imageUniqueName = '';
+
+        if ($dto->image) {
+            $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
+
+            $imageDirectory = './upload/category/';
+
+            $imageDestination = $imageDirectory . $imageUniqueName;
+        }
+
+        $category->setImage($imageDestination);
+
+        $category->setDescription($dto->description);
+
+        $this->em->persist($category);
+
+        $this->em->flush();
+
+        if ($dto->image) {
+            $dto->image->move($imageDirectory, $imageUniqueName);
+        }
+
+        return $this->redirectToRoute('admin.category.list');
+    }
+
+    /**
+     * @Route(path="/edit-symfony-form/{id}", methods={"GET", "POST"}, name="edit-symfony-form")
+     * @throws NotFoundException
+     */
+    public function editSymfonyFormAction(Request $request): Response
+    {
+        /**
+         * @var Category $category
+         */
+        $category = $this->em->getRepository(Category::class)->find($request->get('id'));
+
+        if (!$category) {
+            throw new NotFoundException('Category not found');
+        }
+
+        $dto = new CategoryDto();
+
+        $dto->title = $category->getTitle();
+
+        $dto->description = $category->getDescription();
+
+        $dto->parentCategory = $category->getParent();
+
+        $form = $this->createForm(CategoryFormType::class, $dto);
+
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->renderForm('admin/category/symfony-form.html.twig', [
+                'form' => $form,
+                'title' => 'Edit Category',
+                'category' => $category,
+            ]);
+        }
+
+        $category->setTitle($dto->title);
+
+        $category->setDescription($dto->description);
+
+        $category->setParent($dto->parentCategory);
+
+        if ($dto->image) {
+            $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
+
+            $imageDirectory = './upload/category/';
+
+            $imageDestination = $imageDirectory . $imageUniqueName;
+
+            $previousImage = $category->getImage();
+
+            $category->setImage($imageDestination);
+
+            $dto->image->move($imageDirectory, $imageUniqueName);
+
+            if ($previousImage) {
+                $this->fileSystem->remove($previousImage);
+            }
+        }
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin.category.edit-symfony-form', ['id' => $category->getId()]);
     }
 
     /**

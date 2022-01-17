@@ -140,20 +140,12 @@ class BannerController extends AbstractController
      */
     public function addSymfonyFormAction(Request $request): Response
     {
-        // теперь в реквесте все отрисованные спец функциями поля будут иметь имена banner_add_form[НАЗВАНИЕ ПОЛЯ]
-
-        // создание объекта для наполнения
-        // объект можно наполнить прямо тут, если это форма редактирования
         $dto = new BannerDto();
-        // создание формы из конфигурации
+
         $form = $this->createForm(BannerFormType::class, $dto);
-        // проверка:
-        // - была ли отправлена форма вообще. Это проверяется, если в request есть поля формы с именами вроде banner_add_form[НАЗВАНИЕ ПОЛЯ]
-        // - валидации
-        // - наполняется дто
+
         $form->handleRequest($request);
 
-        // проверка, была ли форма отправлена или это отрисовка формы
         if (!$form->isSubmitted()) {
             return $this->renderForm('admin/banner/symfony-form.html.twig', [
                 'form' => $form,
@@ -161,29 +153,31 @@ class BannerController extends AbstractController
             ]);
         }
 
-        // провера валидности формы
         if (!$form->isValid()) {
-            // отрисовка ошибок
             return $this->renderForm('admin/banner/symfony-form.html.twig', [
                 'form' => $form,
                 'title' => 'Add Banner',
             ]);
         }
 
-        // переливание данных из дто в ентити
-
         $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
+
         $imageDirectory = './upload/banner/';
+
         $imageDestination = $imageDirectory . $imageUniqueName;
 
         $banner = new Banner($imageDestination, $dto->link);
-        $banner->setTitle($dto->title);
-        $banner->setDescription($dto->description);
-        $banner->setButtonLabel($dto->buttonLabel);
-        $banner->setBannerPlace($dto->bannerPlace); // тут уже будет энтити, а не айди
 
-        // запись в БД
+        $banner->setTitle($dto->title);
+
+        $banner->setDescription($dto->description);
+
+        $banner->setButtonLabel($dto->buttonLabel);
+
+        $banner->setBannerPlace($dto->bannerPlace);
+
         $this->em->persist($banner);
+
         $this->em->flush();
 
         $dto->image->move($imageDirectory, $imageUniqueName);
@@ -201,44 +195,57 @@ class BannerController extends AbstractController
     {
         /** @var Banner $banner */
         $banner = $this->em->getRepository(Banner::class)->find($request->get('id'));
+
         if (!$banner) {
             throw new NotFoundException('banner is not found');
         }
 
         $dto = new BannerDto();
+
         $dto->bannerPlace = $banner->getBannerPlace();
+
         $dto->link = $banner->getLink();
+
         $dto->title = $banner->getTitle();
+
         $dto->description = $banner->getDescription();
+
         $dto->buttonLabel = $banner->getButtonLabel();
 
-        $form = $this->createForm(BannerFormType::class, $dto);
+        $form = $this->createForm(BannerFormType::class, $dto, ['banner' => $banner]);
+
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
             return $this->renderForm('admin/banner/symfony-form.html.twig', [
                 'bannerImage' => $banner->getImage(),
                 'form' => $form,
-                'title' => 'Add Banner',
+                'title' => 'Edit Banner',
             ]);
         }
 
-        // переливание данных из дто в ентити
-
         if ($dto->image) {
             $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
+
             $imageDirectory = './upload/banner/';
+
             $imageDestination = $imageDirectory . $imageUniqueName;
+
             $dto->image->move($imageDirectory, $imageUniqueName);
 
             $this->fileSystem->remove($banner->getImage());
         }
 
         $banner->setTitle($dto->title);
+
         $banner->setLink($dto->link);
+
         $banner->setDescription($dto->description);
+
         $banner->setButtonLabel($dto->buttonLabel);
+
         $banner->setBannerPlace($dto->bannerPlace);
+
         if (isset($imageDestination)) {
             $banner->setImage($imageDestination);
         }

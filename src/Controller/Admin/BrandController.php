@@ -193,12 +193,17 @@ class BrandController extends AbstractController
 
     /**
      * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
+     * @throws NotFoundException
      */
     public function editAction(Request $request): Response
     {
         $id = (int)$request->get('id');
 
         $brand = $this->em->getRepository(Brand::class)->find($id);
+
+        if (!$brand) {
+            throw new NotFoundException('Brand not found');
+        }
 
         $title = (string)$request->get('title');
 

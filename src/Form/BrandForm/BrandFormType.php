@@ -17,6 +17,7 @@ class BrandFormType extends AbstractType
 
         $builder->add('title', TextType::class, [
             'label' => 'Title',
+            'required' => true,
             'constraints' => [
                 new NotNull(),
             ]

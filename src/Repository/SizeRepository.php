@@ -56,4 +56,27 @@ class SizeRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getArrayResult();
     }
+
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function checkProductsBySizeAndCategoryIds(int $sizeId, int $categoryId): int
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb->join('s.products', 'sp');
+
+        $qb->join('sp.category', 'pc');
+
+        $qb->join('pc.parent', 'pcp');
+
+        $qb->select("count(sp.id)");
+
+        $qb->where("s.id = $sizeId");
+
+        $qb->andWhere("pcp.id = $categoryId");
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
+    }
 }
