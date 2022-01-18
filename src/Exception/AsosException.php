@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Exception;
 
-class BadRequestException extends AsosException
+use Exception;
+
+class AsosException extends Exception
 {
 
 }
