@@ -162,7 +162,7 @@ class BannerController extends AbstractController
 
         $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
 
-        $imageDirectory = './upload/banner/';
+        $imageDirectory = '/upload/banner/';
 
         $imageDestination = $imageDirectory . $imageUniqueName;
 
@@ -180,7 +180,7 @@ class BannerController extends AbstractController
 
         $this->em->flush();
 
-        $dto->image->move($imageDirectory, $imageUniqueName);
+        $dto->image->move($this->getParameter('public_dir') . $imageDirectory, $imageUniqueName);
 
         return $this->redirectToRoute('admin.banner.list');
     }
