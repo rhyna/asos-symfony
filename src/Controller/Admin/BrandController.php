@@ -63,46 +63,46 @@ class BrandController extends AbstractController
             ]);
     }
 
-    /**
-     * @Route(path="/add", methods={"GET"}, name="add.form")
-     */
-    public function addForm(Request $request): Response
-    {
-        return $this->render('admin/brand/form.html.twig',
-            [
-                'title' => 'Add Brand',
-            ]);
-    }
+//    /**
+//     * @Route(path="/add", methods={"GET"}, name="add.form")
+//     */
+//    public function addForm(Request $request): Response
+//    {
+//        return $this->render('admin/brand/form.html.twig',
+//            [
+//                'title' => 'Add Brand',
+//            ]);
+//    }
+
+//    /**
+//     * @Route(path="/add", methods={"POST"}, name="add.action")
+//     */
+//    public function addAction(Request $request): Response
+//    {
+//        $title = (string)$request->get('title');
+//
+//        $descriptionWomen = (string)$request->get('descriptionWomen') ?: null;
+//
+//        $descriptionMen = (string)$request->get('descriptionMen') ?: null;
+//
+//        $brand = new Brand($title);
+//
+//        $brand->setDescriptionWomen($descriptionWomen);
+//
+//        $brand->setDescriptionMen($descriptionMen);
+//
+//        $this->em->persist($brand);
+//
+//        $this->em->flush();
+//
+//        return $this->redirectToRoute('admin.brand.list');
+//
+//    }
 
     /**
-     * @Route(path="/add", methods={"POST"}, name="add.action")
+     * @Route(path="/add", methods={"GET", "POST"}, name="add")
      */
-    public function addAction(Request $request): Response
-    {
-        $title = (string)$request->get('title');
-
-        $descriptionWomen = (string)$request->get('descriptionWomen') ?: null;
-
-        $descriptionMen = (string)$request->get('descriptionMen') ?: null;
-
-        $brand = new Brand($title);
-
-        $brand->setDescriptionWomen($descriptionWomen);
-
-        $brand->setDescriptionMen($descriptionMen);
-
-        $this->em->persist($brand);
-
-        $this->em->flush();
-
-        return $this->redirectToRoute('admin.brand.list');
-
-    }
-
-    /**
-     * @Route(path="/add-symfony-form", methods={"GET", "POST"}, name="add-symfony-form")
-     */
-    public function addSymfonyFormAction(Request $request): Response
+    public function addFormAndAction(Request $request): Response
     {
         $dto = new BrandDto();
 
@@ -111,7 +111,7 @@ class BrandController extends AbstractController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->renderForm('admin/brand/symfony-form.html.twig', [
+            return $this->renderForm('admin/brand/form.html.twig', [
                 'form' => $form,
                 'title' => 'Add Brand',
             ]);
@@ -127,14 +127,14 @@ class BrandController extends AbstractController
 
         $this->em->flush();
 
-        return $this->redirectToRoute('admin.brand.list');
+        return $this->redirectToRoute('admin.brand.edit', ['id' => $brand->getId()]);
     }
 
     /**
-     * @Route(path="/edit-symfony-form/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit-symfony-form")
+     * @Route(path="/edit/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit")
      * @throws NotFoundException
      */
-    public function editSymfonyFormAction(Request $request): Response
+    public function editFormAndAction(Request $request): Response
     {
         $id = $request->get('id');
 
@@ -158,7 +158,7 @@ class BrandController extends AbstractController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->renderForm('admin/brand/symfony-form.html.twig', [
+            return $this->renderForm('admin/brand/form.html.twig', [
                 'form' => $form,
                 'title' => 'Edit Brand',
             ]);
@@ -172,55 +172,55 @@ class BrandController extends AbstractController
 
         $this->em->flush();
 
-        return $this->redirectToRoute('admin.brand.list');
+        return $this->redirectToRoute('admin.brand.edit', ['id' => $brand->getId()]);
     }
 
-    /**
-     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
-     */
-    public function editForm(Request $request): Response
-    {
-        $id = (int)$request->get('id');
-
-        $brand = $this->em->getRepository(Brand::class)->find($id);
-
-        return $this->render('admin/brand/form.html.twig',
-            [
-                'brand' => $brand,
-                'title' => 'Edit Brand',
-            ]);
-    }
-
-    /**
-     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
-     * @throws NotFoundException
-     */
-    public function editAction(Request $request): Response
-    {
-        $id = (int)$request->get('id');
-
-        $brand = $this->em->getRepository(Brand::class)->find($id);
-
-        if (!$brand) {
-            throw new NotFoundException('Brand not found');
-        }
-
-        $title = (string)$request->get('title');
-
-        $descriptionWomen = (string)$request->get('descriptionWomen') ?: null;
-
-        $descriptionMen = (string)$request->get('descriptionMen') ?: null;
-
-        $brand->setTitle($title);
-
-        $brand->setDescriptionWomen($descriptionWomen);
-
-        $brand->setDescriptionMen($descriptionMen);
-
-        $this->em->flush();
-
-        return $this->redirectToRoute('admin.brand.list');
-    }
+//    /**
+//     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
+//     */
+//    public function editForm(Request $request): Response
+//    {
+//        $id = (int)$request->get('id');
+//
+//        $brand = $this->em->getRepository(Brand::class)->find($id);
+//
+//        return $this->render('admin/brand/form.html.twig',
+//            [
+//                'brand' => $brand,
+//                'title' => 'Edit Brand',
+//            ]);
+//    }
+//
+//    /**
+//     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
+//     * @throws NotFoundException
+//     */
+//    public function editAction(Request $request): Response
+//    {
+//        $id = (int)$request->get('id');
+//
+//        $brand = $this->em->getRepository(Brand::class)->find($id);
+//
+//        if (!$brand) {
+//            throw new NotFoundException('Brand not found');
+//        }
+//
+//        $title = (string)$request->get('title');
+//
+//        $descriptionWomen = (string)$request->get('descriptionWomen') ?: null;
+//
+//        $descriptionMen = (string)$request->get('descriptionMen') ?: null;
+//
+//        $brand->setTitle($title);
+//
+//        $brand->setDescriptionWomen($descriptionWomen);
+//
+//        $brand->setDescriptionMen($descriptionMen);
+//
+//        $this->em->flush();
+//
+//        return $this->redirectToRoute('admin.brand.list');
+//    }
 
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")

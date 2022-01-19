@@ -68,77 +68,77 @@ class BannerController extends AbstractController
             ]);
     }
 
+//    /**
+//     * @Route(path="/add", methods={"GET"}, name="add.form")
+//     */
+//    public function addForm(Request $request): Response
+//    {
+//        $repository = $this->em->getRepository(BannerPlace::class);
+//
+//        $bannerPlaces = $repository->findAll();
+//
+//        return $this->render('admin/banner/form.html.twig',
+//            [
+//                'bannerPlaces' => $bannerPlaces,
+//                'title' => 'Add Banner',
+//            ]);
+//    }
+//
+//    /**
+//     * @Route(path="/add", methods={"POST"}, name="add.action")
+//     */
+//    public function addAction(Request $request): Response
+//    {
+//        /** @var UploadedFile $image */
+//        $image = $request->files->get('image');
+//
+//        $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
+//
+//        $imageDirectory = './upload/banner/';
+//
+//        $imageDestination = $imageDirectory . $imageUniqueName;
+//
+//        $bannerPlaceId = (int)$request->get('banner-place') ?: null;
+//
+//        $link = (string)$request->get('link');
+//
+//        $title = (string)$request->get('title') ?: null;
+//
+//        $description = (string)$request->get('description') ?: null;
+//
+//        $buttonLabel = (string)$request->get('button-label') ?: null;
+//
+//        $banner = new Banner($imageDestination, $link);
+//
+//        $banner->setTitle($title);
+//
+//        $banner->setDescription($description);
+//
+//        $banner->setButtonLabel($buttonLabel);
+//
+//        $bannerPlace = null;
+//
+//        if ($bannerPlaceId) {
+//            $repository = $this->em->getRepository(BannerPlace::class);
+//
+//            $bannerPlace = $repository->find($bannerPlaceId);
+//        }
+//
+//        $banner->setBannerPlace($bannerPlace);
+//
+//        $this->em->persist($banner);
+//
+//        $this->em->flush();
+//
+//        $image->move($imageDirectory, $imageUniqueName);
+//
+//        return $this->redirectToRoute('admin.banner.list');
+//    }
+
     /**
-     * @Route(path="/add", methods={"GET"}, name="add.form")
+     * @Route(path="/add", methods={"GET", "POST"}, name="add")
      */
-    public function addForm(Request $request): Response
-    {
-        $repository = $this->em->getRepository(BannerPlace::class);
-
-        $bannerPlaces = $repository->findAll();
-
-        return $this->render('admin/banner/form.html.twig',
-            [
-                'bannerPlaces' => $bannerPlaces,
-                'title' => 'Add Banner',
-            ]);
-    }
-
-    /**
-     * @Route(path="/add", methods={"POST"}, name="add.action")
-     */
-    public function addAction(Request $request): Response
-    {
-        /** @var UploadedFile $image */
-        $image = $request->files->get('image');
-
-        $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
-
-        $imageDirectory = './upload/banner/';
-
-        $imageDestination = $imageDirectory . $imageUniqueName;
-
-        $bannerPlaceId = (int)$request->get('banner-place') ?: null;
-
-        $link = (string)$request->get('link');
-
-        $title = (string)$request->get('title') ?: null;
-
-        $description = (string)$request->get('description') ?: null;
-
-        $buttonLabel = (string)$request->get('button-label') ?: null;
-
-        $banner = new Banner($imageDestination, $link);
-
-        $banner->setTitle($title);
-
-        $banner->setDescription($description);
-
-        $banner->setButtonLabel($buttonLabel);
-
-        $bannerPlace = null;
-
-        if ($bannerPlaceId) {
-            $repository = $this->em->getRepository(BannerPlace::class);
-
-            $bannerPlace = $repository->find($bannerPlaceId);
-        }
-
-        $banner->setBannerPlace($bannerPlace);
-
-        $this->em->persist($banner);
-
-        $this->em->flush();
-
-        $image->move($imageDirectory, $imageUniqueName);
-
-        return $this->redirectToRoute('admin.banner.list');
-    }
-
-    /**
-     * @Route(path="/add-symfony-form", methods={"GET", "POST"}, name="add-symfony-form")
-     */
-    public function addSymfonyFormAction(Request $request): Response
+    public function addFormAndAction(Request $request): Response
     {
         $dto = new BannerDto();
 
@@ -147,14 +147,14 @@ class BannerController extends AbstractController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted()) {
-            return $this->renderForm('admin/banner/symfony-form.html.twig', [
+            return $this->renderForm('admin/banner/form.html.twig', [
                 'form' => $form,
                 'title' => 'Add Banner',
             ]);
         }
 
         if (!$form->isValid()) {
-            return $this->renderForm('admin/banner/symfony-form.html.twig', [
+            return $this->renderForm('admin/banner/form.html.twig', [
                 'form' => $form,
                 'title' => 'Add Banner',
             ]);
@@ -182,22 +182,22 @@ class BannerController extends AbstractController
 
         $dto->image->move($this->getParameter('public_dir') . $imageDirectory, $imageUniqueName);
 
-        return $this->redirectToRoute('admin.banner.list');
+        return $this->redirectToRoute('admin.banner.edit', ['id' =>  $banner->getId()]);
     }
 
     /**
      * requirements в параметрах ниже - это валидация параметров зашитых в урле. \d+ означает, что мы ожидаем
      * число (\d) и оно должно быть длиной больше нуля символов (+)
-     * @Route(path="/edit-symfony-form/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit-symfony-form")
+     * @Route(path="/edit/{id}", methods={"GET", "POST"}, requirements={"id"="\d+"}, name="edit")
      * @throws NotFoundException
      */
-    public function editSymfonyFormAction(Request $request): Response
+    public function editFormAndAction(Request $request): Response
     {
         /** @var Banner $banner */
         $banner = $this->em->getRepository(Banner::class)->find($request->get('id'));
 
         if (!$banner) {
-            throw new NotFoundException('banner is not found');
+            throw new NotFoundException('Banner not found');
         }
 
         $dto = new BannerDto();
@@ -217,7 +217,7 @@ class BannerController extends AbstractController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->renderForm('admin/banner/symfony-form.html.twig', [
+            return $this->renderForm('admin/banner/form.html.twig', [
                 'bannerImage' => $banner->getImage(),
                 'form' => $form,
                 'title' => 'Edit Banner',
@@ -227,13 +227,13 @@ class BannerController extends AbstractController
         if ($dto->image) {
             $imageUniqueName = uniqid() . '.' . $dto->image->getClientOriginalExtension();
 
-            $imageDirectory = './upload/banner/';
+            $imageDirectory = '/upload/banner/';
 
             $imageDestination = $imageDirectory . $imageUniqueName;
 
-            $dto->image->move($imageDirectory, $imageUniqueName);
+            $dto->image->move($this->getParameter('public_dir') . $imageDirectory, $imageUniqueName);
 
-            $this->fileSystem->remove($banner->getImage());
+            $this->fileSystem->remove($this->getParameter('public_dir') . $banner->getImage());
         }
 
         $banner->setTitle($dto->title);
@@ -252,100 +252,100 @@ class BannerController extends AbstractController
 
         $this->em->flush();
 
-        return $this->redirectToRoute('admin.banner.list');
+        return $this->redirectToRoute('admin.banner.edit', ['id' => $banner->getId()]);
     }
 
-    /**
-     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
-     */
-    public function editForm(Request $request): Response
-    {
-        $id = (int)$request->get('id');
+//    /**
+//     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
+//     */
+//    public function editForm(Request $request): Response
+//    {
+//        $id = (int)$request->get('id');
+//
+//        $repository = $this->em->getRepository(Banner::class);
+//
+//        $banner = $repository->find($id);
+//
+//        $repository = $this->em->getRepository(BannerPlace::class);
+//
+//        $bannerPlaces = $repository->findAll();
+//
+//        return $this->render('admin/banner/form.html.twig',
+//            [
+//                'banner' => $banner,
+//                'bannerPlaces' => $bannerPlaces,
+//                'title' => 'Edit Banner',
+//            ]);
+//    }
 
-        $repository = $this->em->getRepository(Banner::class);
-
-        $banner = $repository->find($id);
-
-        $repository = $this->em->getRepository(BannerPlace::class);
-
-        $bannerPlaces = $repository->findAll();
-
-        return $this->render('admin/banner/form.html.twig',
-            [
-                'banner' => $banner,
-                'bannerPlaces' => $bannerPlaces,
-                'title' => 'Edit Banner',
-            ]);
-    }
-
-    /**
-     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
-     */
-    public function editAction(Request $request): Response
-    {
-        /** @var UploadedFile $image */
-        $image = $request->files->get('image');
-
-        $imageDestination = null;
-
-        if ($image) {
-
-            $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
-
-            $imageDirectory = './upload/banner/';
-
-            $imageDestination = $imageDirectory . $imageUniqueName;
-        }
-
-        $bannerPlaceId = (int)$request->get('banner-place') ?: null;
-
-        $link = (string)$request->get('link');
-
-        $title = (string)$request->get('title') ?: null;
-
-        $description = (string)$request->get('description') ?: null;
-
-        $buttonLabel = (string)$request->get('button-label') ?: null;
-
-        $bannerId = (int)$request->get('id');
-
-        $banner = $this->em->getRepository(Banner::class)->find($bannerId);
-
-        $banner->setLink($link);
-
-        $banner->setTitle($title);
-
-        $banner->setDescription($description);
-
-        $banner->setButtonLabel($buttonLabel);
-
-        $previousImage = $banner->getImage();
-
-        if ($imageDestination) {
-            $banner->setImage($imageDestination);
-        }
-
-        $bannerPlace = null;
-
-        if ($bannerPlaceId) {
-
-            $repository = $this->em->getRepository(BannerPlace::class);
-
-            $bannerPlace = $repository->find($bannerPlaceId);
-        }
-
-        $banner->setBannerPlace($bannerPlace);
-
-        $this->em->flush();
-
-        if ($image) {
-            $image->move($imageDirectory, $imageUniqueName);
-
-            $this->fileSystem->remove($previousImage);
-        }
-
-        return $this->redirectToRoute('admin.banner.list');
-    }
+//    /**
+//     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
+//     */
+//    public function editAction(Request $request): Response
+//    {
+//        /** @var UploadedFile $image */
+//        $image = $request->files->get('image');
+//
+//        $imageDestination = null;
+//
+//        if ($image) {
+//
+//            $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
+//
+//            $imageDirectory = './upload/banner/';
+//
+//            $imageDestination = $imageDirectory . $imageUniqueName;
+//        }
+//
+//        $bannerPlaceId = (int)$request->get('banner-place') ?: null;
+//
+//        $link = (string)$request->get('link');
+//
+//        $title = (string)$request->get('title') ?: null;
+//
+//        $description = (string)$request->get('description') ?: null;
+//
+//        $buttonLabel = (string)$request->get('button-label') ?: null;
+//
+//        $bannerId = (int)$request->get('id');
+//
+//        $banner = $this->em->getRepository(Banner::class)->find($bannerId);
+//
+//        $banner->setLink($link);
+//
+//        $banner->setTitle($title);
+//
+//        $banner->setDescription($description);
+//
+//        $banner->setButtonLabel($buttonLabel);
+//
+//        $previousImage = $banner->getImage();
+//
+//        if ($imageDestination) {
+//            $banner->setImage($imageDestination);
+//        }
+//
+//        $bannerPlace = null;
+//
+//        if ($bannerPlaceId) {
+//
+//            $repository = $this->em->getRepository(BannerPlace::class);
+//
+//            $bannerPlace = $repository->find($bannerPlaceId);
+//        }
+//
+//        $banner->setBannerPlace($bannerPlace);
+//
+//        $this->em->flush();
+//
+//        if ($image) {
+//            $image->move($imageDirectory, $imageUniqueName);
+//
+//            $this->fileSystem->remove($previousImage);
+//        }
+//
+//        return $this->redirectToRoute('admin.banner.list');
+//    }
 
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")

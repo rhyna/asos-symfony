@@ -1,0 +1,63 @@
+{% extends '/admin/base.html.twig' %}
+
+{% block body %}
+    <div class="admin-title">{{ title }}</div>
+    <form action="" method="post" enctype="multipart/form-data" id="bannerForm" class="entity-form">
+        <div class="form-image">
+            <div class="form-group">
+                {% if banner is defined %}
+                    <div class="entity-form-image entity-form-image--banner"
+                         style='background-image: url("{{ banner.image }}")'>
+                    </div>
+                {% endif %}
+                <input class="form-control-file" name="image" id="image" type="file"
+                       {{ app.request.requestUri is same as path('admin.banner.add.form') ? 'required' : ''}}>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="banner-place">Banner place</label>
+            <select class="form-control" name="banner-place" id="banner-place">
+                {% for bannerPlace in bannerPlaces %}
+                    <option value="{{ bannerPlace.id }}"
+                            {{ banner is defined and banner.bannerPlace.id is defined and banner.bannerPlace.id is same as bannerPlace.id ? 'selected' : '' }}>
+                        {{ bannerPlace.title }}
+                    </option>
+                {% endfor %}
+                <option value=""
+                        {{ banner is not defined or banner.bannerPlace.id is not defined ? 'selected' : '' }}>
+                    NO PLACE (Banner not posted yet)
+                </option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="link">Link</label>
+            <input class="form-control" type="text" name="link" id="link" required
+                   value="{{ banner.link | default('') }}">
+        </div>
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input class="form-control" type="text" name="title" id="title"
+                   value="{{ banner.title | default('') }}">
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control"
+                      name="description"
+                      id="description"
+                      rows="3">{{ banner.description | default('') }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="button-label">Button Label</label>
+            <input class="form-control" type="text" name="button-label" id="button-label"
+                   value="{{ banner.buttonLabel | default('') }}">
+        </div>
+        <button type="submit" class="entity-form-submit">
+            Submit
+        </button>
+        {# updateBanners() checks taken banner places, needs to be finished later #}
+{#        <button type="submit" class="entity-form-submit" onclick="event.preventDefault();#}
+{#                updateBanner({{ banner.id | default(null) }})">#}
+{#            Submit#}
+{#        </button>#}
+    </form>
+{% endblock %}

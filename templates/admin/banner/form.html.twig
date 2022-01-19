@@ -3,61 +3,57 @@
 {% block body %}
     <div class="admin-title">{{ title }}</div>
     <form action="" method="post" enctype="multipart/form-data" id="bannerForm" class="entity-form">
+        {{ form_row(form._token) }}
         <div class="form-image">
             <div class="form-group">
-                {% if banner is defined %}
+                {% if bannerImage is defined %}
                     <div class="entity-form-image entity-form-image--banner"
-                         style='background-image: url("{{ banner.image | trim('.') }}")'>
+                         style='background-image: url("{{ bannerImage }}")'>
                     </div>
                 {% endif %}
-                <input class="form-control-file" name="image" id="image" type="file"
-                       {{ app.request.requestUri is same as path('admin.banner.add.form') ? 'required' : ''}}>
+                {{ form_widget(form.image, {'attr': {'class': 'form-control-file'}}) }}
+                <div class="form-error">
+                    {{ form_errors(form.image) }}
+                </div>
             </div>
         </div>
         <div class="form-group">
-            <label for="banner-place">Banner place</label>
-            <select class="form-control" name="banner-place" id="banner-place">
-                {% for bannerPlace in bannerPlaces %}
-                    <option value="{{ bannerPlace.id }}"
-                            {{ banner is defined and banner.bannerPlace.id is defined and banner.bannerPlace.id is same as bannerPlace.id ? 'selected' : '' }}>
-                        {{ bannerPlace.title }}
-                    </option>
-                {% endfor %}
-                <option value=""
-                        {{ banner is not defined or banner.bannerPlace.id is not defined ? 'selected' : '' }}>
-                    NO PLACE (Banner not posted yet)
-                </option>
-            </select>
+            {{ form_label(form['banner-place']) }}
+            {{ form_widget(form['banner-place'], {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">
+                {{ form_errors(form['banner-place']) }}
+            </div>
         </div>
         <div class="form-group">
-            <label for="link">Link</label>
-            <input class="form-control" type="text" name="link" id="link" required
-                   value="{{ banner.link | default('') }}">
+            {{ form_label(form.link) }}
+            {{ form_widget(form.link, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">
+                {{ form_errors(form.link) }}
+            </div>
         </div>
         <div class="form-group">
-            <label for="title">Title</label>
-            <input class="form-control" type="text" name="title" id="title"
-                   value="{{ banner.title | default('') }}">
+            {{ form_label(form.title) }}
+            {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">
+                {{ form_errors(form.title) }}
+            </div>
         </div>
         <div class="form-group">
-            <label for="description">Description</label>
-            <textarea class="form-control"
-                      name="description"
-                      id="description"
-                      rows="3">{{ banner.description | default('') }}</textarea>
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+            <div class="form-error">
+                {{ form_errors(form.description) }}
+            </div>
         </div>
         <div class="form-group">
-            <label for="button-label">Button Label</label>
-            <input class="form-control" type="text" name="button-label" id="button-label"
-                   value="{{ banner.buttonLabel | default('') }}">
+            {{ form_label(form['button-label']) }}
+            {{ form_widget(form['button-label'], {'attr': {'class': 'form-control'}}) }}
+            <div class="form-error">
+                {{ form_errors(form['button-label']) }}
+            </div>
         </div>
         <button type="submit" class="entity-form-submit">
             Submit
         </button>
-        {# updateBanners() checks taken banner places, needs to be finished later #}
-{#        <button type="submit" class="entity-form-submit" onclick="event.preventDefault();#}
-{#                updateBanner({{ banner.id | default(null) }})">#}
-{#            Submit#}
-{#        </button>#}
     </form>
 {% endblock %}

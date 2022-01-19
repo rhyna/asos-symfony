@@ -1,6 +1,6 @@
 {% extends '/admin/base.html.twig' %}
 {% block body %}
-    <a href="{{ path('admin.category.add.form') }}" class="add-entity">Add category</a>
+    <a href="{{ path('admin.category.add') }}" class="add-entity">Add category</a>
     <h1 class="entity-list-title">Categories</h1>
     <div class="catalog-filters">
         <form>
@@ -29,7 +29,7 @@
                     <div class="entity-list-item" data-id="{{ category.id }}">
                         <div class="row entity-list-item__row">
                             <div class="col">
-                                <a href="{{ path('admin.category.edit.form', {
+                                <a href="{{ path('admin.category.edit', {
                                     id: category.id
                                 }) }}">
                                     {{ category.title }}
@@ -38,7 +38,7 @@
                             <div class="col">{{ category.rootCategory | default ('') }} {{ category.parentTitle | default ('') }}</div>
                             <div class="col-1 entity-list-item-icons">
                                 <div class="entity-list-item-icons__inner">
-                                    <a href="{{ path('admin.category.edit.form', {
+                                    <a href="{{ path('admin.category.edit', {
                                         id: category.id
                                     }) }}">
                                         <i class="far fa-edit"></i>
