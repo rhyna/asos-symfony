@@ -11,8 +11,8 @@
                     <div class="previews">
                         {% for image in images %}
                             <span class="{{ loop.first ? 'selected' : '' }}"
-                                  data-full="{{ image | trim('.') }}">
-                                <img alt='' src="{{ image | trim('.') }}"/>
+                                  data-full="{{ image }}">
+                                <img alt='' src="{{ image }}"/>
                             </span>
                         {% endfor %}
                     </div>
@@ -20,7 +20,7 @@
                 <div class="full">
                     {% for image in images %}
                         {% if loop.first %}
-                            <img src="{{ image | trim('.') }}" alt=""/>
+                            <img src="{{ image }}" alt=""/>
                         {% endif %}
                     {% endfor %}
                     {% if not images %}

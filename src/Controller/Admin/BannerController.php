@@ -373,7 +373,7 @@ class BannerController extends AbstractController
 
             $this->em->flush();
 
-            $this->fileSystem->remove($bannerImage);
+            $this->fileSystem->remove($this->getParameter('public_dir') . $bannerImage);
 
             return new Response('Successfully deleted the banner', 200);
 

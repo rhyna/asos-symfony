@@ -20,7 +20,7 @@
                             <a href="{{ path('product', { id: product['id'] }) }}">
                                 {% if product['image'] %}
                                     <div class="catalog-item-image"
-                                         style="background-image: url({{ product['image'] | trim('.') }})">
+                                         style="background-image: url({{ product['image'] }})">
                                     </div>
                                 {% else %}
                                     <div class="catalog-item-image catalog-item-image--noimage">

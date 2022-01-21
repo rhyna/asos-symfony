@@ -120,14 +120,6 @@ class ProductController extends AbstractController
 
         $categoriesByGender = $this->categoryFilterService->getCategoriesByGender();
 
-//        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
-//
-//        $categoriesByGender = [];
-//
-//        foreach ($categoryLevels as $root) {
-//            $categoriesByGender[$root['title']] = $this->getFlatListOfSubcategories($root['childCategory1']);
-//        }
-
         return $this->render('admin/product/list.html.twig', [
             'products' => $products,
             'title' => 'Product List',
@@ -249,7 +241,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * method is too big
      * @Route(path="/add", methods={"POST"}, name="add.action")
      */
     public function addAction(Request $request): Response
@@ -285,25 +276,25 @@ class ProductController extends AbstractController
                 if ($image === 'image') {
                     $product->setImage($data['destination']);
 
-                    $data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
                 }
 
                 if ($image === 'image1') {
                     $product->setImage1($data['destination']);
 
-                    $data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
                 }
 
                 if ($image === 'image2') {
                     $product->setImage2($data['destination']);
 
-                    $data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
                 }
 
                 if ($image === 'image3') {
                     $product->setImage3($data['destination']);
 
-                    $data['object']->move($data['directory'], $data['uniqueName']);
+                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
                 }
             }
 
@@ -323,7 +314,7 @@ class ProductController extends AbstractController
 
             $this->em->flush();
 
-            return $this->redirectToRoute('admin.product.list');
+            return $this->redirectToRoute('admin.product.edit.form', ['id' => $product->getId()]);
 
         } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
@@ -425,7 +416,7 @@ class ProductController extends AbstractController
 
                 $uniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
 
-                $directory = './upload/product/';
+                $directory = '/upload/product/';
 
                 $destination = $directory . $uniqueName;
 
@@ -494,7 +485,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * method is too big
      * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
      */
     public function editAction(Request $request): Response
@@ -612,7 +602,7 @@ class ProductController extends AbstractController
 
             $this->em->flush();
 
-            return $this->redirectToRoute('admin.product.list');
+            return $this->redirectToRoute('admin.product.edit.form', ['id' => $product->getId()]);
 
         } catch (BadRequestException $e) {
             return new Response($e->getMessage(), 400);
@@ -630,9 +620,11 @@ class ProductController extends AbstractController
 
     private function moveNewImageAndRemoveOld(array $data, ?string $prevImage): void
     {
-        $data['object']->move($data['directory'], $data['uniqueName']);
+        $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
 
-        $this->fileSystem->remove($prevImage);
+        if ($prevImage) {
+            $this->fileSystem->remove($this->getParameter('public_dir') . $prevImage);
+        }
     }
 
     /**
@@ -672,7 +664,11 @@ class ProductController extends AbstractController
 
             $this->em->flush();
 
-            $this->fileSystem->remove($images);
+            foreach ($images as $image) {
+                if ($image) {
+                    $this->fileSystem->remove($this->getParameter('public_dir') . $image);
+                }
+            }
 
             $this->em->getRepository(SearchWord::class)->deleteUnusedSearchWords($searchWordsToDelete);
 
@@ -751,7 +747,7 @@ class ProductController extends AbstractController
      */
     private function validateImage(UploadedFile $image)
     {
-        $extensions = ['png', 'jpeg', 'jpg', 'gif'];
+        $extensions = ['png', 'jpeg', 'jpg', 'gif', 'jfif'];
 
         $extension = $image->getClientOriginalExtension();
 
@@ -794,33 +790,43 @@ class ProductController extends AbstractController
             if ($imageName === 'image') {
                 $prevImage = $product->getImage();
 
-                $product->setImage(null);
+                if ($prevImage) {
+                    $this->fileSystem->remove($this->getParameter('public_dir') . $prevImage);
+                }
 
-                $this->fileSystem->remove($prevImage);
+                $product->setImage(null);
             }
 
             if ($imageName === 'image1') {
                 $prevImage = $product->getImage1();
 
+                if ($prevImage) {
+                    $this->fileSystem->remove($this->getParameter('public_dir') . $prevImage);
+                }
+
                 $product->setImage1(null);
 
-                $this->fileSystem->remove($prevImage);
             }
 
             if ($imageName === 'image2') {
                 $prevImage = $product->getImage2();
 
-                $product->setImage2(null);
+                if ($prevImage) {
+                    $this->fileSystem->remove($this->getParameter('public_dir') . $prevImage);
+                }
 
-                $this->fileSystem->remove($prevImage);
+                $product->setImage2(null);
             }
 
             if ($imageName === 'image3') {
+
                 $prevImage = $product->getImage3();
 
-                $product->setImage3(null);
+                if ($prevImage) {
+                    $this->fileSystem->remove($this->getParameter('public_dir') . $prevImage);
+                }
 
-                $this->fileSystem->remove($prevImage);
+                $product->setImage3(null);
             }
 
             $this->em->flush();

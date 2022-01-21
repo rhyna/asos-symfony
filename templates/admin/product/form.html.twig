@@ -105,7 +105,7 @@
                             {% if not url %}
                                 <div class="entity-form-image entity-form-image--deleted">
                             {% else %}
-                                <div class="entity-form-image" style="background-image: url('{{ url | trim('.') }}')">
+                                <div class="entity-form-image" style="background-image: url('{{ url }}')">
                             {% endif %}
                             {{ not url ? 'No image' : '' }}
                             {% if url %}

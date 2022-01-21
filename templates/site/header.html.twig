@@ -68,7 +68,7 @@
                                                                 'categories': category['subCategoryIds']
                                                             }) }}">
                                                                 <div class="subbar-dropdown-item--brand-image"
-                                                                     style="background-image: url('{{ brand['productImage'] | trim('.') }}')">
+                                                                     style="background-image: url('{{ brand['productImage'] }}')">
                                                                 </div>
                                                                 {{ brand['brandTitle'] }}
                                                             </a>
@@ -84,7 +84,7 @@
                                                 <div class="subbar-dropdown-menu-preview-image__wrapper">
                                                     <a href="{{ path('category', {'gender': gender, 'id': category['id']}) }}">
                                                         <div class="subbar-dropdown-menu-preview-image"
-                                                             style='background-image: url("{{ category['image'] | trim('.') }}")'>
+                                                             style='background-image: url("{{ category['image'] }}")'>
                                                             <span>{{ category['title'] }}</span>
                                                         </div>
                                                     </a>
@@ -124,7 +124,7 @@
                                                         <a href="{{ path('brand', { 'id': brand['brandId'], 'gender': gender }) }}">
                                                             <div class="subbar-dropdown-menu-preview-image"
                                                                  style='background-image:
-                                                                         url("{{ brand['productImage'] | trim('.') }}")'
+                                                                         url("{{ brand['productImage'] }}")'
                                                             >
                                                                 <span>{{ brand['brandTitle'] }}</span>
                                                             </div>

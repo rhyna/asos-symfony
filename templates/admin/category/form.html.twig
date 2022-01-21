@@ -23,7 +23,7 @@
                 {% if category is defined %}
                     <div class="entity-form-image entity-form-image--category {{ category.image ? '' : 'entity-form-image--deleted' }}"
                             {% if category.image %}
-                                style="background-image: url('{{ category.image | trim('.') }}')"
+                                style="background-image: url('{{ category.image }}')"
                             {% endif %}
                     >
                         {{ not category.image ? 'No image' : '' }}

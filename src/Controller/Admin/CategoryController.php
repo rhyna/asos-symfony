@@ -381,7 +381,9 @@ class CategoryController extends AbstractController
 
             $this->em->flush();
 
-            $this->fileSystem->remove($this->getParameter('public_dir') . $categoryImage);
+            if ($categoryImage) {
+                $this->fileSystem->remove($this->getParameter('public_dir') . $categoryImage);
+            }
 
             return new Response('Successfully deleted the category', 200);
 
@@ -425,7 +427,9 @@ class CategoryController extends AbstractController
 
             $this->em->flush();
 
-            $this->fileSystem->remove($this->getParameter('public_dir') . $imageToDelete);
+            if ($imageToDelete) {
+                 $this->fileSystem->remove($this->getParameter('public_dir') . $imageToDelete);
+            }
 
             return new Response();
 
