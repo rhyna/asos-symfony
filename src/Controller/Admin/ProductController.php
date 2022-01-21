@@ -13,6 +13,7 @@ use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\SystemErrorException;
 use App\Exception\ValidationErrorException;
+use App\Service\Filter\CategoryFilterService;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use App\Service\Search\SearchService;
@@ -34,18 +35,21 @@ class ProductController extends AbstractController
     private Filesystem $fileSystem;
     private PageDeterminerService $pageDeterminerService;
     private SearchService $searchService;
+    private CategoryFilterService $categoryFilterService;
 
     public function __construct(PaginationService      $paginationService,
                                 EntityManagerInterface $em,
                                 Filesystem             $fileSystem,
                                 PageDeterminerService  $pageDeterminerService,
-                                SearchService          $searchService)
+                                SearchService          $searchService,
+                                CategoryFilterService  $categoryFilterService)
     {
         $this->paginationService = $paginationService;
         $this->em = $em;
         $this->fileSystem = $fileSystem;
         $this->pageDeterminerService = $pageDeterminerService;
         $this->searchService = $searchService;
+        $this->categoryFilterService = $categoryFilterService;
     }
 
     /**
@@ -114,23 +118,15 @@ class ProductController extends AbstractController
 
         $brandsData = $this->em->getRepository(Brand::class)->getAllBrandsIdAndTitle();
 
-        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
+        $categoriesByGender = $this->categoryFilterService->getCategoriesByGender();
 
-        $categoriesByGender = [];
-
-        foreach ($categoryLevels as $root) {
-            $categoriesByGender[$root['title']] = [];
-
-            foreach ($root['childCategory1'] as $level1) {
-                foreach ($level1['childCategory2'] as $level2) {
-                    $array = [];
-                    $array['id'] = $level2['id'];
-                    $array['title'] = $level2['title'];
-                    $array['parentCategoryTitle'] = $level2['parentTitle'];
-                    $categoriesByGender[$root['title']][] = $array;
-                }
-            }
-        }
+//        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
+//
+//        $categoriesByGender = [];
+//
+//        foreach ($categoryLevels as $root) {
+//            $categoriesByGender[$root['title']] = $this->getFlatListOfSubcategories($root['childCategory1']);
+//        }
 
         return $this->render('admin/product/list.html.twig', [
             'products' => $products,
@@ -343,7 +339,7 @@ class ProductController extends AbstractController
         }
     }
 
-     private function validateProductImage(array $image): bool
+    private function validateProductImage(array $image): bool
     {
         $extensions = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
 
