@@ -9,6 +9,7 @@ use App\Entity\Size;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\ValidationErrorException;
+use App\Service\CategoryLevelsBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,10 +22,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class SizeController extends AbstractController
 {
     private EntityManagerInterface $em;
+    private CategoryLevelsBuilder $categoryLevelsBuilder;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, CategoryLevelsBuilder $categoryLevelsBuilder)
     {
         $this->em = $em;
+        $this->categoryLevelsBuilder = $categoryLevelsBuilder;
     }
 
     /**
@@ -32,7 +35,7 @@ class SizeController extends AbstractController
      */
     public function list(Request $request): Response
     {
-        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
+        $categoryLevels = $this->categoryLevelsBuilder->getCategoryLevels();
 
         return $this->render('admin/size/list.html.twig', [
             'title' => 'Manage Sizes',

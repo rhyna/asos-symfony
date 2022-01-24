@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
-use App\Entity\Category;
-use App\Entity\Product;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\TopMenuBuilder;
 use Twig\Extension\AbstractExtension;
 
 class HelpersExtension extends AbstractExtension
 {
-    private EntityManagerInterface $em;
+    private TopMenuBuilder $topMenuBuilder;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(TopMenuBuilder $topMenuBuilder)
     {
-        $this->em = $em;
+        $this->topMenuBuilder = $topMenuBuilder;
     }
 
     public function getFunctions(): array
@@ -52,9 +50,6 @@ class HelpersExtension extends AbstractExtension
 
     public function getMenuConfig(): array
     {
-        $repository = $this->em->getRepository(Category::class);
-
-        return $repository->getMenuConfig();
-
+        return $this->topMenuBuilder->getMenuConfig();
     }
 }

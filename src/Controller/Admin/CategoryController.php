@@ -11,6 +11,7 @@ use App\Exception\SystemErrorException;
 use App\Exception\ValidationErrorException;
 use App\Form\CategoryForm\CategoryDto;
 use App\Form\CategoryForm\CategoryFormType;
+use App\Service\CategoryLevelsBuilder;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,16 +30,19 @@ class CategoryController extends AbstractController
     private EntityManagerInterface $em;
     private Filesystem $fileSystem;
     private PageDeterminerService $pageDeterminerService;
+    private CategoryLevelsBuilder $categoryLevelsBuilder;
 
     public function __construct(PaginationService      $paginationService,
                                 EntityManagerInterface $em,
                                 Filesystem             $fileSystem,
-                                PageDeterminerService  $pageDeterminerService)
+                                PageDeterminerService  $pageDeterminerService,
+                                CategoryLevelsBuilder  $categoryLevelsBuilder)
     {
         $this->paginationService = $paginationService;
         $this->em = $em;
         $this->fileSystem = $fileSystem;
         $this->pageDeterminerService = $pageDeterminerService;
+        $this->categoryLevelsBuilder = $categoryLevelsBuilder;
     }
 
     /**
@@ -51,7 +55,7 @@ class CategoryController extends AbstractController
 
         $categoriesByGender = [];
 
-        $categoryLevels = $repository->getCategoryLevels();
+        $categoryLevels = $this->categoryLevelsBuilder->getCategoryLevels();
 
         foreach ($categoryLevels as $gender) {
             foreach ($gender['childCategory1'] as $category) {
@@ -428,7 +432,7 @@ class CategoryController extends AbstractController
             $this->em->flush();
 
             if ($imageToDelete) {
-                 $this->fileSystem->remove($this->getParameter('public_dir') . $imageToDelete);
+                $this->fileSystem->remove($this->getParameter('public_dir') . $imageToDelete);
             }
 
             return new Response();

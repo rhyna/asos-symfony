@@ -18,7 +18,7 @@ class CategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Category::class);
     }
 
-    private function getRootCategories(): array
+    public function getRootCategories(): array
     {
         $qb = $this->createQueryBuilder('c');
 
@@ -29,114 +29,17 @@ class CategoryRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    private function getFirstLevelCategories(array $categoryLevels): array
+    public function getSubCategories(int $parentCategoryLevelId): array
     {
-        foreach ($categoryLevels as &$categoryLevel) {
-            $qb = $this->createQueryBuilder('c');
+        $qb = $this->createQueryBuilder('c');
 
-            $qb->select('c.title', 'c.id', 'cp.id as parentId', 'cp.title as parentTitle');
+        $qb->select('c.title', 'c.id', 'cp.id as parentId', 'cp.title as parentTitle', 'c.image');
 
-            $qb->leftJoin('c.parent', 'cp');
+        $qb->leftJoin('c.parent', 'cp');
 
-            $qb->where('c.parent = ' . $categoryLevel['id']);
+        $qb->where('c.parent = ' . $parentCategoryLevelId);
 
-            $categoryLevel['childCategory1'] = $qb->getQuery()->getResult();
-        }
-
-        return $categoryLevels;
-    }
-
-    private function getSecondLevelCategories(array $categoryLevels): array
-    {
-        foreach ($categoryLevels as &$categoryLevel) {
-
-            foreach ($categoryLevel['childCategory1'] as &$childCategory) {
-                $qb = $this->createQueryBuilder('c');
-
-                $qb->select('c.title', 'c.id', 'cp.id as parentId', 'cp.title as parentTitle', 'c.image');
-
-                $qb->leftJoin('c.parent', 'cp');
-
-                $qb->where('c.parent = ' . $childCategory['id']);
-
-                $childCategory['childCategory2'] = $qb->getQuery()->getResult();
-            }
-        }
-
-        return $categoryLevels;
-    }
-
-    public function getCategoryLevels(): array
-    {
-        $categoryLevels = $this->getRootCategories();
-
-        $categoryLevels = $this->getFirstLevelCategories($categoryLevels);
-
-        return $this->getSecondLevelCategories($categoryLevels);
-    }
-
-    public function getMenuConfig(): array
-    {
-        $config = $this->getCategoryLevels();
-
-        return array_map(/**
-         * @throws NonUniqueResultException
-         */ function ($root) {
-            $productRepository = $this->getEntityManager()->getRepository('App:Product');
-
-            $config1 = [];
-
-            $config1['flag'] = strtolower($root['title']);
-
-            $categoryIdsForAllBrandsMenu = [];
-
-            foreach ($root['childCategory1'] as $firstLevel) {
-                $config1['categories'][$firstLevel['title']]['subCategories'] = $firstLevel['childCategory2'];
-
-                $secondLevelCategoryIds = [];
-
-                //$subCategoryIdsGETParams = '';
-
-                foreach ($firstLevel['childCategory2'] as $secondLevel) {
-                    $secondLevelCategoryIds[] = (int)$secondLevel['id'];
-
-                    //$subCategoryIdsGETParams .= "&categories[]=" . (int)$secondLevel['id'];
-                }
-
-                $brandInfo = $productRepository->getProductBrandsByCategories($secondLevelCategoryIds);
-
-                $config1['categories'][$firstLevel['title']]['brandsData'] = $brandInfo;
-
-                $config1['categories'][$firstLevel['title']]['subCategoryIds'] = $secondLevelCategoryIds;
-
-                //$config1['categories'][$firstLevel['title']]['subCategoryIdsGETParams'] = $subCategoryIdsGETParams;
-
-                $previewCategoryIds = array_slice($secondLevelCategoryIds, 0, 2);
-
-                $previewCategories = [];
-
-                foreach ($previewCategoryIds as $id) {
-                    $previewCategory = $productRepository->getPreviewCategory($id);
-
-                    if ($previewCategory) {
-                        $previewCategories[] = $previewCategory;
-                    }
-                }
-
-                $config1['categories'][$firstLevel['title']]['previewCategories'] = $previewCategories;
-
-                for ($i = 0; $i <= 3; $i++) {
-                    if (isset($secondLevelCategoryIds[$i])) {
-                        $categoryIdsForAllBrandsMenu[] = $secondLevelCategoryIds[$i];
-                    }
-                }
-            }
-
-            $config1['brands'] = $productRepository->getProductBrandsByCategories($categoryIdsForAllBrandsMenu);
-
-            return $config1;
-
-        }, $config);
+        return $qb->getQuery()->getResult();
     }
 
     private function getCategoryListQB(): QueryBuilder

@@ -13,6 +13,7 @@ use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Exception\SystemErrorException;
 use App\Exception\ValidationErrorException;
+use App\Service\CategoryLevelsBuilder;
 use App\Service\Filter\CategoryFilterService;
 use App\Service\PageDeterminerService;
 use App\Service\Pagination\PaginationService;
@@ -36,13 +37,15 @@ class ProductController extends AbstractController
     private PageDeterminerService $pageDeterminerService;
     private SearchService $searchService;
     private CategoryFilterService $categoryFilterService;
+    private CategoryLevelsBuilder $categoryLevelsBuilder;
 
     public function __construct(PaginationService      $paginationService,
                                 EntityManagerInterface $em,
                                 Filesystem             $fileSystem,
                                 PageDeterminerService  $pageDeterminerService,
                                 SearchService          $searchService,
-                                CategoryFilterService  $categoryFilterService)
+                                CategoryFilterService  $categoryFilterService,
+                                CategoryLevelsBuilder  $categoryLevelsBuilder)
     {
         $this->paginationService = $paginationService;
         $this->em = $em;
@@ -50,6 +53,7 @@ class ProductController extends AbstractController
         $this->pageDeterminerService = $pageDeterminerService;
         $this->searchService = $searchService;
         $this->categoryFilterService = $categoryFilterService;
+        $this->categoryLevelsBuilder = $categoryLevelsBuilder;
     }
 
     /**
@@ -136,7 +140,7 @@ class ProductController extends AbstractController
      */
     public function addForm(Request $request): Response
     {
-        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
+        $categoryLevels = $this->categoryLevelsBuilder->getCategoryLevels();
 
         $brands = $this->em->getRepository(Brand::class)->getBrandListSortedByTitle();
 
@@ -445,7 +449,7 @@ class ProductController extends AbstractController
      */
     public function editForm(Request $request): Response
     {
-        $categoryLevels = $this->em->getRepository(Category::class)->getCategoryLevels();
+        $categoryLevels = $this->categoryLevelsBuilder->getCategoryLevels();
 
         $brands = $this->em->getRepository(Brand::class)->getBrandListSortedByTitle();
 
