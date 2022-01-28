@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 class ProductRepository extends ServiceEntityRepository
@@ -54,7 +55,7 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
     public function countProductsInList(array $join, array $where): int
@@ -82,52 +83,36 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
-    public function getProductBrandsByCategories(array $categoryIds): array
+    public function getProductBrandsByCategories(array $brandIds, int $categoryId): ?array
     {
-        $result = [];
+        $qb = $this->createQueryBuilder('p');
 
-        $brandIds = [];
+        $qb->select("b.id as brandId, b.title as brandTitle, p.image as productImage, cp.id as parentId");
 
-        foreach ($categoryIds as $categoryId) {
-            $qb = $this->createQueryBuilder('p');
+        $qb->join('p.brand', 'b');
 
-            $qb->select("b.id as brandId, b.title as brandTitle, p.image as productImage, cp.id as parentId");
+        $qb->join('p.category', 'c');
 
-            $qb->join('p.brand', 'b');
+        $qb->join('c.parent', 'cp');
 
-            $qb->join('p.category', 'c');
+        $qb->where("c.id = $categoryId");
 
-            $qb->join('c.parent', 'cp');
+        $qb->andWhere('p.image is not null');
 
-            $qb->where("c.id = $categoryId");
-
-            $qb->andWhere('p.image is not null');
-
-            if ($brandIds) {
-                $qb->andWhere("b.id not in (:brandIds)");
-                $qb->setParameter(':brandIds', $brandIds);
-            }
-
-            $qb->setMaxResults(1);
-
-            $fetchedResult = $qb->getQuery()->getOneOrNullResult();
-
-            if ($fetchedResult) {
-                $brandIds[] = $fetchedResult['brandId'];
-
-                $result['data'][] = $fetchedResult;
-
-                $result['ids'] = $brandIds;
-            }
+        if ($brandIds) {
+            $qb->andWhere("b.id not in (:brandIds)");
+            $qb->setParameter(':brandIds', $brandIds);
         }
 
-        return $result;
+        $qb->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     /**
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function getPreviewCategory(int $categoryId): ?array
     {

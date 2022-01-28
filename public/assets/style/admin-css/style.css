@@ -462,4 +462,21 @@ label {
   font-weight: lighter;
   font-size: 16px;
 }
+.error404 {
+  padding: 30px;
+  text-align: center;
+}
+.error404 .return-button {
+  font-size: 18px;
+  padding: 5px 20px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  transition: background-color 0.1s linear;
+  background-color: #17a2b8;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.error404 .return-button:hover {
+  background-color: #17a2b896;
+}
 /*# sourceMappingURL=style.css.map */

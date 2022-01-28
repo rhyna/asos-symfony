@@ -17,9 +17,9 @@ class ErrorController extends AbstractController
     public function handleException(\Throwable $exception, LoggerInterface $logger): Response
     {
         if ($exception instanceof NotFoundHttpException) {
-            // $this->render('path-to-view', [], new Response('', 404));
+             return $this->render('_errors/error404.html.twig', [], new Response('', 404));
 
-            return new Response('404', 404); // сделать рендер вьюхи в папке templates/_errors/
+            //return new Response('404', 404); // сделать рендер вьюхи в папке templates/_errors/
         }
         if ($exception instanceof AccessDeniedHttpException || $exception instanceof UnauthorizedHttpException) {
             return new Response('403/401'); // сделать рендер вьюхи в папке templates/_errors/

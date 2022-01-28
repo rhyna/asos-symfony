@@ -11,11 +11,15 @@ class TopMenuBuilder
 {
     private CategoryLevelsBuilder $categoryLevelsBuilder;
     private EntityManagerInterface $em;
+    private TopMenuBrandListBuilder $topMenuBrandListBuilder;
 
-    public function __construct(CategoryLevelsBuilder $categoryLevelsBuilder, EntityManagerInterface $em)
+    public function __construct(CategoryLevelsBuilder $categoryLevelsBuilder,
+                                EntityManagerInterface $em,
+                                TopMenuBrandListBuilder $topMenuBrandListBuilder)
     {
         $this->categoryLevelsBuilder = $categoryLevelsBuilder;
         $this->em = $em;
+        $this->topMenuBrandListBuilder = $topMenuBrandListBuilder;
     }
 
     public function getMenuConfig(): array
@@ -40,7 +44,7 @@ class TopMenuBuilder
                     $secondLevelCategoryIds[] = (int)$secondLevel['id'];
                 }
 
-                $brandInfo = $productRepository->getProductBrandsByCategories($secondLevelCategoryIds);
+                $brandInfo = $this->topMenuBrandListBuilder->getBrandList($secondLevelCategoryIds);
 
                 $config1['categories'][$firstLevel['title']]['brandsData'] = $brandInfo;
 
@@ -67,7 +71,7 @@ class TopMenuBuilder
                 }
             }
 
-            $config1['brands'] = $productRepository->getProductBrandsByCategories($categoryIdsForAllBrandsMenu);
+            $config1['brands'] = $this->topMenuBrandListBuilder->getBrandList($categoryIdsForAllBrandsMenu);
 
             return $config1;
 
