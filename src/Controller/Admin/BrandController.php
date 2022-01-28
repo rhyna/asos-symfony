@@ -142,7 +142,7 @@ class BrandController extends AbstractController
         $brand = $this->em->getRepository(Brand::class)->find($id);
 
         if (!$brand) {
-            throw new NotFoundException('Brand not found');
+            throw new NotFoundException('Brand not found', 404);
         }
 
         $dto = new BrandDto();

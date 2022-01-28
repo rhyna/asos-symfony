@@ -17,15 +17,47 @@ class ErrorController extends AbstractController
     public function handleException(\Throwable $exception, LoggerInterface $logger): Response
     {
         if ($exception instanceof NotFoundHttpException) {
-             return $this->render('_errors/error404.html.twig', [], new Response('', 404));
+             return $this->render('_errors/error-page.html.twig', [
+                 'title' => 'Error 404',
+                 'header' => 'Error 404 - Page not found',
+                 'message' => 'Something went wrong. The page you requested has not been found.',
+             ], new Response('', 404));
+        }
 
-            //return new Response('404', 404); // сделать рендер вьюхи в папке templates/_errors/
+        if ($exception instanceof AccessDeniedHttpException) {
+            return $this->render('_errors/error-page.html.twig', [
+                 'title' => 'Error 403',
+                 'header' => 'Error 403 - Access denied',
+                 'message' => 'Something went wrong. You don\'t have a right to view this page.',
+             ], new Response('', 403));
         }
-        if ($exception instanceof AccessDeniedHttpException || $exception instanceof UnauthorizedHttpException) {
-            return new Response('403/401'); // сделать рендер вьюхи в папке templates/_errors/
+
+        if ($exception instanceof UnauthorizedHttpException) {
+            return $this->render('_errors/error-page.html.twig', [
+                 'title' => 'Error 401',
+                 'header' => 'Error 401 - Unauthorized',
+                 'message' => 'Something went wrong. Access denied to unauthorized users.',
+             ], new Response('', 401));
         }
+
+//        if ($exception instanceof AccessDeniedHttpException || $exception instanceof UnauthorizedHttpException) {
+//            return $this->render('_errors/error-page.html.twig', [
+//                 'title' => 'Error 40x',
+//                 'header' => 'Error 40x - xxx',
+//                 'message' => 'Something went wrong. xxx',
+//             ], new Response(''));
+//
+//            //return new Response('403/401'); // сделать рендер вьюхи в папке templates/_errors/
+//        }
+
         if ($exception instanceof AsosException) {
-            return new Response($exception->getMessage()); // сделать рендер вьюхи в папке templates/_errors/
+            return $this->render('_errors/error-page.html.twig', [
+                 'title' => 'Error ' . $exception->getCode(),
+                 'header' => 'Error ' . $exception->getCode(),
+                 'message' => $exception->getMessage(),
+             ], new Response('', $exception->getCode()));
+
+            //return new Response($exception->getMessage()); // сделать рендер вьюхи в папке templates/_errors/
         }
 
         return new Response($exception->getMessage(), 500);

@@ -217,7 +217,7 @@ class CategoryController extends AbstractController
         $category = $this->em->getRepository(Category::class)->find($request->get('id'));
 
         if (!$category) {
-            throw new NotFoundException('Category not found');
+            throw new NotFoundException('Category not found', 404);
         }
 
         $dto = new CategoryDto();
