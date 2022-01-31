@@ -35,7 +35,7 @@ class BrandCatalogController extends AbstractController
      */
     public function brand(Request $request): Response
     {
-        try {
+//        try {
             $id = (int)$request->get('id');
 
             $gender = $request->get('gender');
@@ -176,12 +176,12 @@ class BrandCatalogController extends AbstractController
                 'breadcrumbs' => $breadcrumbs,
             ]);
 
-        } catch (NotFoundException $e) {
-            return new Response($e->getMessage(), 404);
-
-        } catch (\Throwable $e) {
-            return new Response($e->getMessage(), 500);
-        }
+//        } catch (NotFoundException $e) {
+//            return new Response($e->getMessage(), 404);
+//
+//        } catch (\Throwable $e) {
+//            return new Response($e->getMessage(), 500);
+//        }
     }
 
     /**

@@ -168,19 +168,19 @@ class ProductController extends AbstractController
         $title = $request->get('title');
 
         if (!$title) {
-            throw new BadRequestException('No title provided', 400);
+            throw new BadRequestException('No title provided');
         }
 
         $productCode = (int)$request->get('productCode');
 
         if (!$productCode) {
-            throw new BadRequestException('No product code provided', 400);
+            throw new BadRequestException('No product code provided');
         }
 
         $price = $request->get('price');
 
         if (!$price) {
-            throw new BadRequestException('No price provided', 400);
+            throw new BadRequestException('No price provided');
         }
 
         $price = (float)$price;
@@ -190,7 +190,7 @@ class ProductController extends AbstractController
         $categoryId = (int)$request->get('categoryId');
 
         if (!$categoryId) {
-            throw new BadRequestException('No category id provided', 400);
+            throw new BadRequestException('No category id provided');
         }
 
         /**
@@ -199,13 +199,13 @@ class ProductController extends AbstractController
         $category = $this->em->getRepository(Category::class)->find($categoryId);
 
         if (!$category) {
-            throw new NotFoundException('Category not found', 404);
+            throw new NotFoundException('Category not found');
         }
 
         $sizeIds = $request->get('sizes');
 
         if (!$sizeIds) {
-            throw new BadRequestException('No size id(s) provided', 400);
+            throw new BadRequestException('No size id(s) provided');
         }
 
         $sizes = $this->getSizeArray($sizeIds);
@@ -255,7 +255,7 @@ class ProductController extends AbstractController
             $productCodeExists = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productData['productCode']]);
 
             if ($productCodeExists) {
-                throw new ValidationErrorException('A product with such a product code already exists', 422);
+                throw new ValidationErrorException('A product with such a product code already exists');
             }
 
             $product = new Product($productData['productCode'], $productData['price'], $productData['title'], $productData['category']);
@@ -368,7 +368,7 @@ class ProductController extends AbstractController
             $size = $this->em->getRepository(Size::class)->find((int)$sizeId);
 
             if (!$size) {
-                throw new NotFoundException('Size not found', 404);
+                throw new NotFoundException('Size not found');
             }
 
             $sizes[] = $size;
@@ -393,7 +393,7 @@ class ProductController extends AbstractController
             $brand = $this->em->getRepository(Brand::class)->find($brandId);
 
             if (!$brand) {
-                throw new NotFoundException('Brand not found', 404);
+                throw new NotFoundException('Brand not found');
             }
         }
 
@@ -496,10 +496,8 @@ class ProductController extends AbstractController
 //        try {
             $id = (int)$request->get('id');
 
-            $id = null;
-
             if (!$id) {
-                throw new BadRequestException('No id provided', 400);
+                throw new BadRequestException('No id provided');
             }
 
             /**
@@ -508,7 +506,7 @@ class ProductController extends AbstractController
             $product = $this->em->getRepository(Product::class)->find($id);
 
             if (!$product) {
-                throw new BadRequestException('Product not found', 404);
+                throw new NotFoundException('Product not found');
             }
 
             $productData = $this->getProductDataForAddAndEdit($request);
@@ -522,7 +520,7 @@ class ProductController extends AbstractController
                 $productByProductCodeId = (int)$productByProductCode->getId();
 
                 if ($productByProductCodeId !== $id) {
-                    throw new ValidationErrorException('A product with such a product code already exists', 422);
+                    throw new ValidationErrorException('A product with such a product code already exists');
                 }
             }
 
@@ -758,7 +756,7 @@ class ProductController extends AbstractController
         $extension = $image->getClientOriginalExtension();
 
         if (!in_array($extension, $extensions)) {
-            throw new ValidationErrorException("File extension should be: 'png', 'jpeg', 'jpg', 'gif'", 422);
+            throw new ValidationErrorException("File extension should be: 'png', 'jpeg', 'jpg', 'gif'");
         }
 
         //$size = $image->getMaxFilesize();

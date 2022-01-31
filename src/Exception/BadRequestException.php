@@ -6,5 +6,5 @@ namespace App\Exception;
 
 class BadRequestException extends AsosException
 {
-
+    protected $code = 400;
 }

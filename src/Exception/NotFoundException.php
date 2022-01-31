@@ -6,5 +6,5 @@ namespace App\Exception;
 
 class NotFoundException extends AsosException
 {
-
+    protected $code = 404;
 }

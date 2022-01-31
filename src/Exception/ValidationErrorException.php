@@ -6,5 +6,5 @@ namespace App\Exception;
 
 class ValidationErrorException extends AsosException
 {
-
+    protected $code = 422;
 }

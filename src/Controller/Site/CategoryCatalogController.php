@@ -38,7 +38,9 @@ class CategoryCatalogController extends AbstractController
      */
     public function category(Request $request): Response
     {
-        try {
+//        try {
+           // throw new \Exception();
+
             $categoryId = (int)$request->get('id');
 
             if (!$categoryId) {
@@ -154,14 +156,14 @@ class CategoryCatalogController extends AbstractController
                 'breadcrumbs' => $breadcrumbs,
             ]);
 
-        } catch (BadRequestException $e) {
-            return new Response($e->getMessage(), 400);
-
-        } catch (NotFoundException $e) {
-            return new Response($e->getMessage(), 404);
-
-        } catch (\Throwable $e) {
-            return new Response($e->getMessage(), 500);
-        }
+//        } catch (BadRequestException $e) {
+//            return new Response($e->getMessage(), 400);
+//
+//        } catch (NotFoundException $e) {
+//            return new Response($e->getMessage(), 404);
+//
+//        } catch (\Throwable $e) {
+//            return new Response($e->getMessage(), 500);
+//        }
     }
 }

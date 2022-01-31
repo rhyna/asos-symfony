@@ -27,7 +27,7 @@ class ProductPageController extends AbstractController
      */
     public function product(Request $request): Response
     {
-        try {
+//        try {
             $id = (int)$request->get('id');
 
             if (!$id) {
@@ -112,14 +112,14 @@ class ProductPageController extends AbstractController
                 'gender' => $gender,
             ]);
 
-        } catch (BadRequestException $e) {
-            return new Response($e->getMessage(), 400);
-
-        } catch (NotFoundException $e) {
-            return new Response($e->getMessage(), 404);
-
-        } catch (\Throwable $e) {
-            return new Response($e->getMessage(), 500);
-        }
+//        } catch (BadRequestException $e) {
+//            return new Response($e->getMessage(), 400);
+//
+//        } catch (NotFoundException $e) {
+//            return new Response($e->getMessage(), 404);
+//
+//        } catch (\Throwable $e) {
+//            return new Response($e->getMessage(), 500);
+//        }
     }
 }

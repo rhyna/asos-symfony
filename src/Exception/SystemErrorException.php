@@ -7,4 +7,5 @@ namespace App\Exception;
 class SystemErrorException extends AsosException
 {
     protected $message = 'A system error occurred';
+    protected $code = 500;
 }

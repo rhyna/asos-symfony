@@ -197,7 +197,7 @@ class BannerController extends AbstractController
         $banner = $this->em->getRepository(Banner::class)->find($request->get('id'));
 
         if (!$banner) {
-            throw new NotFoundException('Banner not found', 404);
+            throw new NotFoundException('Banner not found');
         }
 
         $dto = new BannerDto();
@@ -362,8 +362,6 @@ class BannerController extends AbstractController
             $id = (int)$id;
 
             $banner = $this->em->getRepository(Banner::class)->find($id);
-
-            $banner = null;
 
             if (!$banner) {
                 throw new NotFoundException('Such a banner does not exist');
