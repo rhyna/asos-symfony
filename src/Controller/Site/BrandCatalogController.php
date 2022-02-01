@@ -134,7 +134,7 @@ class BrandCatalogController extends AbstractController
                 $categoryIds[] = $data['id'];
             }
 
-            $categoryIds = implode(',', $categoryIds);
+//            $categoryIds = implode(',', $categoryIds);
 
             $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategoryAndBrand($id, $categoryIds);
 
@@ -195,8 +195,6 @@ class BrandCatalogController extends AbstractController
             $categoryRepository = $this->em->getRepository(Category::class);
 
             $categoryIdsByGender = $categoryRepository->getRootSubCategories($gender);
-
-            $categoryIdsByGender = implode(',', $categoryIdsByGender);
 
             $brandRepository = $this->em->getRepository(Brand::class);
 

@@ -60,7 +60,9 @@ class BannerRepository extends ServiceEntityRepository
 
         $qb->join('b.bannerPlace', 'bp');
 
-        $qb->where("bp.gender = '$gender'");
+        $qb->where("bp.gender = :gender");
+
+        $qb->setParameter('gender', $gender);
 
         $result = $qb->getQuery()->getResult();
 
@@ -72,6 +74,5 @@ class BannerRepository extends ServiceEntityRepository
 
         return $formatted;
     }
-
 
 }

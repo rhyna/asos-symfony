@@ -37,7 +37,9 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->leftJoin('c.parent', 'cp');
 
-        $qb->where('c.parent = ' . $parentCategoryLevelId);
+        $qb->where('c.parent = :parentCategoryLevelId');
+
+        $qb->setParameter('parentCategoryLevelId', $parentCategoryLevelId);
 
         return $qb->getQuery()->getResult();
     }
@@ -63,8 +65,14 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->leftJoin('cp.parent', 'cp1');
 
-        foreach ($whereClauses as $clause) {
-            $qb->andWhere($clause);
+//        foreach ($whereClauses as $clause) {
+//            $qb->andWhere($clause);
+//        }
+
+        foreach ($whereClauses as $key => $clause) {
+            $qb->andWhere($clause['clause']);
+
+            $qb->setParameter($key, $clause['parameter']);
         }
 
         $qb->addOrderBy('cp.id', 'ASC');
@@ -88,8 +96,10 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->select("count(distinct c.id)");
 
-        foreach ($whereClauses as $clause) {
-            $qb->andWhere($clause);
+        foreach ($whereClauses as $key => $clause) {
+            $qb->andWhere($clause['clause']);
+
+            $qb->setParameter($key, $clause['parameter']);
         }
 
         return (int)$qb->getQuery()->getSingleScalarResult();
@@ -122,7 +132,7 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $rootSubCategoryIds = $this->getRootSubCategories($gender);
 
-        $rootSubCategories = implode(',', $rootSubCategoryIds);
+        //$rootSubCategories = implode(',', $rootSubCategoryIds);
 
         $qb = $this->createQueryBuilder('c');
 
@@ -132,9 +142,13 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->join("c.parent", "cp");
 
-        $qb->where("p.brand = $brandId");
+        $qb->where("p.brand = :brandId");
 
-        $qb->andWhere("c.id in ($rootSubCategories)");
+        $qb->andWhere("c.id in (:rootSubCategoryIds)");
+
+        $qb->setParameter('brandId', $brandId);
+
+        $qb->setParameter('rootSubCategoryIds', $rootSubCategoryIds);
 
         $qb->orderBy('c.title', 'asc');
 

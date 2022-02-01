@@ -33,14 +33,16 @@ class SizeRepository extends ServiceEntityRepository
 
         $qb->join("p.category", "c");
 
-        $qb->where("c.id = $categoryId");
+        $qb->where("c.id = :categoryId");
 
         $qb->orderBy('s.sortOrder', 'asc');
+
+        $qb->setParameter('categoryId', $categoryId);
 
         return $qb->getQuery()->getArrayResult();
     }
 
-    public function getUniqueSizesOfProductsByCategoryAndBrand(int $brandId, string $categoryIds): array
+    public function getUniqueSizesOfProductsByCategoryAndBrand(int $brandId, array $categoryIds): array
     {
         $qb = $this->getUniqueSizesOfProductsQB();
 
@@ -48,11 +50,15 @@ class SizeRepository extends ServiceEntityRepository
 
         $qb->join("p.brand", "b");
 
-        $qb->where("c.id in ($categoryIds)");
+        $qb->where("c.id in (:categoryIds)");
 
-        $qb->andWhere("b.id = $brandId");
+        $qb->andWhere("b.id = :brandId");
 
         $qb->orderBy('s.sortOrder', 'asc');
+
+        $qb->setParameter('brandId', $brandId);
+
+        $qb->setParameter('categoryIds', $categoryIds);
 
         return $qb->getQuery()->getArrayResult();
     }
@@ -73,9 +79,13 @@ class SizeRepository extends ServiceEntityRepository
 
         $qb->select("count(sp.id)");
 
-        $qb->where("s.id = $sizeId");
+        $qb->where("s.id = :sizeId");
 
-        $qb->andWhere("pcp.id = $categoryId");
+        $qb->andWhere("pcp.id = :categoryId");
+
+        $qb->setParameter('sizeId', $sizeId);
+
+        $qb->setParameter('categoryId', $categoryId);
 
         return (int)$qb->getQuery()->getSingleScalarResult();
     }

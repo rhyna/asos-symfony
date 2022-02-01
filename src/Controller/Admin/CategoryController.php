@@ -74,9 +74,15 @@ class CategoryController extends AbstractController
         $ids = $request->get('ids');
 
         if ($ids) {
-            $ids = implode(',', $ids);
+//            //$ids = implode(',', $ids);
 
-            $whereClauses[] = "cp.id IN ($ids)";
+            $arr['ids']['clause'] = "cp.id IN (:ids)";
+
+            $arr['ids']['parameter'] = $ids;
+
+            $whereClauses['ids'] = $arr['ids'];
+
+//            $whereClauses[] = "cp.id IN ($ids)";
         }
 
         $page = $this->pageDeterminerService->determinePage();

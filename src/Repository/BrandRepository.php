@@ -67,7 +67,7 @@ class BrandRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getBrandsByGender(string $categoryIdsByGender): array
+    public function getBrandsByGender(array $categoryIdsByGender): array
     {
         $qb = $this->createQueryBuilder('br');
 
@@ -75,9 +75,11 @@ class BrandRepository extends ServiceEntityRepository
 
         $qb->join("br.products", 'p');
 
-        $qb->where("p.category in ($categoryIdsByGender)");
+        $qb->where("p.category in (:categoryIdsByGender)");
 
         $qb->orderBy("br.title", "asc");
+
+        $qb->setParameter('categoryIdsByGender', $categoryIdsByGender);
 
         $fetchedResult = $qb->getQuery()->getResult();
 
@@ -92,7 +94,9 @@ class BrandRepository extends ServiceEntityRepository
 
         $qb->join("br.products", "p");
 
-        $qb->where("p.category = $categoryId");
+        $qb->where("p.category = :categoryId");
+
+        $qb->setParameter('categoryId', $categoryId);
 
         return $qb->getQuery()->getResult();
     }
