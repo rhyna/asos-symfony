@@ -91,17 +91,31 @@ class ProductController extends AbstractController
         $categoryIds = $request->get('categories');
 
         if ($categoryIds) {
-            $categoryIds = implode(",", $categoryIds);
+//            $categoryIds = implode(",", $categoryIds);
+//
+//            $where[] = "c.id in ($categoryIds)";
 
-            $where[] = "c.id in ($categoryIds)";
+
+            $arr['categoryIds']['clause'] = "c.id IN (:categoryIds)";
+
+            $arr['categoryIds']['parameter'] = $categoryIds;
+
+            $where['categoryIds'] = $arr['categoryIds'];
         }
 
         $brandIds = $request->get('brands');
 
         if ($brandIds) {
-            $brandIds = implode(",", $brandIds);
+//            $brandIds = implode(",", $brandIds);
+//
+//            $where[] = "b.id in ($brandIds)";
 
-            $where[] = "b.id in ($brandIds)";
+
+            $arr['brandIds']['clause'] = "b.id IN (:brandIds)";
+
+            $arr['brandIds']['parameter'] = $brandIds;
+
+            $where['brandIds'] = $arr['brandIds'];
         }
 
         $sort = $request->get('sort');

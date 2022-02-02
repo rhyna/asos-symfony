@@ -24,12 +24,18 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->addSelect($select);
 
-        foreach ($where as $i => $clause) {
-            if ($i === 0) {
-                $qb->where($clause);
-            } else {
-                $qb->andWhere($clause);
-            }
+//        foreach ($where as $i => $clause) {
+//            if ($i === 0) {
+//                $qb->where($clause);
+//            } else {
+//                $qb->andWhere($clause);
+//            }
+//        }
+
+        foreach ($where as $key => $clause) {
+            $qb->andWhere($clause['clause']);
+
+            $qb->setParameter($key, $clause['parameter']);
         }
 
         foreach ($join as $clause) {
@@ -64,8 +70,14 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->select('count(distinct p.id)');
 
-        foreach ($where as $clause) {
-            $qb->andWhere($clause);
+//        foreach ($where as $clause) {
+//            $qb->andWhere($clause);
+//        }
+
+        foreach ($where as $key => $clause) {
+            $qb->andWhere($clause['clause']);
+
+            $qb->setParameter($key, $clause['parameter']);
         }
 
         foreach ($join as $clause) {
@@ -97,13 +109,16 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->join('c.parent', 'cp');
 
-        $qb->where("c.id = $categoryId");
+        $qb->where("c.id = :categoryId");
+
+        $qb->setParameter('categoryId', $categoryId);
 
         $qb->andWhere('p.image is not null');
 
         if ($brandIds) {
             $qb->andWhere("b.id not in (:brandIds)");
-            $qb->setParameter(':brandIds', $brandIds);
+
+            $qb->setParameter('brandIds', $brandIds);
         }
 
         $qb->setMaxResults(1);
@@ -122,9 +137,11 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->join('p.category', 'c');
 
-        $qb->where("c.id = $categoryId");
+        $qb->where("c.id = :categoryId");
 
         $qb->andWhere('c.image is not null');
+
+        $qb->setParameter('categoryId', $categoryId);
 
         $qb->setMaxResults(1);
 
@@ -139,7 +156,9 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->select('s.id, s.title');
 
-        $qb->where("p.id = $productId");
+        $qb->where("p.id = :productId");
+
+        $qb->setParameter('productId', $productId);
 
         $qb->orderBy('s.sortOrder', 'asc');
 

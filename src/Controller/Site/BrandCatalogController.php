@@ -36,145 +36,165 @@ class BrandCatalogController extends AbstractController
     public function brand(Request $request): Response
     {
 //        try {
-            $id = (int)$request->get('id');
+        $id = (int)$request->get('id');
 
-            $gender = $request->get('gender');
+        $gender = $request->get('gender');
 
-            /**
-             * @var Brand $brand
-             */
-            $brand = $this->em->getRepository(Brand::class)->find($id);
+        /**
+         * @var Brand $brand
+         */
+        $brand = $this->em->getRepository(Brand::class)->find($id);
 
-            if (!$brand) {
-                throw new NotFoundException('No brand found');
-            }
+        if (!$brand) {
+            throw new NotFoundException('No brand found');
+        }
 
-            $description = '';
+        $description = '';
 
-            if ($gender === 'women') {
-                $description = $brand->getDescriptionWomen();
-            }
+        if ($gender === 'women') {
+            $description = $brand->getDescriptionWomen();
+        }
 
-            if ($gender === 'men') {
-                $description = $brand->getDescriptionMen();
-            }
+        if ($gender === 'men') {
+            $description = $brand->getDescriptionMen();
+        }
 
-            $brandTitle = $brand->getTitle();
+        $brandTitle = $brand->getTitle();
 
-            $categoryRepository = $this->em->getRepository(Category::class);
+        $categoryRepository = $this->em->getRepository(Category::class);
 
-            $rootSubCategoryIds = $categoryRepository->getRootSubCategories($gender);
+        $rootSubCategoryIds = $categoryRepository->getRootSubCategories($gender);
 
-            $page = $this->pageDeterminerService->determinePage();
+        $page = $this->pageDeterminerService->determinePage();
 
-            $select = "p.title, p.price, p.image";
+        $select = "p.title, p.price, p.image";
 
-            $join = [
-                [
-                    'clause' => 'p.brand',
-                    'alias' => 'b',
-                    'type' => 'leftJoin',
-                ],
-                [
-                    'clause' => 'p.category',
-                    'alias' => 'c',
-                    'type' => 'join',
-                ],
+        $join = [
+            [
+                'clause' => 'p.brand',
+                'alias' => 'b',
+                'type' => 'leftJoin',
+            ],
+            [
+                'clause' => 'p.category',
+                'alias' => 'c',
+                'type' => 'join',
+            ],
+        ];
+
+        $where = [];
+
+        $order = [];
+
+        $where['id']['clause'] = "b.id = :id";
+
+        $where['id']['parameter'] = $id;
+
+        $sizeIds = $request->get('sizes');
+
+        if ($sizeIds) {
+//            $sizeIds = implode(",", $sizeIds);
+//
+//            $where[] = "s.id in ($sizeIds)";
+
+            $arr['sizeIds']['clause'] = "s.id IN (:sizeIds)";
+
+            $arr['sizeIds']['parameter'] = $sizeIds;
+
+            $where['sizeIds'] = $arr['sizeIds'];
+
+            $join[] = [
+                'clause' => 'p.sizes',
+                'alias' => 's',
+                'type' => 'join',
             ];
+        }
 
-            $where = [];
+        $categoryIds = $request->get('categories');
 
-            $order = [];
+        if ($categoryIds) {
+//            $categoryIds = implode(",", $categoryIds);
+//
+//            $where[] = "c.id in ($categoryIds)";
 
-            $where[] = "b.id = $id";
+            $arr['categoryIds']['clause'] = "c.id IN (:categoryIds)";
 
-            $sizeIds = $request->get('sizes');
+            $arr['categoryIds']['parameter'] = $categoryIds;
 
-            if ($sizeIds) {
-                $sizeIds = implode(",", $sizeIds);
+            $where['categoryIds'] = $arr['categoryIds'];
+        }
 
-                $where[] = "s.id in ($sizeIds)";
+        if (!$categoryIds) {
+//            $categoryIds = implode(",", $rootSubCategoryIds);
+//
+//            $where[] = "c.id in ($categoryIds)";
 
-                $join[] =  [
-                    'clause' => 'p.sizes',
-                    'alias' => 's',
-                    'type' => 'join',
-                ];
-            }
+            $arr['categoryIds']['clause'] = "c.id IN (:categoryIds)";
 
-            $categoryIds = $request->get('categories');
+            $arr['categoryIds']['parameter'] = $rootSubCategoryIds;
 
-            if ($categoryIds) {
-                $categoryIds = implode(",", $categoryIds);
+            $where['categoryIds'] = $arr['categoryIds'];
+        }
 
-                $where[] = "c.id in ($categoryIds)";
-            }
+        $sort = $request->get('sort');
 
-            if (!$categoryIds) {
-                $categoryIds = implode(",", $rootSubCategoryIds);
+        if ($sort === 'price-asc') {
+            $order = ["p.price", "ASC"];
+        }
 
-                $where[] = "c.id in ($categoryIds)";
-            }
+        if ($sort === 'price-desc') {
+            $order = ["p.price", "DESC"];
+        }
 
-            $sort = $request->get('sort');
+        $categoryConfig = $categoryRepository->getRootSubCategoriesByBrand($id, $gender);
 
-            if ($sort === 'price-asc') {
-                $order = ["p.price", "ASC"];
-            }
+        $categoryIds = [];
 
-            if ($sort === 'price-desc') {
-                $order = ["p.price", "DESC"];
-            }
-
-            $categoryConfig = $categoryRepository->getRootSubCategoriesByBrand($id, $gender);
-
-            $categoryIds = [];
-
-            foreach ($categoryConfig as $data) {
-                $categoryIds[] = $data['id'];
-            }
+        foreach ($categoryConfig as $data) {
+            $categoryIds[] = $data['id'];
+        }
 
 //            $categoryIds = implode(',', $categoryIds);
 
-            $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategoryAndBrand($id, $categoryIds);
+        $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategoryAndBrand($id, $categoryIds);
 
-            $productRepository = $this->em->getRepository(Product::class);
+        $productRepository = $this->em->getRepository(Product::class);
 
-            $totalProducts = $productRepository->countProductsInList($join, $where);
+        $totalProducts = $productRepository->countProductsInList($join, $where);
 
-            $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
+        $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
 
-            $products = $productRepository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
+        $products = $productRepository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
 
-            $breadcrumbs = [
-                [
-                    'title' => $gender,
-                    'url' => $this->generateUrl($gender),
+        $breadcrumbs = [
+            [
+                'title' => $gender,
+                'url' => $this->generateUrl($gender),
 
-                ],
-                [
-                    'title' => "All $gender brands",
-                    'url' => $this->generateUrl('all-brands', ['gender' => $gender]),
-                ],
-                [
-                    'title' => $brandTitle,
-                    'url' => '',
-                ],
-            ];
+            ],
+            [
+                'title' => "All $gender brands",
+                'url' => $this->generateUrl('all-brands', ['gender' => $gender]),
+            ],
+            [
+                'title' => $brandTitle,
+                'url' => '',
+            ],
+        ];
 
-            return $this->render('site/catalog.html.twig', [
-                'entity' => $brand,
-                'entityType' => 'brand',
-                'title' => ucwords("$gender $brandTitle | ASOS"),
-                'description' => $description,
-                'gender' => $gender,
-                'categoryConfig' => $categoryConfig,
-                'sizeConfig' => $sizeConfig,
-                'products' => $products,
-                'pagination' => $pagination,
-                'page' => $page,
-                'breadcrumbs' => $breadcrumbs,
-            ]);
+        return $this->render('site/catalog.html.twig', [
+            'entity' => $brand,
+            'entityType' => 'brand',
+            'title' => ucwords("$gender $brandTitle | ASOS"),
+            'description' => $description,
+            'gender' => $gender,
+            'categoryConfig' => $categoryConfig,
+            'sizeConfig' => $sizeConfig,
+            'products' => $products,
+            'pagination' => $pagination,
+            'page' => $page,
+            'breadcrumbs' => $breadcrumbs,
+        ]);
 
 //        } catch (NotFoundException $e) {
 //            return new Response($e->getMessage(), 404);

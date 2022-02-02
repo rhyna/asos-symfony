@@ -39,122 +39,138 @@ class CategoryCatalogController extends AbstractController
     public function category(Request $request): Response
     {
 //        try {
-           // throw new \Exception();
+        // throw new \Exception();
 
-            $categoryId = (int)$request->get('id');
+        $categoryId = (int)$request->get('id');
 
-            if (!$categoryId) {
-                throw new BadRequestException('No id provided');
-            }
+        if (!$categoryId) {
+            throw new BadRequestException('No id provided');
+        }
 
-            $gender = $request->get('gender');
+        $gender = $request->get('gender');
 
-            /**
-             * @var Category $category
-             */
-            $category = $this->em->getRepository(Category::class)->find($categoryId);
+        /**
+         * @var Category $category
+         */
+        $category = $this->em->getRepository(Category::class)->find($categoryId);
 
-            if (!$category) {
-                throw new NotFoundException('No category found');
-            }
+        if (!$category) {
+            throw new NotFoundException('No category found');
+        }
 
-            $categoryTitle = $category->getTitle();
+        $categoryTitle = $category->getTitle();
 
-            $categoryDescription = $category->getDescription();
+        $categoryDescription = $category->getDescription();
 
-            $brandConfig = $this->em->getRepository(Brand::class)->getBrandsTitleAndIdByCategory($categoryId);
+        $brandConfig = $this->em->getRepository(Brand::class)->getBrandsTitleAndIdByCategory($categoryId);
 
-            $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategory($categoryId);
+        $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategory($categoryId);
 
-            $page = $this->pageDeterminerService->determinePage();
+        $page = $this->pageDeterminerService->determinePage();
 
-            $select = "p.title, p.price, p.image";
+        $select = "p.title, p.price, p.image";
 
-            $join = [
-                [
-                    'clause' => 'p.category',
-                    'alias' => 'c',
-                    'type' => 'join',
-                ],
+        $join = [
+            [
+                'clause' => 'p.category',
+                'alias' => 'c',
+                'type' => 'join',
+            ],
+        ];
+
+        $where = [];
+
+        $order = [];
+
+//        $where[] = "c.id = $categoryId";
+
+        $where['categoryId']['clause'] = "c.id = :categoryId";
+
+        $where['categoryId']['parameter'] = $categoryId;
+
+        $sizeIds = $request->get('sizes');
+
+        if ($sizeIds) {
+//            $sizeIds = implode(",", $sizeIds);
+//
+//            $where[] = "s.id in ($sizeIds)";
+
+            $join[] = [
+                'clause' => 'p.sizes',
+                'alias' => 's',
+                'type' => 'join',
             ];
 
-            $where = [];
+            $arr['sizeIds']['clause'] = "s.id IN (:sizeIds)";
 
-            $order = [];
+            $arr['sizeIds']['parameter'] = $sizeIds;
 
-            $where[] = "c.id = $categoryId";
+            $where['sizeIds'] = $arr['sizeIds'];
+        }
 
-            $sizeIds = $request->get('sizes');
+        $brandIds = $request->get('brands');
 
-            if ($sizeIds) {
-                $sizeIds = implode(",", $sizeIds);
+        if ($brandIds) {
+//            $brandIds = implode(",", $brandIds);
+//
+//            $where[] = "b.id in ($brandIds)";
 
-                $where[] = "s.id in ($sizeIds)";
-
-                $join[] = [
-                    'clause' => 'p.sizes',
-                    'alias' => 's',
-                    'type' => 'join',
-                ];
-            }
-
-            $brandIds = $request->get('brands');
-
-            if ($brandIds) {
-                $brandIds = implode(",", $brandIds);
-
-                $where[] = "b.id in ($brandIds)";
-
-                $join[] = [
-                    'clause' => 'p.brand',
-                    'alias' => 'b',
-                    'type' => 'leftJoin',
-                ];
-            }
-
-            $sort = $request->get('sort');
-
-            if ($sort === 'price-asc') {
-                $order = ["p.price", "ASC"];
-            }
-
-            if ($sort === 'price-desc') {
-                $order = ["p.price", "DESC"];
-            }
-
-            $productRepository = $this->em->getRepository(Product::class);
-
-            $totalProducts = $productRepository->countProductsInList($join, $where);
-
-            $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
-
-            $products = $productRepository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
-
-            $breadcrumbs = [
-                [
-                    'title' => $gender,
-                    'url' => $this->generateUrl($gender),
-
-                ],
-                [
-                    'title' => $categoryTitle,
-                    'url' => $this->generateUrl('category', ['gender' => $gender, 'id' => $categoryId]),
-                ],
+            $join[] = [
+                'clause' => 'p.brand',
+                'alias' => 'b',
+                'type' => 'leftJoin',
             ];
 
-            return $this->render('site/catalog.html.twig', [
-                'entity' => $category,
-                'entityType' => 'category',
-                'title' => ucwords("$gender $categoryTitle | ASOS"),
-                'description' => $categoryDescription,
-                'gender' => $gender,
-                'brandConfig' => $brandConfig,
-                'sizeConfig' => $sizeConfig,
-                'products' => $products,
-                'pagination' => $pagination,
-                'page' => $page,
-                'breadcrumbs' => $breadcrumbs,
-            ]);
+            $arr['brandIds']['clause'] = "b.id IN (:brandIds)";
+
+            $arr['brandIds']['parameter'] = $brandIds;
+
+            $where['brandIds'] = $arr['brandIds'];
+        }
+
+        $sort = $request->get('sort');
+
+        if ($sort === 'price-asc') {
+            $order = ["p.price", "ASC"];
+        }
+
+        if ($sort === 'price-desc') {
+            $order = ["p.price", "DESC"];
+        }
+
+        $productRepository = $this->em->getRepository(Product::class);
+
+        $totalProducts = $productRepository->countProductsInList($join, $where);
+
+        $pagination = $this->paginationService->calculate($page, 12, $totalProducts);
+
+        $products = $productRepository->getProductList($select, $join, $where, $order, $pagination->limit, $pagination->offset);
+
+        $breadcrumbs = [
+            [
+                'title' => $gender,
+                'url' => $this->generateUrl($gender),
+
+            ],
+            [
+                'title' => $categoryTitle,
+                'url' => $this->generateUrl('category', ['gender' => $gender, 'id' => $categoryId]),
+            ],
+        ];
+
+        return $this->render('site/catalog.html.twig', [
+            'entity' => $category,
+            'entityType' => 'category',
+            'title' => ucwords("$gender $categoryTitle | ASOS"),
+            'description' => $categoryDescription,
+            'gender' => $gender,
+            'brandConfig' => $brandConfig,
+            'sizeConfig' => $sizeConfig,
+            'products' => $products,
+            'pagination' => $pagination,
+            'page' => $page,
+            'breadcrumbs' => $breadcrumbs,
+        ]);
 
 //        } catch (BadRequestException $e) {
 //            return new Response($e->getMessage(), 400);
