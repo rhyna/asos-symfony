@@ -71,7 +71,7 @@ class SearchController extends AbstractController
 
         $searchWordIds = $searchRepository->getSearchWordIds($normalizedQueryArray);
 
-        if (!$searchWordIds) {
+        if (!$searchWordIds || count($normalizedQueryArray) !== count($searchWordIds)) {
             return $this->render("site/search-no-result.html.twig", [
                 'title' => "You searched: '$query' | ASOS",
                 'gender' => 'women',
@@ -96,7 +96,13 @@ class SearchController extends AbstractController
 
             $join[] = $arr;
 
-            $where[] = "sw$i.id = $id";
+//            $where[] = "sw$i.id = $id";
+
+            $arr1["id$i"]['clause'] = "sw$i.id = :id$i";
+
+            $arr1["id$i"]['parameter'] = $id;
+
+            $where["id$i"] = $arr1["id$i"];
         }
 
         $page = $this->pageDeterminerService->determinePage();

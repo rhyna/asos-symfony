@@ -79,7 +79,7 @@ class SearchService
 
         $productId = $product->getId();
 
-        $usedSearchWords = $searchWordRepository->checkUsedSearchWords(implode(',', $currentSearchWordIds), $productId);
+        $usedSearchWords = $searchWordRepository->checkUsedSearchWords($currentSearchWordIds, $productId);
 
         $usedSearchWordIds = [];
 

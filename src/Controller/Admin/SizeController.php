@@ -322,7 +322,7 @@ class SizeController extends AbstractController
      */
     public function deleteAction(Request $request): Response
     {
-        try {
+//        try {
             $id = (int)$request->get('id');
 
             if (!$id) {
@@ -375,14 +375,14 @@ class SizeController extends AbstractController
 
             return new Response('Successfully deleted the size', 200);
 
-        } catch (BadRequestException $e) {
-            return new Response($e->getMessage(), 400);
-
-        } catch (NotFoundException $e) {
-            return new Response($e->getMessage(), 404);
-
-        } catch (\Throwable $e) {
-            return new Response($e->getMessage(), 500);
-        }
+//        } catch (BadRequestException $e) {
+//            return new Response($e->getMessage(), 400);
+//
+//        } catch (NotFoundException $e) {
+//            return new Response($e->getMessage(), 404);
+//
+//        } catch (\Throwable $e) {
+//            return new Response($e->getMessage(), 500);
+//        }
     }
 }

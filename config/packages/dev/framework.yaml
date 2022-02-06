@@ -1,2 +1,2 @@
-#framework:
-#    error_controller: App\Controller\Admin\ErrorController::handleException
+framework:
+    error_controller: App\Controller\Admin\ErrorController::handleException

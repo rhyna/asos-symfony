@@ -6,6 +6,8 @@ namespace App\Repository;
 
 use App\Entity\SearchWord;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
 class SearchWordRepository extends ServiceEntityRepository
@@ -17,20 +19,22 @@ class SearchWordRepository extends ServiceEntityRepository
 
     public function getSearchWordIds(array $query): array
     {
-         $qb = $this->createQueryBuilder('sw');
+        $qb = $this->createQueryBuilder('sw');
 
-         $query = "'" . implode("', '", $query) . "'";
+        //$query = "'" . implode("', '", $query) . "'";
 
-         $qb->select("sw.id");
+        $qb->select("sw.id");
 
-         $qb->where("sw.word in ($query)");
+        $qb->where("sw.word in (:query)");
 
-         $fetchedResult = $qb->getQuery()->getResult();
+        $qb->setParameter('query', $query);
 
-         return array_column($fetchedResult, 'id');
+        $fetchedResult = $qb->getQuery()->getResult();
+
+        return array_column($fetchedResult, 'id');
     }
 
-    public function checkUsedSearchWords(string $searchWordIds, int $productId): array
+    public function checkUsedSearchWords(array $searchWordIds, int $productId): array
     {
         $qb = $this->createQueryBuilder('sw');
 
@@ -38,9 +42,13 @@ class SearchWordRepository extends ServiceEntityRepository
 
         $qb->join("sw.products", "swp");
 
-        $qb->where("sw.id in ($searchWordIds)");
+        $qb->where("sw.id in (:searchWordIds)");
 
-        $qb->andWhere("swp.id != $productId");
+        $qb->setParameter('searchWordIds', $searchWordIds);
+
+        $qb->andWhere("swp.id != :productId");
+
+        $qb->setParameter('productId', $productId);
 
         return $qb->getQuery()->getScalarResult();
     }
@@ -50,10 +58,12 @@ class SearchWordRepository extends ServiceEntityRepository
      */
     public function deleteUnusedSearchWords(array $unusedSearchWordIds): void
     {
-        $unusedSearchWordIds = implode(',', $unusedSearchWordIds);
+        //$unusedSearchWordIds = implode(',', $unusedSearchWordIds);
 
-        $sql = "delete from search_word sw where sw.id in ($unusedSearchWordIds)";
+        $sql = "delete from search_word sw where sw.id in (?)";
 
-        $this->_em->getConnection()->executeQuery($sql);
+        $this->_em->getConnection()->executeQuery($sql, [
+            $unusedSearchWordIds
+        ], [Connection::PARAM_INT_ARRAY]);
     }
 }

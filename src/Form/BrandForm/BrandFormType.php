@@ -35,7 +35,6 @@ class BrandFormType extends AbstractType
             'label' => 'Description (women)',
             'required' => false,
             'constraints' => [
-//                new Type('string'),
             ],
         ]);
     }
