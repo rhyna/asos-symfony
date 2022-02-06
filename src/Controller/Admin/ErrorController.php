@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
@@ -32,7 +33,7 @@ class ErrorController extends AbstractController
              ], new Response('', 403));
         }
 
-        if ($exception instanceof UnauthorizedHttpException) {
+        if ($exception instanceof UnauthorizedHttpException || ($exception instanceof HttpException && $exception->getStatusCode() === 401)) {
             return $this->render('_errors/error-page.html.twig', [
                  'title' => 'Error 401',
                  'header' => 'Error 401 - Unauthorized',
