@@ -62,6 +62,8 @@ class ProductController extends AbstractController
      */
     public function list(Request $request): Response
     {
+        $user = $this->getUser();
+
         $repository = $this->em->getRepository(Product::class);
 
         $select = 'p.title, p.productCode, p.price, p.image, 
@@ -91,11 +93,6 @@ class ProductController extends AbstractController
         $categoryIds = $request->get('categories');
 
         if ($categoryIds) {
-//            $categoryIds = implode(",", $categoryIds);
-//
-//            $where[] = "c.id in ($categoryIds)";
-
-
             $arr['categoryIds']['clause'] = "c.id IN (:categoryIds)";
 
             $arr['categoryIds']['parameter'] = $categoryIds;
@@ -106,11 +103,6 @@ class ProductController extends AbstractController
         $brandIds = $request->get('brands');
 
         if ($brandIds) {
-//            $brandIds = implode(",", $brandIds);
-//
-//            $where[] = "b.id in ($brandIds)";
-
-
             $arr['brandIds']['clause'] = "b.id IN (:brandIds)";
 
             $arr['brandIds']['parameter'] = $brandIds;
@@ -263,89 +255,75 @@ class ProductController extends AbstractController
      */
     public function addAction(Request $request): Response
     {
-//        try {
-            $productData = $this->getProductDataForAddAndEdit($request);
+        $productData = $this->getProductDataForAddAndEdit($request);
 
-            $productCodeExists = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productData['productCode']]);
+        $productCodeExists = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productData['productCode']]);
 
-            if ($productCodeExists) {
-                throw new ValidationErrorException('A product with such a product code already exists');
+        if ($productCodeExists) {
+            throw new ValidationErrorException('A product with such a product code already exists');
+        }
+
+        $product = new Product($productData['productCode'], $productData['price'], $productData['title'], $productData['category']);
+
+        $product->setBrand($productData['brand']);
+
+        $product->setProductDetails($productData['details']);
+
+        $product->setAboutMe($productData['aboutMe']);
+
+        $product->setLookAfterMe($productData['lookAfterMe']);
+
+        foreach ($productData['sizes'] as $size) {
+            $product->addSize($size);
+        }
+
+        foreach ($productData['imageData'] as $image => $data) {
+            if (!$data) {
+                continue;
             }
 
-            $product = new Product($productData['productCode'], $productData['price'], $productData['title'], $productData['category']);
+            if ($image === 'image') {
+                $product->setImage($data['destination']);
 
-            $product->setBrand($productData['brand']);
-
-            $product->setProductDetails($productData['details']);
-
-            $product->setAboutMe($productData['aboutMe']);
-
-            $product->setLookAfterMe($productData['lookAfterMe']);
-
-            foreach ($productData['sizes'] as $size) {
-                $product->addSize($size);
+                $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
             }
 
-            foreach ($productData['imageData'] as $image => $data) {
-                if (!$data) {
-                    continue;
-                }
+            if ($image === 'image1') {
+                $product->setImage1($data['destination']);
 
-                if ($image === 'image') {
-                    $product->setImage($data['destination']);
-
-                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
-                }
-
-                if ($image === 'image1') {
-                    $product->setImage1($data['destination']);
-
-                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
-                }
-
-                if ($image === 'image2') {
-                    $product->setImage2($data['destination']);
-
-                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
-                }
-
-                if ($image === 'image3') {
-                    $product->setImage3($data['destination']);
-
-                    $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
-                }
+                $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
             }
 
-            foreach ($productData['normalizedSearchWords'] as $word) {
-                $searchWord = $this->em->getRepository(SearchWord::class)->findOneBy(['word' => $word]);
+            if ($image === 'image2') {
+                $product->setImage2($data['destination']);
 
-                if (!$searchWord) {
-                    $searchWord = new SearchWord($word);
-                }
-
-                $product->addSearchWord($searchWord);
-
-                $this->em->persist($searchWord);
+                $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
             }
 
-            $this->em->persist($product);
+            if ($image === 'image3') {
+                $product->setImage3($data['destination']);
 
-            $this->em->flush();
+                $data['object']->move($this->getParameter('public_dir') . $data['directory'], $data['uniqueName']);
+            }
+        }
 
-            return $this->redirectToRoute('admin.product.edit.form', ['id' => $product->getId()]);
+        foreach ($productData['normalizedSearchWords'] as $word) {
+            $searchWord = $this->em->getRepository(SearchWord::class)->findOneBy(['word' => $word]);
 
-//        } catch (BadRequestException $e) {
-//            return new Response($e->getMessage(), 400);
-//
-//        } catch (NotFoundException $e) {
-//            return new Response($e->getMessage(), 404);
-//
-//        } catch (ValidationErrorException $e) {
-//            return new Response($e->getMessage(), 422);
-//
-//        } catch (\Throwable $e) {
-//            return new Response($e->getMessage(), 500);
-//        }
+            if (!$searchWord) {
+                $searchWord = new SearchWord($word);
+            }
+
+            $product->addSearchWord($searchWord);
+
+            $this->em->persist($searchWord);
+        }
+
+        $this->em->persist($product);
+
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin.product.edit.form', ['id' => $product->getId()]);
     }
 
     private function validateProductImage(array $image): bool
@@ -507,133 +485,119 @@ class ProductController extends AbstractController
      */
     public function editAction(Request $request): Response
     {
-//        try {
-            $id = (int)$request->get('id');
+        $id = (int)$request->get('id');
 
-            if (!$id) {
-                throw new BadRequestException('No id provided');
+        if (!$id) {
+            throw new BadRequestException('No id provided');
+        }
+
+        /**
+         * @var Product $product
+         */
+        $product = $this->em->getRepository(Product::class)->find($id);
+
+        if (!$product) {
+            throw new NotFoundException('Product not found');
+        }
+
+        $productData = $this->getProductDataForAddAndEdit($request);
+
+        /**
+         * @var Product $productByProductCode
+         */
+        $productByProductCode = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productData['productCode']]);
+
+        if ($productByProductCode) {
+            $productByProductCodeId = (int)$productByProductCode->getId();
+
+            if ($productByProductCodeId !== $id) {
+                throw new ValidationErrorException('A product with such a product code already exists');
+            }
+        }
+
+        $product->setTitle($productData['title']);
+
+        $product->setProductCode($productData['productCode']);
+
+        $product->setPrice($productData['price']);
+
+        $product->setCategory($productData['category']);
+
+        $product->setBrand($productData['brand']);
+
+        $product->setProductDetails($productData['details']);
+
+        $product->setAboutMe($productData['aboutMe']);
+
+        $product->setLookAfterMe($productData['lookAfterMe']);
+
+        $product->deleteSizes();
+
+        foreach ($productData['sizes'] as $size) {
+            $product->addSize($size);
+        }
+
+        $unusedSearchWordIds = $this->searchService->findUnusedSearchWordsToDelete($product);
+
+        $product->deleteSearchWords();
+
+        $searchWordRepository = $this->em->getRepository(SearchWord::class);
+
+        $searchWordRepository->deleteUnusedSearchWords($unusedSearchWordIds);
+
+        foreach ($productData['normalizedSearchWords'] as $word) {
+            $searchWord = $searchWordRepository->findOneBy(['word' => $word]);
+
+            if (!$searchWord) {
+                $searchWord = new SearchWord($word);
             }
 
-            /**
-             * @var Product $product
-             */
-            $product = $this->em->getRepository(Product::class)->find($id);
+            $product->addSearchWord($searchWord);
 
-            if (!$product) {
-                throw new NotFoundException('Product not found');
+            $this->em->persist($searchWord);
+        }
+
+        foreach ($productData['imageData'] as $image => $data) {
+            if (!$data) {
+                continue;
             }
 
-            $productData = $this->getProductDataForAddAndEdit($request);
+            if ($image === 'image') {
+                $prevImage = $product->getImage();
 
-            /**
-             * @var Product $productByProductCode
-             */
-            $productByProductCode = $this->em->getRepository(Product::class)->findOneBy(['productCode' => $productData['productCode']]);
+                $product->setImage($data['destination']);
 
-            if ($productByProductCode) {
-                $productByProductCodeId = (int)$productByProductCode->getId();
-
-                if ($productByProductCodeId !== $id) {
-                    throw new ValidationErrorException('A product with such a product code already exists');
-                }
+                $this->moveNewImageAndRemoveOld($data, $prevImage);
             }
 
-            $product->setTitle($productData['title']);
+            if ($image === 'image1') {
+                $prevImage = $product->getImage1();
 
-            $product->setProductCode($productData['productCode']);
+                $product->setImage1($data['destination']);
 
-            $product->setPrice($productData['price']);
-
-            $product->setCategory($productData['category']);
-
-            $product->setBrand($productData['brand']);
-
-            $product->setProductDetails($productData['details']);
-
-            $product->setAboutMe($productData['aboutMe']);
-
-            $product->setLookAfterMe($productData['lookAfterMe']);
-
-            $product->deleteSizes();
-
-            foreach ($productData['sizes'] as $size) {
-                $product->addSize($size);
+                $this->moveNewImageAndRemoveOld($data, $prevImage);
             }
 
-            $unusedSearchWordIds = $this->searchService->findUnusedSearchWordsToDelete($product);
+            if ($image === 'image2') {
+                $prevImage = $product->getImage2();
 
-            $product->deleteSearchWords();
+                $product->setImage2($data['destination']);
 
-            $searchWordRepository = $this->em->getRepository(SearchWord::class);
-
-            $searchWordRepository->deleteUnusedSearchWords($unusedSearchWordIds);
-
-            foreach ($productData['normalizedSearchWords'] as $word) {
-                $searchWord = $searchWordRepository->findOneBy(['word' => $word]);
-
-                if (!$searchWord) {
-                    $searchWord = new SearchWord($word);
-                }
-
-                $product->addSearchWord($searchWord);
-
-                $this->em->persist($searchWord);
+                $this->moveNewImageAndRemoveOld($data, $prevImage);
             }
 
-            foreach ($productData['imageData'] as $image => $data) {
-                if (!$data) {
-                    continue;
-                }
+            if ($image === 'image3') {
+                $prevImage = $product->getImage3();
 
-                if ($image === 'image') {
-                    $prevImage = $product->getImage();
+                $product->setImage3($data['destination']);
 
-                    $product->setImage($data['destination']);
-
-                    $this->moveNewImageAndRemoveOld($data, $prevImage);
-                }
-
-                if ($image === 'image1') {
-                    $prevImage = $product->getImage1();
-
-                    $product->setImage1($data['destination']);
-
-                    $this->moveNewImageAndRemoveOld($data, $prevImage);
-                }
-
-                if ($image === 'image2') {
-                    $prevImage = $product->getImage2();
-
-                    $product->setImage2($data['destination']);
-
-                    $this->moveNewImageAndRemoveOld($data, $prevImage);
-                }
-
-                if ($image === 'image3') {
-                    $prevImage = $product->getImage3();
-
-                    $product->setImage3($data['destination']);
-
-                    $this->moveNewImageAndRemoveOld($data, $prevImage);
-                }
+                $this->moveNewImageAndRemoveOld($data, $prevImage);
             }
+        }
 
-            $this->em->flush();
+        $this->em->flush();
 
-            return $this->redirectToRoute('admin.product.edit.form', ['id' => $product->getId()]);
-
-//        } catch (BadRequestException $e) {
-//            return new Response($e->getMessage(), 400);
-//
-//        } catch (NotFoundException $e) {
-//            return new Response($e->getMessage(), 404);
-//
-//        } catch (ValidationErrorException $e) {
-//            return new Response($e->getMessage(), 422);
-//
-//        } catch (\Throwable $e) {
-//            return new Response($e->getMessage(), 500);
-//        }
+        return $this->redirectToRoute('admin.product.edit.form', ['id' => $product->getId()]);
     }
 
     private function moveNewImageAndRemoveOld(array $data, ?string $prevImage): void

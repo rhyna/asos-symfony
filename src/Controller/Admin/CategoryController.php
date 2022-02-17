@@ -74,15 +74,11 @@ class CategoryController extends AbstractController
         $ids = $request->get('ids');
 
         if ($ids) {
-//            //$ids = implode(',', $ids);
-
             $arr['ids']['clause'] = "cp.id IN (:ids)";
 
             $arr['ids']['parameter'] = $ids;
 
             $whereClauses['ids'] = $arr['ids'];
-
-//            $whereClauses[] = "cp.id IN ($ids)";
         }
 
         $page = $this->pageDeterminerService->determinePage();
@@ -102,65 +98,6 @@ class CategoryController extends AbstractController
             'page' => $page,
         ]);
     }
-
-//    /**
-//     * @Route(path="/add", methods={"GET"}, name="add.form")
-//     */
-//    public function addForm(Request $request): Response
-//    {
-//        $repository = $this->em->getRepository(Category::class);
-//
-//        $categoryLevels = $repository->getCategoryLevels();
-//
-//        return $this->render('admin/category/form.html.twig', [
-//            'title' => 'Add Category',
-//            'categories' => $categoryLevels,
-//        ]);
-//    }
-//
-//    /**
-//     * @Route(path="/add", methods={"POST"}, name="add.action")
-//     */
-//    public function addAction(Request $request): Response
-//    {
-//        $title = (string)$request->get('title');
-//
-//        $parentCategoryId = (int)$request->get('parent');
-//
-//        $repository = $this->em->getRepository(Category::class);
-//
-//        $parent = $repository->find($parentCategoryId);
-//
-//        $description = (string)$request->get('description') ?: null;
-//
-//        $image = $request->files->get('image') ?: null;
-//
-//        $imageDestination = null;
-//
-//        if ($image) {
-//            $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
-//
-//            $imageDirectory = './upload/category/';
-//
-//            $imageDestination = $imageDirectory . $imageUniqueName;
-//        }
-//
-//        $category = new Category($title, $parent);
-//
-//        $category->setDescription($description);
-//
-//        $category->setImage($imageDestination);
-//
-//        $this->em->persist($category);
-//
-//        $this->em->flush();
-//
-//        if ($image) {
-//            $image->move($imageDirectory, $imageUniqueName);
-//        }
-//
-//        return $this->redirectToRoute('admin.category.list');
-//    }
 
     /**
      * @Route(path="/add", methods={"GET", "POST"}, name="add")
@@ -274,77 +211,6 @@ class CategoryController extends AbstractController
 
         return $this->redirectToRoute('admin.category.edit', ['id' => $category->getId()]);
     }
-
-//    /**
-//     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
-//     */
-//    public function editForm(Request $request): Response
-//    {
-//        $repository = $this->em->getRepository(Category::class);
-//
-//        $categoryLevels = $repository->getCategoryLevels();
-//
-//        $id = (int)$request->get('id');
-//
-//        $category = $repository->find($id);
-//
-//        return $this->render('admin/category/form.html.twig', [
-//            'title' => 'Edit Category',
-//            'categories' => $categoryLevels,
-//            'category' => $category,
-//            'entityType' => 'category',
-//        ]);
-//    }
-
-//    /**
-//     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
-//     */
-//    public function editAction(Request $request): Response
-//    {
-//        $repository = $this->em->getRepository(Category::class);
-//
-//        $id = (int)$request->get('id');
-//
-//        $title = (string)$request->get('title');
-//
-//        $parentCategoryId = (int)$request->get('parent');
-//
-//        $parent = $repository->find($parentCategoryId);
-//
-//        $description = (string)$request->get('description') ?: null;
-//
-//        $image = $request->files->get('image') ?: null;
-//
-//        $category = $repository->find($id);
-//
-//        $category->setTitle($title);
-//
-//        $category->setParent($parent);
-//
-//        $category->setDescription($description);
-//
-//        $previousImage = $category->getImage();
-//
-//        if ($image) {
-//            $imageUniqueName = uniqid() . '.' . $image->getClientOriginalExtension();
-//
-//            $imageDirectory = './upload/category/';
-//
-//            $imageDestination = $imageDirectory . $imageUniqueName;
-//
-//            $category->setImage($imageDestination);
-//        }
-//
-//        $this->em->flush();
-//
-//        if ($image) {
-//            $image->move($imageDirectory, $imageUniqueName);
-//
-//            $this->fileSystem->remove($previousImage);
-//        }
-//
-//        return $this->redirectToRoute('admin.category.list');
-//    }
 
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")

@@ -2,8 +2,18 @@
     'Banners' : 'admin.banner.list',
     'Brands' : 'admin.brand.list',
     'Categories' : 'admin.category.list',
-    'Products' : 'admin.product.list'
+    'Products' : 'admin.product.list',
 } %}
+
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    {% set headerNav = headerNav|merge({
+        'Log Out' : 'app_logout',
+    }) %}
+{% else %}
+    {% set headerNav = headerNav|merge({
+        'Log In' : 'login',
+    }) %}
+{% endif %}
 
 <!DOCTYPE html>
 <html lang="en">

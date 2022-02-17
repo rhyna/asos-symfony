@@ -96,8 +96,6 @@ class SearchController extends AbstractController
 
             $join[] = $arr;
 
-//            $where[] = "sw$i.id = $id";
-
             $arr1["id$i"]['clause'] = "sw$i.id = :id$i";
 
             $arr1["id$i"]['parameter'] = $id;

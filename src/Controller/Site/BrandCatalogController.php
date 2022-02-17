@@ -35,7 +35,6 @@ class BrandCatalogController extends AbstractController
      */
     public function brand(Request $request): Response
     {
-//        try {
         $id = (int)$request->get('id');
 
         $gender = $request->get('gender');
@@ -93,10 +92,6 @@ class BrandCatalogController extends AbstractController
         $sizeIds = $request->get('sizes');
 
         if ($sizeIds) {
-//            $sizeIds = implode(",", $sizeIds);
-//
-//            $where[] = "s.id in ($sizeIds)";
-
             $arr['sizeIds']['clause'] = "s.id IN (:sizeIds)";
 
             $arr['sizeIds']['parameter'] = $sizeIds;
@@ -113,10 +108,6 @@ class BrandCatalogController extends AbstractController
         $categoryIds = $request->get('categories');
 
         if ($categoryIds) {
-//            $categoryIds = implode(",", $categoryIds);
-//
-//            $where[] = "c.id in ($categoryIds)";
-
             $arr['categoryIds']['clause'] = "c.id IN (:categoryIds)";
 
             $arr['categoryIds']['parameter'] = $categoryIds;
@@ -125,10 +116,6 @@ class BrandCatalogController extends AbstractController
         }
 
         if (!$categoryIds) {
-//            $categoryIds = implode(",", $rootSubCategoryIds);
-//
-//            $where[] = "c.id in ($categoryIds)";
-
             $arr['categoryIds']['clause'] = "c.id IN (:categoryIds)";
 
             $arr['categoryIds']['parameter'] = $rootSubCategoryIds;
@@ -153,8 +140,6 @@ class BrandCatalogController extends AbstractController
         foreach ($categoryConfig as $data) {
             $categoryIds[] = $data['id'];
         }
-
-//            $categoryIds = implode(',', $categoryIds);
 
         $sizeConfig = $this->em->getRepository(Size::class)->getUniqueSizesOfProductsByCategoryAndBrand($id, $categoryIds);
 
@@ -195,13 +180,6 @@ class BrandCatalogController extends AbstractController
             'page' => $page,
             'breadcrumbs' => $breadcrumbs,
         ]);
-
-//        } catch (NotFoundException $e) {
-//            return new Response($e->getMessage(), 404);
-//
-//        } catch (\Throwable $e) {
-//            return new Response($e->getMessage(), 500);
-//        }
     }
 
     /**

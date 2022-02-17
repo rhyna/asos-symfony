@@ -41,24 +41,12 @@ class ErrorController extends AbstractController
              ], new Response('', 401));
         }
 
-//        if ($exception instanceof AccessDeniedHttpException || $exception instanceof UnauthorizedHttpException) {
-//            return $this->render('_errors/error-page.html.twig', [
-//                 'title' => 'Error 40x',
-//                 'header' => 'Error 40x - xxx',
-//                 'message' => 'Something went wrong. xxx',
-//             ], new Response(''));
-//
-//            //return new Response('403/401'); // сделать рендер вьюхи в папке templates/_errors/
-//        }
-
         if ($exception instanceof AsosException) {
             return $this->render('_errors/error-page.html.twig', [
                  'title' => 'Error ' . $exception->getCode(),
                  'header' => 'Error ' . $exception->getCode(),
                  'message' => $exception->getMessage(),
              ], new Response('', $exception->getCode()));
-
-            //return new Response($exception->getMessage()); // сделать рендер вьюхи в папке templates/_errors/
         }
 
         return new Response($exception->getMessage(), 500);

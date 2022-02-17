@@ -277,7 +277,7 @@ label {
 }
 .entity-form-errors {
   margin-left: 20px;
-  color: #ff253a;
+  color: #b62836;
   margin-bottom: 20px;
 }
 .entity-form-errors--image-group {
@@ -315,13 +315,6 @@ label {
 .login-form__wrapper {
   display: flex;
   justify-content: center;
-}
-.login-form h1 {
-  margin-bottom: 20px;
-  text-align: center;
-}
-.login-form label {
-  font-weight: normal;
 }
 .banner-place-modal .modal-header {
   border-bottom: 0;
@@ -468,15 +461,18 @@ label {
 }
 .error404 .return-button {
   font-size: 18px;
-  padding: 5px 20px;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  transition: background-color 0.1s linear;
-  background-color: #17a2b8;
-  color: #fff;
-  letter-spacing: 0.5px;
+  padding: 10px 25px;
 }
-.error404 .return-button:hover {
-  background-color: #17a2b896;
+.form-error {
+  margin-top: 5px;
+}
+.form-error li {
+  color: #de5a67;
+  font-style: italic;
+}
+.login-form-error {
+  margin-bottom: 20px;
+  color: #de5a67;
+  font-style: italic;
 }
 /*# sourceMappingURL=style.css.map */

@@ -38,9 +38,6 @@ class CategoryCatalogController extends AbstractController
      */
     public function category(Request $request): Response
     {
-//        try {
-        // throw new \Exception();
-
         $categoryId = (int)$request->get('id');
 
         if (!$categoryId) {
@@ -82,8 +79,6 @@ class CategoryCatalogController extends AbstractController
 
         $order = [];
 
-//        $where[] = "c.id = $categoryId";
-
         $where['categoryId']['clause'] = "c.id = :categoryId";
 
         $where['categoryId']['parameter'] = $categoryId;
@@ -91,9 +86,6 @@ class CategoryCatalogController extends AbstractController
         $sizeIds = $request->get('sizes');
 
         if ($sizeIds) {
-//            $sizeIds = implode(",", $sizeIds);
-//
-//            $where[] = "s.id in ($sizeIds)";
 
             $join[] = [
                 'clause' => 'p.sizes',
@@ -111,9 +103,6 @@ class CategoryCatalogController extends AbstractController
         $brandIds = $request->get('brands');
 
         if ($brandIds) {
-//            $brandIds = implode(",", $brandIds);
-//
-//            $where[] = "b.id in ($brandIds)";
 
             $join[] = [
                 'clause' => 'p.brand',
@@ -171,15 +160,5 @@ class CategoryCatalogController extends AbstractController
             'page' => $page,
             'breadcrumbs' => $breadcrumbs,
         ]);
-
-//        } catch (BadRequestException $e) {
-//            return new Response($e->getMessage(), 400);
-//
-//        } catch (NotFoundException $e) {
-//            return new Response($e->getMessage(), 404);
-//
-//        } catch (\Throwable $e) {
-//            return new Response($e->getMessage(), 500);
-//        }
     }
 }

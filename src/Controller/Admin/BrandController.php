@@ -63,42 +63,6 @@ class BrandController extends AbstractController
             ]);
     }
 
-//    /**
-//     * @Route(path="/add", methods={"GET"}, name="add.form")
-//     */
-//    public function addForm(Request $request): Response
-//    {
-//        return $this->render('admin/brand/form.html.twig',
-//            [
-//                'title' => 'Add Brand',
-//            ]);
-//    }
-
-//    /**
-//     * @Route(path="/add", methods={"POST"}, name="add.action")
-//     */
-//    public function addAction(Request $request): Response
-//    {
-//        $title = (string)$request->get('title');
-//
-//        $descriptionWomen = (string)$request->get('descriptionWomen') ?: null;
-//
-//        $descriptionMen = (string)$request->get('descriptionMen') ?: null;
-//
-//        $brand = new Brand($title);
-//
-//        $brand->setDescriptionWomen($descriptionWomen);
-//
-//        $brand->setDescriptionMen($descriptionMen);
-//
-//        $this->em->persist($brand);
-//
-//        $this->em->flush();
-//
-//        return $this->redirectToRoute('admin.brand.list');
-//
-//    }
-
     /**
      * @Route(path="/add", methods={"GET", "POST"}, name="add")
      */
@@ -174,53 +138,6 @@ class BrandController extends AbstractController
 
         return $this->redirectToRoute('admin.brand.edit', ['id' => $brand->getId()]);
     }
-
-//    /**
-//     * @Route(path="/edit/{id}", methods={"GET"}, name="edit.form")
-//     */
-//    public function editForm(Request $request): Response
-//    {
-//        $id = (int)$request->get('id');
-//
-//        $brand = $this->em->getRepository(Brand::class)->find($id);
-//
-//        return $this->render('admin/brand/form.html.twig',
-//            [
-//                'brand' => $brand,
-//                'title' => 'Edit Brand',
-//            ]);
-//    }
-//
-//    /**
-//     * @Route(path="/edit/{id}", methods={"POST"}, name="edit.action")
-//     * @throws NotFoundException
-//     */
-//    public function editAction(Request $request): Response
-//    {
-//        $id = (int)$request->get('id');
-//
-//        $brand = $this->em->getRepository(Brand::class)->find($id);
-//
-//        if (!$brand) {
-//            throw new NotFoundException('Brand not found');
-//        }
-//
-//        $title = (string)$request->get('title');
-//
-//        $descriptionWomen = (string)$request->get('descriptionWomen') ?: null;
-//
-//        $descriptionMen = (string)$request->get('descriptionMen') ?: null;
-//
-//        $brand->setTitle($title);
-//
-//        $brand->setDescriptionWomen($descriptionWomen);
-//
-//        $brand->setDescriptionMen($descriptionMen);
-//
-//        $this->em->flush();
-//
-//        return $this->redirectToRoute('admin.brand.list');
-//    }
 
     /**
      * @Route(path="/delete", methods={"POST"}, name="delete.action")

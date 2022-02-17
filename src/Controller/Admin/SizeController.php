@@ -322,67 +322,56 @@ class SizeController extends AbstractController
      */
     public function deleteAction(Request $request): Response
     {
-//        try {
-            $id = (int)$request->get('id');
+        $id = (int)$request->get('id');
 
-            if (!$id) {
-                throw new BadRequestException('The id is not provided');
-            }
+        if (!$id) {
+            throw new BadRequestException('The id is not provided');
+        }
 
-            $categoryId = (int)$request->get('categoryId');
+        $categoryId = (int)$request->get('categoryId');
 
-            if (!$categoryId) {
-                throw new BadRequestException('The category id is not provided');
-            }
+        if (!$categoryId) {
+            throw new BadRequestException('The category id is not provided');
+        }
 
-            /**
-             * @var Size $size
-             */
-            $size = $this->em->getRepository(Size::class)->find($id);
+        /**
+         * @var Size $size
+         */
+        $size = $this->em->getRepository(Size::class)->find($id);
 
-            if (!$size) {
-                throw new NotFoundException('Such a size does not exist');
-            }
+        if (!$size) {
+            throw new NotFoundException('Such a size does not exist');
+        }
 
-            $sizeCategories = $size->getCategories();
+        $sizeCategories = $size->getCategories();
 
-            /**
-             * @var Category $currentCategory ;
-             */
-            $currentCategory = $this->em->getRepository(Category::class)->find($categoryId);
+        /**
+         * @var Category $currentCategory ;
+         */
+        $currentCategory = $this->em->getRepository(Category::class)->find($categoryId);
 
-            if (!$currentCategory) {
-                throw new NotFoundException('Such a category does not exist');
-            }
+        if (!$currentCategory) {
+            throw new NotFoundException('Such a category does not exist');
+        }
 
-            $productsExist = $this->em->getRepository(Size::class)->checkProductsBySizeAndCategoryIds($id, $categoryId);
+        $productsExist = $this->em->getRepository(Size::class)->checkProductsBySizeAndCategoryIds($id, $categoryId);
 
-            if ($productsExist) {
-                throw new ValidationErrorException('The size has associated product(s) in this category. Delete the products first');
-            }
+        if ($productsExist) {
+            throw new ValidationErrorException('The size has associated product(s) in this category. Delete the products first');
+        }
 
-            $currentCategorySizes = $currentCategory->getSizes();
+        $currentCategorySizes = $currentCategory->getSizes();
 
-            if ($sizeCategories->contains($currentCategory)) {
-                $sizeCategories->removeElement($currentCategory);
-            }
+        if ($sizeCategories->contains($currentCategory)) {
+            $sizeCategories->removeElement($currentCategory);
+        }
 
-            if ($currentCategorySizes->contains($size)) {
-                $currentCategorySizes->removeElement($size);
-            }
+        if ($currentCategorySizes->contains($size)) {
+            $currentCategorySizes->removeElement($size);
+        }
 
-            $this->em->flush();
+        $this->em->flush();
 
-            return new Response('Successfully deleted the size', 200);
-
-//        } catch (BadRequestException $e) {
-//            return new Response($e->getMessage(), 400);
-//
-//        } catch (NotFoundException $e) {
-//            return new Response($e->getMessage(), 404);
-//
-//        } catch (\Throwable $e) {
-//            return new Response($e->getMessage(), 500);
-//        }
+        return new Response('Successfully deleted the size', 200);
     }
 }
