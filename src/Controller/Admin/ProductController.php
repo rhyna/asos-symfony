@@ -62,8 +62,6 @@ class ProductController extends AbstractController
      */
     public function list(Request $request): Response
     {
-        $user = $this->getUser();
-
         $repository = $this->em->getRepository(Product::class);
 
         $select = 'p.title, p.productCode, p.price, p.image, 
