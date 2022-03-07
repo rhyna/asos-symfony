@@ -737,7 +737,11 @@ class ProductController extends AbstractController
             throw new ValidationErrorException("File extension should be: 'png', 'jpeg', 'jpg', 'gif'");
         }
 
-        //$size = $image->getMaxFilesize();
+        $size = $image->getSize();
+
+        if ($size > 5000000) {
+            throw new ValidationErrorException("File size should not exceed 5 Mb");
+        }
     }
 
     /**
