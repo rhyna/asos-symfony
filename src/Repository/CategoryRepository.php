@@ -65,10 +65,6 @@ class CategoryRepository extends ServiceEntityRepository
 
         $qb->leftJoin('cp.parent', 'cp1');
 
-//        foreach ($whereClauses as $clause) {
-//            $qb->andWhere($clause);
-//        }
-
         foreach ($whereClauses as $key => $clause) {
             $qb->andWhere($clause['clause']);
 

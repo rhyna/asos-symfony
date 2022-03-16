@@ -60,7 +60,7 @@ class BannerFormType extends AbstractType
             'placeholder' => 'NO PLACE (Banner not posted yet)',
             'property_path' => 'bannerPlace',
             'class' => BannerPlace::class,
-            'choice_label' => 'title', // название поле в BannerPlace для отображения в селекте
+            'choice_label' => 'title',
             'constraints' => [
                 new UniqueEntity([
                     'entityClass' => BannerPlace::class,

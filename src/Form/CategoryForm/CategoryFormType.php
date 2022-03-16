@@ -29,7 +29,7 @@ class CategoryFormType extends AbstractType
 
         $builder->add('parentCategory', EntityType::class, [
             'label' => 'Parent Category',
-            'required'   => false, // чтобы отрисовать плейсхолдер
+            'required'   => false,
             'placeholder' => 'Please choose category',
             'class' => Category::class,
             'choice_label' => function (Category $choice) {

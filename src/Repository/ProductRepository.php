@@ -24,14 +24,6 @@ class ProductRepository extends ServiceEntityRepository
 
         $qb->addSelect($select);
 
-//        foreach ($where as $i => $clause) {
-//            if ($i === 0) {
-//                $qb->where($clause);
-//            } else {
-//                $qb->andWhere($clause);
-//            }
-//        }
-
         foreach ($where as $key => $clause) {
             $qb->andWhere($clause['clause']);
 
@@ -69,10 +61,6 @@ class ProductRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('p');
 
         $qb->select('count(distinct p.id)');
-
-//        foreach ($where as $clause) {
-//            $qb->andWhere($clause);
-//        }
 
         foreach ($where as $key => $clause) {
             $qb->andWhere($clause['clause']);
